@@ -1,0 +1,73 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import type { MaybeRefOrGetter } from 'vue'
+import type { Paginated, PetCreateInput, PetListQuery, PetUpdateInput } from '#shared/schemas'
+
+type PetListParams = MaybeRefOrGetter<Partial<PetListQuery>>
+
+/** Public: list available pets. */
+export function usePublicPetsQuery(params: PetListParams = () => ({})) {
+  const api = useRequestFetch()
+  return useQuery({
+    queryKey: ['public-pets', params],
+    queryFn: () => api<Paginated<PetDto>>('/api/pets', { query: toValue(params) }),
+  })
+}
+
+/** Public: single pet detail. */
+export function usePublicPetQuery(id: MaybeRefOrGetter<string>) {
+  const api = useRequestFetch()
+  return useQuery({
+    queryKey: ['public-pet', id],
+    queryFn: () => api<PetDto>(`/api/pets/${toValue(id)}`),
+  })
+}
+
+/** Admin: list pets (all statuses). */
+export function useAdminPetsQuery(params: PetListParams = () => ({})) {
+  const api = useRequestFetch()
+  return useQuery({
+    queryKey: ['admin-pets', params],
+    queryFn: () => api<Paginated<PetDto>>('/api/admin/pets', { query: toValue(params) }),
+  })
+}
+
+/** Admin: single pet. */
+export function useAdminPetQuery(id: MaybeRefOrGetter<string>) {
+  const api = useRequestFetch()
+  return useQuery({
+    queryKey: ['admin-pet', id],
+    queryFn: () => api<PetDto>(`/api/admin/pets/${toValue(id)}`),
+  })
+}
+
+export function useCreatePet() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: PetCreateInput) =>
+      api<PetDto>('/api/admin/pets', { method: 'POST', body }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-pets'] }),
+  })
+}
+
+export function useUpdatePet() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: PetUpdateInput }) =>
+      api<PetDto>(`/api/admin/pets/${id}`, { method: 'PATCH', body }),
+    onSuccess: (_data, { id }) => {
+      qc.invalidateQueries({ queryKey: ['admin-pets'] })
+      qc.invalidateQueries({ queryKey: ['admin-pet', id] })
+    },
+  })
+}
+
+export function useDeletePet() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/admin/pets/${id}`, { method: 'DELETE' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-pets'] }),
+  })
+}

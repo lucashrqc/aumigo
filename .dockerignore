@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+.data
+.git
+.github
+coverage
+test-results
+playwright-report
+*.log
+.env
+.env.*
+!.env.example
+docs

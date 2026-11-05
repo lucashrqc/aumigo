@@ -1,0 +1,44 @@
+import type {
+  AppliedVaccineRepository,
+  VaccineRepository,
+} from '../repositories/vaccine.repository'
+import type {
+  AppliedVaccineCreateInput,
+  VaccineCreateInput,
+  VaccineUpdateInput,
+} from '#shared/schemas'
+
+export class VaccineService {
+  constructor(
+    private readonly vaccines: VaccineRepository,
+    private readonly appliedVaccines: AppliedVaccineRepository,
+  ) {}
+
+  list() {
+    return this.vaccines.list()
+  }
+
+  create(input: VaccineCreateInput, actorId: string) {
+    return this.vaccines.create(input, actorId)
+  }
+
+  async update(id: string, input: VaccineUpdateInput, actorId: string) {
+    const updated = await this.vaccines.update(id, input, actorId)
+    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Vaccine not found' })
+    return updated
+  }
+
+  listAppliedForPet(petId: string) {
+    return this.appliedVaccines.listByPet(petId)
+  }
+
+  async applyToPet(input: AppliedVaccineCreateInput, actorId: string) {
+    const vaccine = await this.vaccines.findById(input.vaccineId)
+    if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Unknown vaccine' })
+    return this.appliedVaccines.create(input, actorId)
+  }
+
+  removeApplied(id: string) {
+    return this.appliedVaccines.delete(id)
+  }
+}

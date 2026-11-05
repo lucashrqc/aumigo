@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  BETTER_AUTH_SECRET: ci-test-secret-0123456789abcdef
+  BETTER_AUTH_URL: http://localhost:3000
+
+jobs:
+  lint-typecheck-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aumor
+          POSTGRES_PASSWORD: aumor
+          POSTGRES_DB: aumor_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aumor -d aumor_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Integration tests
+        run: pnpm test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://aumor:aumor@localhost:5432/aumor_test
+
+      - name: Build
+        run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-test
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aumor
+          POSTGRES_PASSWORD: aumor
+          POSTGRES_DB: aumor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aumor -d aumor"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://aumor:aumor@localhost:5432/aumor?sslmode=disable
+      NUXT_PUBLIC_AUTH_BASE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Migrate & seed
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
+
+      - name: Build
+        run: pnpm build
+
+      - name: E2E tests
+        run: pnpm test:e2e

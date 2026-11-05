@@ -1,0 +1,49 @@
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { admin } from 'better-auth/plugins'
+import { account, session, user, verification } from '../database/schema'
+import { useDb } from './db'
+
+function buildAuth() {
+  const config = useRuntimeConfig()
+
+  const googleConfigured = Boolean(config.googleClientId && config.googleClientSecret)
+
+  return betterAuth({
+    baseURL: config.betterAuthUrl,
+    secret: config.betterAuthSecret,
+    database: drizzleAdapter(useDb(), {
+      provider: 'pg',
+      schema: { user, session, account, verification },
+    }),
+    emailAndPassword: {
+      enabled: true,
+      autoSignIn: true,
+      minPasswordLength: 8,
+    },
+    // Google is prepared but only enabled once credentials are provided.
+    socialProviders: googleConfigured
+      ? {
+          google: {
+            clientId: config.googleClientId,
+            clientSecret: config.googleClientSecret,
+          },
+        }
+      : {},
+    // Only the `admin` role can use BetterAuth admin-plugin operations;
+    // domain admin-panel access (staff + admin) is enforced in requireStaff().
+    plugins: [admin({ adminRoles: ['admin'], defaultRole: 'adopter' })],
+  })
+}
+
+export type Auth = ReturnType<typeof buildAuth>
+
+let _auth: Auth | undefined
+
+/** Memoized BetterAuth instance for the Nitro runtime. */
+export function useAuth(): Auth {
+  if (!_auth) {
+    _auth = buildAuth()
+  }
+  return _auth
+}
