@@ -1,6 +1,7 @@
 import {
   columnVisibilityFeature,
   createSortedRowModel,
+  rowSelectionFeature,
   rowSortingFeature,
   tableFeatures,
 } from '@tanstack/vue-table'
@@ -10,6 +11,7 @@ import {
 // to the caller (pages do server-side pagination), so rows are never truncated.
 export const features = tableFeatures({
   columnVisibilityFeature,
+  rowSelectionFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
 })

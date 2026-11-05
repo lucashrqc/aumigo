@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import {
   Camera,
-  ChartColumn,
+  ClipboardList,
   CircleQuestionMark,
   Command,
   Database,
+  Dog,
   FileChartColumn,
   FileText,
-  Folder,
   LayoutDashboard,
-  ListTodo,
   Search,
   Settings,
   Sparkles,
+  Syringe,
   Users,
+  PawPrint,
 } from '@lucide/vue'
 
 import NavDocuments from '@/components/NavDocuments.vue'
@@ -29,38 +30,45 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+
+// Session user for NavUser. Avatar isn't implemented on the backend yet, so it
+// falls back to an empty string (AvatarImage then shows the fallback initials).
+const user = computed(() => ({
+  name: auth.user?.name ?? '',
+  email: auth.user?.email ?? '',
+  avatar: auth.user?.image ?? '',
+}))
 
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
   navMain: [
     {
       title: 'Dashboard',
-      url: '#',
+      url: '/admin',
       icon: LayoutDashboard,
     },
     {
-      title: 'Lifecycle',
-      url: '#',
-      icon: ListTodo,
+      title: 'Pets',
+      url: '/admin/pets',
+      icon: Dog,
     },
     {
-      title: 'Analytics',
-      url: '#',
-      icon: ChartColumn,
+      title: 'Vacinas',
+      url: '/admin/vaccines',
+      icon: Syringe,
     },
     {
-      title: 'Projects',
-      url: '#',
-      icon: Folder,
+      title: 'Candidaturas',
+      url: '/admin/applications',
+      icon: ClipboardList,
     },
     {
-      title: 'Team',
-      url: '#',
+      title: 'Staff',
+      url: '/admin/staff',
       icon: Users,
+      adminOnly: true,
     },
   ],
   navClouds: [
@@ -155,8 +163,8 @@ const data = {
         <SidebarMenuItem>
           <SidebarMenuButton as-child class="data-[slot=sidebar-menu-button]:!p-1.5">
             <a href="#">
-              <Command class="!size-5" />
-              <span class="text-base font-semibold">Acme Inc.</span>
+              <PawPrint class="size-6!" />
+              <span class="text-base font-semibold">Aumor</span>
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -168,7 +176,7 @@ const data = {
       <NavSecondary :items="data.navSecondary" class="mt-auto" />
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <NavUser :user="user" />
     </SidebarFooter>
   </Sidebar>
 </template>

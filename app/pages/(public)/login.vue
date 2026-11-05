@@ -40,11 +40,11 @@ async function submit() {
       </CardHeader>
       <CardContent>
         <form class="space-y-4" @submit.prevent="submit">
-          <div>
+          <div class="space-y-2">
             <Label for="email">E-mail</Label>
             <Input id="email" v-model="email" type="email" required autocomplete="email" />
           </div>
-          <div>
+          <div class="space-y-2">
             <Label for="password">Senha</Label>
             <Input
               id="password"

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { CreditCard, EllipsisVertical, LogOut, Bell, CircleUser } from '@lucide/vue'
 
+import { authClient } from '@/lib/auth-client'
+import { useAuthStore } from '@/stores/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -29,6 +31,13 @@ defineProps<{
 }>()
 
 const { isMobile } = useSidebar()
+const auth = useAuthStore()
+
+async function logout() {
+  await authClient.signOut()
+  auth.setUser(null)
+  await navigateTo('/')
+}
 </script>
 
 <template>
@@ -89,8 +98,8 @@ const { isMobile } = useSidebar()
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <LogOut />
+          <DropdownMenuItem @select="logout">
+            <LogOut class="text-red-600 dark:text-red-400" />
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
