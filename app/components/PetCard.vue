@@ -13,16 +13,16 @@ const statusVariant = computed(() =>
       <div class="aspect-video w-full bg-muted">
         <img v-if="cover" :src="cover" :alt="pet.name" class="h-full w-full object-cover" >
         <div v-else class="flex h-full items-center justify-center text-muted-foreground">
-          No photo
+          Sem foto
         </div>
       </div>
       <CardHeader class="gap-2">
         <div class="flex items-center justify-between">
           <CardTitle>{{ pet.name }}</CardTitle>
-          <Badge :variant="statusVariant">{{ pet.status }}</Badge>
+          <Badge :variant="statusVariant">{{ petStatusLabel(pet.status) }}</Badge>
         </div>
         <CardDescription>
-          {{ pet.species?.name ?? 'Unknown' }}
+          {{ pet.species?.name ?? 'Desconhecido' }}
           <template v-if="pet.breed"> · {{ pet.breed.name }}</template>
         </CardDescription>
       </CardHeader>

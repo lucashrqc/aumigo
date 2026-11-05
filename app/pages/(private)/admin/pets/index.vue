@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
+import type { Features } from '@/components/features'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
@@ -18,34 +19,38 @@ async function handleCreate(payload: Parameters<typeof createPet>[0]) {
   try {
     await createPet(payload)
     dialogOpen.value = false
-    toast.success('Pet created')
+    toast.success('Pet criado')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Could not create pet'))
+    toast.error(resolveErrorMessage(err, 'Não foi possível criar o pet'))
   }
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Deactivate ${name}? It will be hidden from the public site.`)) return
+  if (!confirm(`Desativar ${name}? Ele será ocultado do site público.`)) return
   try {
     await deletePet(id)
-    toast.success('Pet deactivated')
+    toast.success('Pet desativado')
   } catch (err) {
     toast.error(resolveErrorMessage(err))
   }
 }
 
-const columns: ColumnDef<PetDto, unknown>[] = [
-  { accessorKey: 'name', header: 'Name' },
+const columns: ColumnDef<Features, PetDto>[] = [
+  { accessorKey: 'name', header: 'Nome' },
   {
     id: 'species',
-    header: 'Species',
+    header: 'Espécie',
     cell: ({ row }) => row.original.species?.name ?? '—',
   },
   {
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) =>
-      h('span', { class: 'rounded px-2 py-0.5 text-xs font-medium capitalize bg-muted' }, row.original.status),
+      h(
+        'span',
+        { class: 'rounded px-2 py-0.5 text-xs font-medium bg-muted' },
+        petStatusLabel(row.original.status),
+      ),
   },
   {
     id: 'actions',
@@ -55,7 +60,7 @@ const columns: ColumnDef<PetDto, unknown>[] = [
         h(
           NuxtLink,
           { to: `/admin/pets/${row.original.id}`, class: 'text-sm underline' },
-          () => 'Edit',
+          () => 'Editar',
         ),
         h(
           'button',
@@ -63,7 +68,7 @@ const columns: ColumnDef<PetDto, unknown>[] = [
             class: 'text-sm text-destructive underline',
             onClick: () => handleDelete(row.original.id, row.original.name),
           },
-          'Delete',
+          'Excluir',
         ),
       ]),
   },
@@ -75,18 +80,18 @@ const columns: ColumnDef<PetDto, unknown>[] = [
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Pets</h1>
       <Dialog v-model:open="dialogOpen">
-        <DialogTrigger as-child><Button>New pet</Button></DialogTrigger>
+        <DialogTrigger as-child><Button>Novo pet</Button></DialogTrigger>
         <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>New pet</DialogTitle>
-            <DialogDescription>Add a pet to the adoption catalog.</DialogDescription>
+            <DialogTitle>Novo pet</DialogTitle>
+            <DialogDescription>Adicione um pet ao catálogo de adoção.</DialogDescription>
           </DialogHeader>
           <PetForm :submitting="creating" @submit="handleCreate" />
         </DialogContent>
       </Dialog>
     </div>
 
-    <p v-if="isLoading" class="text-muted-foreground">Loading…</p>
+    <p v-if="isLoading" class="text-muted-foreground">Carregando…</p>
     <template v-else>
       <DataTable :columns="columns" :data="data?.items ?? []" />
       <Pagination

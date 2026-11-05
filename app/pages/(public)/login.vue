@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'public' })
-useHead({ title: 'Sign in — Aumor' })
+useHead({ title: 'Entrar — Aumor' })
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -19,12 +19,12 @@ async function submit() {
       email: email.value,
       password: password.value,
     })
-    if (error) throw new Error(error.message || 'Invalid credentials')
+    if (error) throw new Error(error.message || 'Credenciais inválidas')
     await auth.fetchSession()
     const redirect = (route.query.redirect as string) || (auth.isStaff ? '/admin' : '/')
     await navigateTo(redirect)
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Sign in failed')
+    toast.error(err instanceof Error ? err.message : 'Falha ao entrar')
   } finally {
     loading.value = false
   }
@@ -35,17 +35,17 @@ async function submit() {
   <div class="mx-auto max-w-sm py-8">
     <Card>
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Welcome back to Aumor.</CardDescription>
+        <CardTitle>Entrar</CardTitle>
+        <CardDescription>Bem-vindo de volta à Aumor.</CardDescription>
       </CardHeader>
       <CardContent>
         <form class="space-y-4" @submit.prevent="submit">
           <div>
-            <Label for="email">Email</Label>
+            <Label for="email">E-mail</Label>
             <Input id="email" v-model="email" type="email" required autocomplete="email" />
           </div>
           <div>
-            <Label for="password">Password</Label>
+            <Label for="password">Senha</Label>
             <Input
               id="password"
               v-model="password"
@@ -54,12 +54,12 @@ async function submit() {
               autocomplete="current-password"
             />
           </div>
-          <Button type="submit" class="w-full" :disabled="loading">Sign in</Button>
+          <Button type="submit" class="w-full" :disabled="loading">Entrar</Button>
         </form>
       </CardContent>
       <CardFooter class="justify-center text-sm text-muted-foreground">
-        No account?
-        <NuxtLink to="/register" class="ml-1 underline">Create one</NuxtLink>
+        Não tem conta?
+        <NuxtLink to="/register" class="ml-1 underline">Crie uma</NuxtLink>
       </CardFooter>
     </Card>
   </div>

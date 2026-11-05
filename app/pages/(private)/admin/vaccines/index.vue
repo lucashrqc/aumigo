@@ -2,7 +2,7 @@
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
-useHead({ title: 'Vaccines — Admin' })
+useHead({ title: 'Vacinas — Admin' })
 
 const { data: vaccines, isLoading } = useVaccinesQuery()
 const { mutateAsync: createVaccine, isPending } = useCreateVaccine()
@@ -19,45 +19,45 @@ async function submit() {
     form.name = ''
     form.description = ''
     form.expirationDate = ''
-    toast.success('Vaccine added')
+    toast.success('Vacina adicionada')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Could not add vaccine'))
+    toast.error(resolveErrorMessage(err, 'Não foi possível adicionar a vacina'))
   }
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Vaccines</h1>
+    <h1 class="text-2xl font-bold">Vacinas</h1>
 
     <Card>
-      <CardHeader><CardTitle>Add vaccine</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Adicionar vacina</CardTitle></CardHeader>
       <CardContent>
         <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" @submit.prevent="submit">
           <div>
-            <Label>Name</Label>
+            <Label>Nome</Label>
             <Input v-model="form.name" required />
           </div>
           <div>
-            <Label>Description</Label>
+            <Label>Descrição</Label>
             <Input v-model="form.description" />
           </div>
           <div>
-            <Label>Expiration date</Label>
+            <Label>Data de validade</Label>
             <Input v-model="form.expirationDate" type="date" />
           </div>
-          <Button type="submit" :disabled="isPending">Add</Button>
+          <Button type="submit" :disabled="isPending">Adicionar</Button>
         </form>
       </CardContent>
     </Card>
 
-    <p v-if="isLoading" class="text-muted-foreground">Loading…</p>
+    <p v-if="isLoading" class="text-muted-foreground">Carregando…</p>
     <Table v-else class="rounded-md border">
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Expiration</TableHead>
+          <TableHead>Nome</TableHead>
+          <TableHead>Descrição</TableHead>
+          <TableHead>Validade</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -66,7 +66,7 @@ async function submit() {
           <TableCell>{{ v.description ?? '—' }}</TableCell>
           <TableCell>{{ v.expirationDate ?? '—' }}</TableCell>
         </TableRow>
-        <TableEmpty v-if="!vaccines?.length" :colspan="3">No vaccines yet.</TableEmpty>
+        <TableEmpty v-if="!vaccines?.length" :colspan="3">Nenhuma vacina ainda.</TableEmpty>
       </TableBody>
     </Table>
   </div>

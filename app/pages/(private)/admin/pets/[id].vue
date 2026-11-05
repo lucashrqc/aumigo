@@ -14,9 +14,9 @@ const { mutateAsync: updatePet, isPending: saving } = useUpdatePet()
 async function handleUpdate(payload: Parameters<typeof updatePet>[0]['body']) {
   try {
     await updatePet({ id: id.value, body: payload })
-    toast.success('Pet updated')
+    toast.success('Pet atualizado')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Could not update pet'))
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar o pet'))
   }
 }
 
@@ -37,14 +37,14 @@ async function recordVaccine() {
       vetLicense: vax.vetLicense || null,
       batchNumber: vax.batchNumber || null,
     })
-    toast.success('Vaccine recorded')
+    toast.success('Vacina registrada')
     vax.vaccineId = ''
     vax.applicationDate = ''
     vax.nextDoseDate = ''
     vax.vetLicense = ''
     vax.batchNumber = ''
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Could not record vaccine'))
+    toast.error(resolveErrorMessage(err, 'Não foi possível registrar a vacina'))
   }
 }
 
@@ -52,17 +52,17 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
 </script>
 
 <template>
-  <div v-if="isLoading" class="text-muted-foreground">Loading…</div>
-  <div v-else-if="!pet" class="text-muted-foreground">Pet not found.</div>
+  <div v-if="isLoading" class="text-muted-foreground">Carregando…</div>
+  <div v-else-if="!pet" class="text-muted-foreground">Pet não encontrado.</div>
 
   <div v-else class="space-y-8">
     <div class="flex items-center gap-3">
-      <Button as-child variant="ghost" size="sm"><NuxtLink to="/admin/pets">← Back</NuxtLink></Button>
+      <Button as-child variant="ghost" size="sm"><NuxtLink to="/admin/pets">← Voltar</NuxtLink></Button>
       <h1 class="text-2xl font-bold">{{ pet.name }}</h1>
     </div>
 
     <Card>
-      <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Detalhes</CardTitle></CardHeader>
       <CardContent>
         <PetForm :initial="pet" :submitting="saving" @submit="handleUpdate" />
       </CardContent>
@@ -70,17 +70,17 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
 
     <Card>
       <CardHeader>
-        <CardTitle>Vaccination records</CardTitle>
-        <CardDescription>Track applied vaccines for this pet.</CardDescription>
+        <CardTitle>Registros de vacinação</CardTitle>
+        <CardDescription>Acompanhe as vacinas aplicadas neste pet.</CardDescription>
       </CardHeader>
       <CardContent class="space-y-6">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Vaccine</TableHead>
-              <TableHead>Applied</TableHead>
-              <TableHead>Next dose</TableHead>
-              <TableHead>Batch</TableHead>
+              <TableHead>Vacina</TableHead>
+              <TableHead>Aplicada</TableHead>
+              <TableHead>Próxima dose</TableHead>
+              <TableHead>Lote</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -90,38 +90,38 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
               <TableCell>{{ a.nextDoseDate ?? '—' }}</TableCell>
               <TableCell>{{ a.batchNumber ?? '—' }}</TableCell>
             </TableRow>
-            <TableEmpty v-if="!applied?.length" :colspan="4">No vaccines recorded yet.</TableEmpty>
+            <TableEmpty v-if="!applied?.length" :colspan="4">Nenhuma vacina registrada ainda.</TableEmpty>
           </TableBody>
         </Table>
 
         <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" @submit.prevent="recordVaccine">
           <div>
-            <Label>Vaccine</Label>
+            <Label>Vacina</Label>
             <Select v-model="vax.vaccineId">
-              <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="v in vaccines ?? []" :key="v.id" :value="v.id">{{ v.name }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Application date</Label>
+            <Label>Data de aplicação</Label>
             <Input v-model="vax.applicationDate" type="date" required />
           </div>
           <div>
-            <Label>Next dose</Label>
+            <Label>Próxima dose</Label>
             <Input v-model="vax.nextDoseDate" type="date" />
           </div>
           <div>
-            <Label>Vet license (CRMV)</Label>
+            <Label>CRMV do veterinário</Label>
             <Input v-model="vax.vetLicense" />
           </div>
           <div>
-            <Label>Batch number</Label>
+            <Label>Número do lote</Label>
             <Input v-model="vax.batchNumber" />
           </div>
           <div class="flex items-end">
-            <Button type="submit" :disabled="applying || !vax.vaccineId">Record vaccine</Button>
+            <Button type="submit" :disabled="applying || !vax.vaccineId">Registrar vacina</Button>
           </div>
         </form>
       </CardContent>

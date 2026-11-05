@@ -4,7 +4,7 @@ import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: 'public' })
-useHead({ title: 'Create account — Aumor' })
+useHead({ title: 'Criar conta — Aumor' })
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -39,19 +39,19 @@ async function submit() {
         email: email.value,
         password: password.value,
       })
-      if (error) throw new Error(error.message || 'Could not create account')
+      if (error) throw new Error(error.message || 'Não foi possível criar a conta')
     }
 
     await auth.fetchSession()
     if (!auth.isAuthenticated) {
       // Staff invite path does not auto-login; send them to sign in.
-      toast.success('Account created. Please sign in.')
+      toast.success('Conta criada. Faça login.')
       await navigateTo('/login')
       return
     }
     await navigateTo(auth.isStaff ? '/admin' : '/')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Registration failed'))
+    toast.error(resolveErrorMessage(err, 'Falha no cadastro'))
   } finally {
     loading.value = false
   }
@@ -62,31 +62,31 @@ async function submit() {
   <div class="mx-auto max-w-sm py-8">
     <Card>
       <CardHeader>
-        <CardTitle>{{ isStaffInvite ? 'Join the Aumor team' : 'Create your account' }}</CardTitle>
+        <CardTitle>{{ isStaffInvite ? 'Junte-se à equipe Aumor' : 'Crie sua conta' }}</CardTitle>
         <CardDescription>
           {{
             isStaffInvite
-              ? 'Complete your staff registration from the invitation.'
-              : 'Register to adopt a pet.'
+              ? 'Conclua seu cadastro de staff a partir do convite.'
+              : 'Cadastre-se para adotar um pet.'
           }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form class="space-y-4" @submit.prevent="submit">
           <div>
-            <Label for="name">Name</Label>
+            <Label for="name">Nome</Label>
             <Input id="name" v-model="name" required autocomplete="name" />
           </div>
           <div v-if="!isStaffInvite">
-            <Label for="email">Email</Label>
+            <Label for="email">E-mail</Label>
             <Input id="email" v-model="email" type="email" required autocomplete="email" />
           </div>
           <div v-if="isStaffInvite">
-            <Label for="phone">Phone (optional)</Label>
+            <Label for="phone">Telefone (opcional)</Label>
             <Input id="phone" v-model="phone" autocomplete="tel" />
           </div>
           <div>
-            <Label for="password">Password</Label>
+            <Label for="password">Senha</Label>
             <Input
               id="password"
               v-model="password"
@@ -97,7 +97,7 @@ async function submit() {
             />
           </div>
           <Button type="submit" class="w-full" :disabled="loading">
-            {{ isStaffInvite ? 'Accept invitation' : 'Create account' }}
+            {{ isStaffInvite ? 'Aceitar convite' : 'Criar conta' }}
           </Button>
         </form>
       </CardContent>

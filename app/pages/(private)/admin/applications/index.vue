@@ -2,7 +2,7 @@
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
-useHead({ title: 'Applications — Admin' })
+useHead({ title: 'Candidaturas — Admin' })
 
 const statusFilter = ref('pending')
 const page = ref(1)
@@ -19,9 +19,9 @@ watch(statusFilter, () => (page.value = 1))
 async function decide(id: string, decision: 'approved' | 'rejected') {
   try {
     await review({ id, body: { decision } })
-    toast.success(decision === 'approved' ? 'Application approved' : 'Application rejected')
+    toast.success(decision === 'approved' ? 'Candidatura aprovada' : 'Candidatura rejeitada')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Could not update application'))
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a candidatura'))
   }
 }
 
@@ -32,30 +32,30 @@ const statusVariant = (s: string) =>
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">Adoption applications</h1>
+      <h1 class="text-2xl font-bold">Candidaturas de adoção</h1>
       <div class="w-48">
         <Select v-model="statusFilter">
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="pending">Pendente</SelectItem>
+            <SelectItem value="approved">Aprovada</SelectItem>
+            <SelectItem value="rejected">Rejeitada</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
           </SelectContent>
         </Select>
       </div>
     </div>
 
-    <p v-if="isLoading" class="text-muted-foreground">Loading…</p>
+    <p v-if="isLoading" class="text-muted-foreground">Carregando…</p>
     <template v-else>
       <Table class="rounded-md border">
         <TableHeader>
           <TableRow>
             <TableHead>Pet</TableHead>
-            <TableHead>Adopter</TableHead>
-            <TableHead>Contact</TableHead>
+            <TableHead>Adotante</TableHead>
+            <TableHead>Contato</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead class="text-right">Actions</TableHead>
+            <TableHead class="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,20 +70,20 @@ const statusVariant = (s: string) =>
               <div class="text-xs text-muted-foreground">{{ app.adopter?.email }}</div>
             </TableCell>
             <TableCell>{{ app.contactPhone ?? '—' }}</TableCell>
-            <TableCell><Badge :variant="statusVariant(app.status)">{{ app.status }}</Badge></TableCell>
+            <TableCell><Badge :variant="statusVariant(app.status)">{{ applicationStatusLabel(app.status) }}</Badge></TableCell>
             <TableCell class="text-right">
               <div v-if="app.status === 'pending'" class="flex justify-end gap-2">
                 <Button size="sm" :disabled="isPending" @click="decide(app.id, 'approved')">
-                  Approve
+                  Aprovar
                 </Button>
                 <Button size="sm" variant="outline" :disabled="isPending" @click="decide(app.id, 'rejected')">
-                  Reject
+                  Rejeitar
                 </Button>
               </div>
-              <span v-else class="text-sm text-muted-foreground">Reviewed</span>
+              <span v-else class="text-sm text-muted-foreground">Analisada</span>
             </TableCell>
           </TableRow>
-          <TableEmpty v-if="!data?.items.length" :colspan="5">No applications.</TableEmpty>
+          <TableEmpty v-if="!data?.items.length" :colspan="5">Nenhuma candidatura.</TableEmpty>
         </TableBody>
       </Table>
       <Pagination

@@ -1,26 +1,30 @@
-<script setup lang="ts" generic="TData">
+<script setup lang="ts" generic="TData extends RowData">
+import type { ColumnDef, RowData } from '@tanstack/vue-table'
+import { FlexRender, useTable } from '@tanstack/vue-table'
+import { features, type Features } from './features'
 import {
-  FlexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useVueTable,
-  type ColumnDef,
-} from '@tanstack/vue-table'
+  Table,
+  TableBody,
+  TableCell,
+  TableEmpty,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 const props = defineProps<{
-  columns: ColumnDef<TData, unknown>[]
+  columns: ColumnDef<Features, TData>[]
   data: TData[]
 }>()
 
-const table = useVueTable({
+const table = useTable({
+  features,
   get data() {
     return props.data
   },
   get columns() {
     return props.columns
   },
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
 })
 </script>
 
@@ -28,13 +32,13 @@ const table = useVueTable({
   <div class="rounded-md border">
     <Table>
       <TableHeader>
-        <TableRow v-for="hg in table.getHeaderGroups()" :key="hg.id">
-          <TableHead v-for="header in hg.headers" :key="header.id">
-            <FlexRender
-              v-if="!header.isPlaceholder"
-              :render="header.column.columnDef.header"
-              :props="header.getContext()"
-            />
+        <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+          <TableHead
+            v-for="header in headerGroup.headers"
+            :key="header.id"
+            :colspan="header.colSpan"
+          >
+            <FlexRender v-if="!header.isPlaceholder" :header="header" />
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -42,7 +46,7 @@ const table = useVueTable({
         <template v-if="table.getRowModel().rows.length">
           <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
             <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-              <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+              <FlexRender :cell="cell" />
             </TableCell>
           </TableRow>
         </template>

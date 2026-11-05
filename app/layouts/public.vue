@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PawPrint } from 'lucide-vue-next'
+import { PawPrint } from '@lucide/vue'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 
@@ -23,7 +23,7 @@ async function logout() {
 
         <nav class="flex items-center gap-2">
           <Button as-child variant="ghost" size="sm">
-            <NuxtLink to="/pets">Adopt</NuxtLink>
+            <NuxtLink to="/pets">Adotar</NuxtLink>
           </Button>
 
           <template v-if="auth.isAuthenticated">
@@ -31,16 +31,16 @@ async function logout() {
               <NuxtLink to="/admin">Admin</NuxtLink>
             </Button>
             <Button as-child variant="ghost" size="sm">
-              <NuxtLink to="/applications">My applications</NuxtLink>
+              <NuxtLink to="/applications">Minhas candidaturas</NuxtLink>
             </Button>
-            <Button variant="outline" size="sm" @click="logout">Sign out</Button>
+            <Button variant="outline" size="sm" @click="logout">Sair</Button>
           </template>
           <template v-else>
             <Button as-child variant="ghost" size="sm">
-              <NuxtLink to="/login">Sign in</NuxtLink>
+              <NuxtLink to="/login">Entrar</NuxtLink>
             </Button>
             <Button as-child size="sm">
-              <NuxtLink to="/register">Sign up</NuxtLink>
+              <NuxtLink to="/register">Cadastrar</NuxtLink>
             </Button>
           </template>
         </nav>
@@ -52,7 +52,7 @@ async function logout() {
     </main>
 
     <footer class="border-t py-6 text-center text-sm text-muted-foreground">
-      Aumor — find your new best friend.
+      Aumor — encontre seu novo melhor amigo.
     </footer>
   </div>
 </template>

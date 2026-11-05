@@ -12,21 +12,107 @@ const { data: applications } = useAdminApplicationsQuery(() => ({ status: 'pendi
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardDescription>Active pets</CardDescription>
+          <CardDescription>Pets ativos</CardDescription>
           <CardTitle class="text-3xl">{{ pets?.total ?? '—' }}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardDescription>Pending applications</CardDescription>
+          <CardDescription>Candidaturas pendentes</CardDescription>
           <CardTitle class="text-3xl">{{ applications?.total ?? '—' }}</CardTitle>
         </CardHeader>
       </Card>
     </div>
+
+    <div
+      class="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4"
+    >
+      <Card class="@container/card">
+        <CardHeader>
+          <CardDescription>Total Revenue</CardDescription>
+          <CardTitle class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            $1,250.00
+          </CardTitle>
+          <CardAction>
+            <Badge variant="outline">
+              <IconTrendingUp />
+              +12.5%
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter class="flex-col items-start gap-1.5 text-sm">
+          <div class="line-clamp-1 flex gap-2 font-medium">
+            Trending up this month <IconTrendingUp class="size-4" />
+          </div>
+          <div class="text-muted-foreground">Visitors for the last 6 months</div>
+        </CardFooter>
+      </Card>
+      <Card class="@container/card">
+        <CardHeader>
+          <CardDescription>New Customers</CardDescription>
+          <CardTitle class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            1,234
+          </CardTitle>
+          <CardAction>
+            <Badge variant="outline">
+              <IconTrendingDown />
+              -20%
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter class="flex-col items-start gap-1.5 text-sm">
+          <div class="line-clamp-1 flex gap-2 font-medium">
+            Down 20% this period <IconTrendingDown class="size-4" />
+          </div>
+          <div class="text-muted-foreground">Acquisition needs attention</div>
+        </CardFooter>
+      </Card>
+      <Card class="@container/card">
+        <CardHeader>
+          <CardDescription>Active Accounts</CardDescription>
+          <CardTitle class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            45,678
+          </CardTitle>
+          <CardAction>
+            <Badge variant="outline">
+              <IconTrendingUp />
+              +12.5%
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter class="flex-col items-start gap-1.5 text-sm">
+          <div class="line-clamp-1 flex gap-2 font-medium">
+            Strong user retention <IconTrendingUp class="size-4" />
+          </div>
+          <div class="text-muted-foreground">Engagement exceed targets</div>
+        </CardFooter>
+      </Card>
+      <Card class="@container/card">
+        <CardHeader>
+          <CardDescription>Growth Rate</CardDescription>
+          <CardTitle class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            4.5%
+          </CardTitle>
+          <CardAction>
+            <Badge variant="outline">
+              <IconTrendingUp />
+              +4.5%
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter class="flex-col items-start gap-1.5 text-sm">
+          <div class="line-clamp-1 flex gap-2 font-medium">
+            Steady performance increase <IconTrendingUp class="size-4" />
+          </div>
+          <div class="text-muted-foreground">Meets growth projections</div>
+        </CardFooter>
+      </Card>
+    </div>
+
     <div class="flex gap-3">
-      <Button as-child><NuxtLink to="/admin/pets">Manage pets</NuxtLink></Button>
+      <Button as-child><NuxtLink to="/admin/pets">Gerenciar pets</NuxtLink></Button>
       <Button as-child variant="outline">
-        <NuxtLink to="/admin/applications">Review applications</NuxtLink>
+        <NuxtLink to="/admin/applications">Analisar candidaturas</NuxtLink>
       </Button>
     </div>
   </div>

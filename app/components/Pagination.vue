@@ -8,16 +8,16 @@ const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.page
 <template>
   <div v-if="totalPages > 1" class="flex items-center justify-center gap-4">
     <Button variant="outline" size="sm" :disabled="page <= 1" @click="emit('update:page', page - 1)">
-      Previous
+      Anterior
     </Button>
-    <span class="text-sm text-muted-foreground">Page {{ page }} of {{ totalPages }}</span>
+    <span class="text-sm text-muted-foreground">Página {{ page }} de {{ totalPages }}</span>
     <Button
       variant="outline"
       size="sm"
       :disabled="page >= totalPages"
       @click="emit('update:page', page + 1)"
     >
-      Next
+      Próxima
     </Button>
   </div>
 </template>

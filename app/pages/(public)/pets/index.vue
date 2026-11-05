@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'public' })
-useHead({ title: 'Adopt a pet — Aumor' })
+useHead({ title: 'Adote um pet — Aumor' })
 
 const search = ref('')
 const speciesFilter = ref('all')
@@ -24,15 +24,15 @@ watch([search, speciesFilter], () => {
   <div class="space-y-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div class="flex-1">
-        <Label for="search">Search</Label>
-        <Input id="search" v-model="search" placeholder="Search by name..." />
+        <Label for="search">Buscar</Label>
+        <Input id="search" v-model="search" placeholder="Buscar por nome..." />
       </div>
       <div class="w-full sm:w-56">
-        <Label>Species</Label>
+        <Label>Espécie</Label>
         <Select v-model="speciesFilter">
-          <SelectTrigger><SelectValue placeholder="All species" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Todas as espécies" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All species</SelectItem>
+            <SelectItem value="all">Todas as espécies</SelectItem>
             <SelectItem v-for="s in species ?? []" :key="s.id" :value="s.id">
               {{ s.name }}
             </SelectItem>
@@ -41,9 +41,9 @@ watch([search, speciesFilter], () => {
       </div>
     </div>
 
-    <p v-if="isLoading" class="text-muted-foreground">Loading pets…</p>
+    <p v-if="isLoading" class="text-muted-foreground">Carregando pets…</p>
     <p v-else-if="!data?.items.length" class="text-muted-foreground">
-      No pets match your search right now.
+      Nenhum pet corresponde à sua busca no momento.
     </p>
 
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
