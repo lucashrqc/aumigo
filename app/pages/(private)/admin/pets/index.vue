@@ -79,16 +79,19 @@ const columns: ColumnDef<Features, PetDto>[] = [
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Pets</h1>
-      <Dialog v-model:open="dialogOpen">
-        <DialogTrigger as-child><Button>Novo pet</Button></DialogTrigger>
-        <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Novo pet</DialogTitle>
-            <DialogDescription>Adicione um pet ao catálogo de adoção.</DialogDescription>
-          </DialogHeader>
-          <PetForm :submitting="creating" @submit="handleCreate" />
-        </DialogContent>
-      </Dialog>
+      <div class="flex items-center gap-2">
+        <Dialog v-model:open="dialogOpen">
+          <DialogTrigger as-child><Button variant="outline">Novo pet</Button></DialogTrigger>
+          <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Novo pet</DialogTitle>
+              <DialogDescription>Adicione um pet ao catálogo de adoção.</DialogDescription>
+            </DialogHeader>
+            <PetForm :submitting="creating" @submit="handleCreate" />
+          </DialogContent>
+        </Dialog>
+        <Button as-child><NuxtLink to="/admin/pets/cadastrar">Cadastrar pet</NuxtLink></Button>
+      </div>
     </div>
 
     <p v-if="isLoading" class="text-muted-foreground">Carregando…</p>

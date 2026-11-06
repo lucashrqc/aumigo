@@ -1,10 +1,12 @@
 import type {
   AppliedVaccineRepository,
   VaccineRepository,
+  VaccineRow,
 } from '../repositories/vaccine.repository'
 import type {
   AppliedVaccineCreateInput,
   VaccineCreateInput,
+  VaccineListQuery,
   VaccineUpdateInput,
 } from '#shared/schemas'
 
@@ -14,8 +16,14 @@ export class VaccineService {
     private readonly appliedVaccines: AppliedVaccineRepository,
   ) {}
 
-  list() {
-    return this.vaccines.list()
+  list(query: VaccineListQuery) {
+    return this.vaccines.list(query)
+  }
+
+  async getById(id: string): Promise<VaccineRow> {
+    const vaccine = await this.vaccines.findById(id)
+    if (!vaccine) throw createError({ statusCode: 404, statusMessage: 'Vaccine not found' })
+    return vaccine
   }
 
   create(input: VaccineCreateInput, actorId: string) {
@@ -26,6 +34,11 @@ export class VaccineService {
     const updated = await this.vaccines.update(id, input, actorId)
     if (!updated) throw createError({ statusCode: 404, statusMessage: 'Vaccine not found' })
     return updated
+  }
+
+  async remove(id: string, actorId: string): Promise<void> {
+    await this.getById(id)
+    await this.vaccines.softDelete(id, actorId)
   }
 
   listAppliedForPet(petId: string) {

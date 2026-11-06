@@ -86,18 +86,9 @@ async function logout() {
           <DropdownMenuGroup>
             <DropdownMenuItem>
               <CircleUser />
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard />
-              Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
+              Meu perfil
             </DropdownMenuItem>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
           <DropdownMenuItem @select="logout">
             <LogOut class="text-red-600 dark:text-red-400" />
             Log out

@@ -137,14 +137,19 @@ export const petImage = pgTable(
 )
 
 /** Vaccine catalog (UML: Vacina). */
-export const vaccine = pgTable('vaccine', {
-  id: primaryId(),
-  name: text('name').notNull(),
-  description: text('description'),
-  expirationDate: date('expiration_date'),
-  ...timestamps,
-  ...auditColumns,
-})
+export const vaccine = pgTable(
+  'vaccine',
+  {
+    id: primaryId(),
+    name: text('name').notNull(),
+    description: text('description'),
+    expirationDate: date('expiration_date'),
+    active: boolean('active').notNull().default(true),
+    ...timestamps,
+    ...auditColumns,
+  },
+  (t) => [index('vaccine_active_idx').on(t.active)],
+)
 
 /** Applied vaccine (UML: VacinaAplicada) — pet <-> vaccine with extra data. */
 export const appliedVaccine = pgTable(

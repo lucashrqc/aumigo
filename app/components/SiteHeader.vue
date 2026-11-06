@@ -17,7 +17,7 @@ const route = useRoute()
       <h1 class="text-sm font-medium">{{ capitalize(route.name as string) }}</h1>
       <div class="ml-auto flex items-center gap-2">
         <Button variant="ghost" as-child size="sm" class="hidden sm:flex">
-          <NuxtLink href="/">Site</NuxtLink>
+          <NuxtLink href="/">Ir para o site</NuxtLink>
         </Button>
       </div>
     </div>

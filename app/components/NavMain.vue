@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { CirclePlus, Mail } from '@lucide/vue'
+import { CirclePlus } from '@lucide/vue'
 
-import { Button } from '@/components/ui/button'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -28,27 +27,24 @@ defineProps<{
       <SidebarMenu>
         <SidebarMenuItem class="flex items-center gap-2">
           <SidebarMenuButton
-            tooltip="Quick Create"
+            as-child
+            tooltip="Cadastrar Pet"
             class="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
           >
-            <CirclePlus />
-            <span>Cadastrar Pet</span>
+            <NuxtLink to="/admin/pets/cadastrar">
+              <CirclePlus />
+              <span>Cadastrar Pet</span>
+            </NuxtLink>
           </SidebarMenuButton>
-          <!-- <Button
-            size="icon"
-            class="size-8 group-data-[collapsible=icon]:opacity-0"
-            variant="outline"
-          >
-            <Mail />
-            <span class="sr-only">Inbox</span>
-          </Button> -->
         </SidebarMenuItem>
       </SidebarMenu>
       <SidebarMenu>
         <SidebarMenuItem v-for="item in items" :key="item.title">
-          <SidebarMenuButton :tooltip="item.title">
-            <component :is="item.icon" v-if="item.icon" />
-            <span>{{ item.title }}</span>
+          <SidebarMenuButton as-child :tooltip="item.title">
+            <NuxtLink :to="item.url">
+              <component :is="item.icon" v-if="item.icon" />
+              <span>{{ item.title }}</span>
+            </NuxtLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

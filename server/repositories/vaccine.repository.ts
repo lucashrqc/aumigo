@@ -1,9 +1,11 @@
-import { asc, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ilike } from 'drizzle-orm'
 import type { Database } from '../database/client'
 import { appliedVaccine, vaccine } from '../database/schema'
 import type {
   AppliedVaccineCreateInput,
+  Paginated,
   VaccineCreateInput,
+  VaccineListQuery,
   VaccineUpdateInput,
 } from '#shared/schemas'
 
@@ -11,17 +13,41 @@ export type VaccineRow = typeof vaccine.$inferSelect
 export type AppliedVaccineRow = typeof appliedVaccine.$inferSelect
 
 export interface VaccineRepository {
-  list(): Promise<VaccineRow[]>
+  list(query: VaccineListQuery): Promise<Paginated<VaccineRow>>
   findById(id: string): Promise<VaccineRow | null>
   create(data: VaccineCreateInput, actorId: string): Promise<VaccineRow>
   update(id: string, data: VaccineUpdateInput, actorId: string): Promise<VaccineRow | null>
+  softDelete(id: string, actorId: string): Promise<void>
 }
 
 export class DrizzleVaccineRepository implements VaccineRepository {
   constructor(private readonly db: Database) {}
 
-  list() {
-    return this.db.query.vaccine.findMany({ orderBy: asc(vaccine.name) })
+  async list(query: VaccineListQuery): Promise<Paginated<VaccineRow>> {
+    const conditions = [
+      eq(vaccine.active, true),
+      query.search ? ilike(vaccine.name, `%${query.search}%`) : undefined,
+    ].filter(Boolean)
+
+    const where = conditions.length ? and(...conditions) : undefined
+    const offset = (query.page - 1) * query.pageSize
+
+    const [items, totalRow] = await Promise.all([
+      this.db.query.vaccine.findMany({
+        where,
+        orderBy: asc(vaccine.name),
+        limit: query.pageSize,
+        offset,
+      }),
+      this.db.select({ value: count() }).from(vaccine).where(where),
+    ])
+
+    return {
+      items,
+      page: query.page,
+      pageSize: query.pageSize,
+      total: totalRow[0]?.value ?? 0,
+    }
   }
 
   async findById(id: string) {
@@ -44,6 +70,13 @@ export class DrizzleVaccineRepository implements VaccineRepository {
       .where(eq(vaccine.id, id))
       .returning()
     return row ?? null
+  }
+
+  async softDelete(id: string, actorId: string): Promise<void> {
+    await this.db
+      .update(vaccine)
+      .set({ active: false, updatedBy: actorId, updatedAt: new Date() })
+      .where(eq(vaccine.id, id))
   }
 }
 

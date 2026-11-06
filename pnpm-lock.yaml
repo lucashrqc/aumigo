@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@internationalized/date':
+        specifier: ^3.12.4
+        version: 3.12.4
       '@lucide/vue':
         specifier: ^1.68.0
         version: 1.68.0(vue@3.5.44(typescript@5.9.3))
@@ -20,6 +23,9 @@ importers:
       '@pinia/nuxt':
         specifier: ^1.0.3
         version: 1.0.3(@nuxt/schema@4.6.4)(confbox@0.3.2)(dotenv@16.6.1)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(pinia@4.1.0(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.44(typescript@5.9.3)))(rolldown@1.2.16)(unplugin@3.7.0(esbuild@0.28.2)(rolldown@1.2.16)(rollup@4.67.4)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
+      '@tanstack/vue-form':
+        specifier: ^1.33.5
+        version: 1.33.5(vue@3.5.44(typescript@5.9.3))
       '@tanstack/vue-query':
         specifier: ^5.106.0
         version: 5.106.0(vue@3.5.44(typescript@5.9.3))
@@ -50,6 +56,9 @@ importers:
       drizzle-orm:
         specifier: ^0.45.4
         version: 0.45.4(@neondatabase/serverless@1.2.0)(@prisma/client@5.22.0)(@types/pg@8.23.1)(better-sqlite3@12.11.1)(kysely@0.28.19)(pg@8.23.1)
+      maska:
+        specifier: ^3.2.2
+        version: 3.2.2
       nuxt:
         specifier: ^4.6.4
         version: 4.6.4(737d78b4ed0fe2a6cbfb4bf33964da72)
@@ -2008,9 +2017,21 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/devtools-event-client@0.4.4':
+    resolution: {integrity: sha512-6T5Yop/793YI+H+5J8Hsyj4kCih9sl4t3ElLgKioW5hk3ocn+ZdSJ94tT7vL7uabxSugWYBZlOTMPzEw2puvQw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  '@tanstack/form-core@1.33.5':
+    resolution: {integrity: sha512-3dfx9MBP0aq5sXKteikG629X9oviptrQj0IFRk9YGcb+lB7Kv5x8S17oOSk1wUWgjQZ4xVJEMbKwOAODymocgA==}
+
   '@tanstack/match-sorter-utils@9.2.6':
     resolution: {integrity: sha512-DIpUSOhPfQ7u/qfUi/Wgm0wBO56MyBYXGvnlI0NcauDRPqdBUlAZZjW2Dxm92m+k1UWVhKw8YJ4f47+75Aujyw==}
     engines: {node: '>=20'}
+
+  '@tanstack/pacer-lite@0.1.1':
+    resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
+    engines: {node: '>=18'}
 
   '@tanstack/query-core@5.106.0':
     resolution: {integrity: sha512-3GuqVrhCG0bBfmLt4AU0SIm8UuZ1rzeRjDiQBnYuzW3lkri1RdawWN73jZYvB4kC8WyDUoDgBx3kyO3TbNH/6Q==}
@@ -2025,11 +2046,25 @@ packages:
   '@tanstack/virtual-core@3.19.11':
     resolution: {integrity: sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A==}
 
+  '@tanstack/vue-form@1.33.5':
+    resolution: {integrity: sha512-IvNlJ1LGFqt2pkwwCM+ltMWeBpF/qUeP9vlQwknMJphrIjJtZfmVr+VaN4BsOEbZQVK2vDkglqT+u64LTTjyoA==}
+    peerDependencies:
+      vue: ^3.4.0
+
   '@tanstack/vue-query@5.106.0':
     resolution: {integrity: sha512-j+7ANdz6VUv4GfJp2Bb30e/z+wWZCVK56tNxUj+Wvdi4s7LR3Zk6F+2KrQTEJOm4FSoqhzpxQHBF9oPMVmjGqA==}
     peerDependencies:
       '@vue/composition-api': ^1.1.2
       vue: ^2.6.0 || ^3.3.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
+  '@tanstack/vue-store@0.11.2':
+    resolution: {integrity: sha512-wZmkfsvc0dNvOg/Xb/a7uTPKejleI0dR3HHi0t3ZyVM/23MJ7AC0bH6C7rp2seSY4mIYo0pLLbGJGZ/UpO93Zw==}
+    peerDependencies:
+      '@vue/composition-api': ^1.2.1
+      vue: ^2.5.0 || ^3.0.0
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
@@ -4560,6 +4595,9 @@ packages:
   maplibre-gl@6.16.0:
     resolution: {integrity: sha512-gApO66EMtoDZuio680RUBvskR7ahFd/NNhLN4tBAs+Y7FeT4gQV8zVFgYVMRmFxQznOEzecW19w6xOd9XjZjiA==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
+
+  maska@3.2.2:
+    resolution: {integrity: sha512-qhhoeKXYLsDOxfB70nybuGJmB+XsNb/xhKBBQGMMnT5Hw4+lhdeQmgwlkHYoMIUcppcnLHW6LppPPpGewrv9WQ==}
 
   mdn-data@2.37.2:
     resolution: {integrity: sha512-rz9YOBGItdSbe7HcSArUbhiAv4SB/4DKRYg96CSFS2CcIYMbUvBtZlzA1NCbk2AdgbmYwMqwNblLpR441lLeiQ==}
@@ -8199,9 +8237,19 @@ snapshots:
       tailwindcss: 4.3.4
       vite: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
 
+  '@tanstack/devtools-event-client@0.4.4': {}
+
+  '@tanstack/form-core@1.33.5':
+    dependencies:
+      '@tanstack/devtools-event-client': 0.4.4
+      '@tanstack/pacer-lite': 0.1.1
+      '@tanstack/store': 0.11.2
+
   '@tanstack/match-sorter-utils@9.2.6':
     dependencies:
       remove-accents: 0.5.0
+
+  '@tanstack/pacer-lite@0.1.1': {}
 
   '@tanstack/query-core@5.106.0': {}
 
@@ -8213,11 +8261,25 @@ snapshots:
 
   '@tanstack/virtual-core@3.19.11': {}
 
+  '@tanstack/vue-form@1.33.5(vue@3.5.44(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/form-core': 1.33.5
+      '@tanstack/vue-store': 0.11.2(vue@3.5.44(typescript@5.9.3))
+      vue: 3.5.44(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+
   '@tanstack/vue-query@5.106.0(vue@3.5.44(typescript@5.9.3))':
     dependencies:
       '@tanstack/match-sorter-utils': 9.2.6
       '@tanstack/query-core': 5.106.0
       '@vue/devtools-api': 6.6.4
+      vue: 3.5.44(typescript@5.9.3)
+      vue-demi: 0.14.10(vue@3.5.44(typescript@5.9.3))
+
+  '@tanstack/vue-store@0.11.2(vue@3.5.44(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/store': 0.11.2
       vue: 3.5.44(typescript@5.9.3)
       vue-demi: 0.14.10(vue@3.5.44(typescript@5.9.3))
 
@@ -10668,6 +10730,8 @@ snapshots:
       potpack: 2.1.0
       quickselect: 3.0.0
       tinyqueue: 3.0.0
+
+  maska@3.2.2: {}
 
   mdn-data@2.37.2: {}
 

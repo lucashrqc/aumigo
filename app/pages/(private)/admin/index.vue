@@ -464,9 +464,9 @@ const columns = columnHelper.columns([
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+  <div class="flex flex-col gap-4 md:gap-6">
     <SectionCards />
-    <div class="flex flex-col px-4 lg:px-6 gap-6">
+    <div class="flex flex-col gap-6">
       <ChartAreaInteractive />
       <DataTable :columns="columns" :data="data" />
     </div>

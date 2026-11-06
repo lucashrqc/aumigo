@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { uuidSchema } from './common'
+import { paginationSchema, uuidSchema } from './common'
 
 // --- Vaccine catalog ---
 export const vaccineCreateSchema = z.object({
@@ -10,6 +10,11 @@ export const vaccineCreateSchema = z.object({
 export const vaccineUpdateSchema = vaccineCreateSchema.partial()
 export type VaccineCreateInput = z.infer<typeof vaccineCreateSchema>
 export type VaccineUpdateInput = z.infer<typeof vaccineUpdateSchema>
+
+export const vaccineListQuerySchema = paginationSchema.extend({
+  search: z.string().trim().max(120).optional(),
+})
+export type VaccineListQuery = z.infer<typeof vaccineListQuerySchema>
 
 // --- Applied vaccine ---
 export const appliedVaccineCreateSchema = z.object({

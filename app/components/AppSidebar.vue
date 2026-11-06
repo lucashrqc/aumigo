@@ -172,8 +172,8 @@ const data = {
     </SidebarHeader>
     <SidebarContent>
       <NavMain :items="data.navMain" />
-      <NavDocuments :items="data.documents" />
-      <NavSecondary :items="data.navSecondary" class="mt-auto" />
+      <!-- <NavDocuments :items="data.documents" /> -->
+      <!-- <NavSecondary :items="data.navSecondary" class="mt-auto" /> -->
     </SidebarContent>
     <SidebarFooter>
       <NavUser :user="user" />
