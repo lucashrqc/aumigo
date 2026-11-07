@@ -6,7 +6,7 @@ controller → service → repository, with swappable ports. See
 
 ## Stack
 
-- **Runtime:** Nitro (h3). Node 20+ (24 in CI).
+- **Runtime:** Nitro (h3). Node 22+.
 - **DB:** Postgres — Neon serverless in prod/Vercel, Docker Postgres locally.
   Driver auto-selected by URL in `server/database/client.ts` (Neon WebSocket pool
   vs. node-postgres pool; only Neon/node pools support transactions).
@@ -19,7 +19,11 @@ controller → service → repository, with swappable ports. See
 ```
 server/
   api/**              HTTP routes (file-based). /api/admin/** = staff/admin only.
+                      /api/me/** = current user. Public: /api/pets, /api/species,
+                      /api/breeds, /api/locations/**. Auth at /api/auth/[...all].
   services/**         Business logic (one class per aggregate). Pure, testable.
+                      pet, vaccine, adoption, staff, catalog, location, profile,
+                      address, identity.
   repositories/**     Drizzle data access (Drizzle<Name>Repository implements <Name>Repository).
   database/
     schema/           Drizzle tables: auth.ts, domain.ts, enums.ts, columns.ts, relations.ts
@@ -27,12 +31,21 @@ server/
     client.ts         createDatabase(url) — driver selection
     migrate.ts        pnpm db:migrate entrypoint
     seed.ts           pnpm db:seed — first admin + reference species (idempotent)
+    seed-locations.ts pnpm db:seed:locations — BR states + cities from IBGE API
   storage/            ImageStorage port (UrlImageStorage) + BlobStorage port
                       (VercelBlobStorage / DisabledBlobStorage) for uploads
   email/              EmailSender port + ConsoleEmailSender/ResendEmailSender adapters
   utils/              auth.ts, db.ts, session.ts, services.ts (composition root),
                       validation.ts, identity-provider.ts
 ```
+
+## Domain model
+
+Tables (`server/database/schema/domain.ts`): `state` / `city` / `address`
+(BR locations + per-user address), `species` / `breed`, `pet` / `petImage`,
+`vaccine` / `appliedVaccine`, `adoptionApplication`, `staffProfile` /
+`staffInvitation`. Enums (`enums.ts`): user role, pet sex/size/status,
+application status, invitation role.
 
 ## Code patterns
 
@@ -53,7 +66,7 @@ server/
   `requireStaff` (admin+staff, 403), `requireAdmin` (403). `/api/admin/**` always
   calls `requireStaff`/`requireAdmin` — never trust client middleware alone.
 - **Services** take repository/port interfaces via constructor; throw `createError`
-  for HTTP errors. Wired only in `server/utils/services.ts`.
+  for HTTP errors. Wired only in `server/utils/services.ts` via `useXService()`.
 - **Repositories** are the only DB-touching layer; each exposes an interface the
   service depends on. Multi-step writes use `db.transaction`.
 - `useDb()` returns a lazy, process-wide Drizzle client (reused across requests).
@@ -91,7 +104,9 @@ reach the admin panel. The BetterAuth admin plugin's privileged ops are limited
 to `admin` (`adminRoles: ['admin']`); domain admin-panel access (staff+admin) is
 enforced by `requireStaff`.
 
-## Run the app locally
+## Run locally (app + DB in Docker)
+
+Postgres in Docker, everything else on the host:
 
 ```bash
 cp .env.example .env
@@ -99,39 +114,59 @@ docker compose up -d db          # local Postgres on :5432
 pnpm install
 pnpm db:migrate
 pnpm db:seed                     # first admin + reference species (idempotent)
+pnpm db:seed:locations           # BR states + cities (optional, from IBGE API)
 pnpm dev                         # http://localhost:3000
 ```
 
 Seeded admin (override in `.env`): `admin@aumor.local` / `ChangeMe123!`.
 
-## Database (Docker + Drizzle)
+## Run everything in Docker
+
+The `app` service (Dockerfile `dev` target) runs the Nuxt dev server with the
+repo bind-mounted, so host edits hot-reload inside the container:
 
 ```bash
-docker compose up -d db          # start local Postgres only (:5432)
+docker compose up --build        # db + app on :3000
 docker compose down              # stop (volume aumor_pgdata persists data)
+```
 
+`node_modules` and `.nuxt` live in anonymous volumes (not bind-mounted from the
+host), so after changing dependencies you must install **inside** the container
+and restart — a host `pnpm install` won't touch the container's volume:
+
+```bash
+docker compose exec -T app pnpm install    # update node_modules in the container volume
+docker compose restart app                 # reload Nitro/Vite with the new deps
+```
+
+Run migrations/seed against the Dockerized app the same way:
+
+```bash
+docker compose exec -T app pnpm db:migrate
+docker compose exec -T app pnpm db:seed
+```
+
+## Database (Drizzle)
+
+```bash
 pnpm db:generate                 # generate a migration from schema changes
 pnpm db:migrate                  # apply pending migrations
 pnpm db:push                     # push schema without a migration (dev only)
-pnpm db:seed                     # seed first admin + reference data
+pnpm db:seed                     # seed first admin + reference species
+pnpm db:seed:locations           # seed BR states + cities (IBGE)
 pnpm db:studio                   # Drizzle Studio
 ```
 
 Workflow for schema changes: edit `server/database/schema/**` → `pnpm db:generate`
 → review the generated SQL → `pnpm db:migrate`.
 
-## Run everything in Docker
-
-```bash
-docker compose up --build        # db + app (Nuxt dev server) on :3000
-```
-
 ## Environment
 
 Server-only (read in `nuxt.config.ts` runtimeConfig): `DATABASE_URL`,
 `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
 `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `BLOB_READ_WRITE_TOKEN`. Public:
-`NUXT_PUBLIC_AUTH_BASE_URL`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See
+`NUXT_PUBLIC_AUTH_BASE_URL`, `NUXT_PUBLIC_SITE_URL`,
+`NUXT_PUBLIC_CF_ANALYTICS_TOKEN`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See
 `.env.example`.
 
 Email: when `RESEND_API_KEY` is set, `services.ts` wires `ResendEmailSender`

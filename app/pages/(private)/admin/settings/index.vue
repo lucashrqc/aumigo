@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProfileUpdateInput } from '#shared/schemas'
+import type { AddressUpsertInput, ProfileUpdateInput } from '#shared/schemas'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
@@ -8,6 +8,10 @@ useHead({ title: 'Configurações — Admin' })
 const auth = useAuthStore()
 const { data: profile, isLoading } = useProfileQuery()
 const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
+
+const { data: address, isLoading: addressLoading } = useAddressQuery()
+const { mutateAsync: updateAddress, isPending: addressSaving } =
+  useUpdateAddress()
 
 const avatarSaving = ref(false)
 
@@ -31,6 +35,17 @@ async function handleUpdateProfile(payload: ProfileUpdateInput) {
     toast.success('Perfil atualizado')
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível atualizar o perfil'))
+  }
+}
+
+async function handleUpdateAddress(payload: AddressUpsertInput) {
+  try {
+    await updateAddress(payload)
+    toast.success('Endereço atualizado')
+  } catch (err) {
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível atualizar o endereço'),
+    )
   }
 }
 </script>
@@ -100,11 +115,16 @@ async function handleUpdateProfile(payload: ProfileUpdateInput) {
           <div class="mb-4">
             <h2 class="text-base font-semibold">Endereço</h2>
             <p class="text-muted-foreground text-sm">
-              Seu endereço de contato. A seleção de estado e cidade estará
-              disponível em breve.
+              Seu endereço de contato.
             </p>
           </div>
-          <AddressForm />
+          <AddressForm
+            :key="address?.id"
+            :initial="address"
+            :submitting="addressSaving"
+            :is-loading="addressLoading"
+            @submit="handleUpdateAddress"
+          />
         </section>
       </TabsContent>
     </Tabs>
