@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import type { Features } from '@/components/features'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
@@ -17,6 +18,7 @@ const { mutateAsync: createVaccine, isPending: creating } = useCreateVaccine()
 const { mutateAsync: updateVaccine, isPending: saving } = useUpdateVaccine()
 const { mutateAsync: deleteVaccine } = useDeleteVaccine()
 
+const dialog = useDialog()
 const dialogOpen = ref(false)
 const editOpen = ref(false)
 const editing = ref<VaccineDto | null>(null)
@@ -43,7 +45,16 @@ async function handleUpdate(payload: Parameters<typeof updateVaccine>[0]['body']
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Desativar ${name}? Ela será ocultada do catálogo.`)) return
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Desativar vacina',
+      description: `Desativar ${name}? Ela será ocultada do catálogo.`,
+      confirmText: 'Desativar',
+      destructive: true,
+    },
+  })
+  if (!ok) return
   try {
     await deleteVaccine(id)
     toast.success('Vacina desativada')

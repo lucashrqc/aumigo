@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
 import { Pencil, Trash2 } from '@lucide/vue'
@@ -18,6 +19,7 @@ const { mutateAsync: createSpecies, isPending: creating } = useCreateSpecies()
 const { mutateAsync: updateSpecies, isPending: saving } = useUpdateSpecies()
 const { mutateAsync: deleteSpecies } = useDeleteSpecies()
 
+const dialog = useDialog()
 const dialogOpen = ref(false)
 const editOpen = ref(false)
 const editing = ref<SpeciesDto | null>(null)
@@ -32,19 +34,32 @@ async function handleCreate(payload: Parameters<typeof createSpecies>[0]) {
   }
 }
 
-async function handleUpdate(payload: Parameters<typeof updateSpecies>[0]['body']) {
+async function handleUpdate(
+  payload: Parameters<typeof updateSpecies>[0]['body'],
+) {
   if (!editing.value) return
   try {
     await updateSpecies({ id: editing.value.id, body: payload })
     editOpen.value = false
     toast.success('Espécie atualizada')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a espécie'))
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível atualizar a espécie'),
+    )
   }
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Excluir ${name}? Esta ação não pode ser desfeita.`)) return
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Excluir espécie',
+      description: `Excluir ${name}? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      destructive: true,
+    },
+  })
+  if (!ok) return
   try {
     await deleteSpecies(id)
     toast.success('Espécie excluída')
@@ -92,7 +107,9 @@ const columns: ColumnDef<Features, SpeciesDto>[] = [
         <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nova espécie</DialogTitle>
-            <DialogDescription>Adicione uma espécie ao catálogo.</DialogDescription>
+            <DialogDescription
+              >Adicione uma espécie ao catálogo.</DialogDescription
+            >
           </DialogHeader>
           <SpeciesForm :submitting="creating" @submit="handleCreate" />
         </DialogContent>

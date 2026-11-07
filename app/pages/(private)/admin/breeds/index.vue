@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
 import { Pencil, Trash2 } from '@lucide/vue'
@@ -22,6 +23,7 @@ const { mutateAsync: createBreed, isPending: creating } = useCreateBreed()
 const { mutateAsync: updateBreed, isPending: saving } = useUpdateBreed()
 const { mutateAsync: deleteBreed } = useDeleteBreed()
 
+const dialog = useDialog()
 const dialogOpen = ref(false)
 const editOpen = ref(false)
 const editing = ref<BreedDto | null>(null)
@@ -48,7 +50,16 @@ async function handleUpdate(payload: Parameters<typeof updateBreed>[0]['body']) 
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Excluir ${name}? Esta ação não pode ser desfeita.`)) return
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Excluir raça',
+      description: `Excluir ${name}? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      destructive: true,
+    },
+  })
+  if (!ok) return
   try {
     await deleteBreed(id)
     toast.success('Raça excluída')
