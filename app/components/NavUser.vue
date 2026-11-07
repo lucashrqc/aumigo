@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CreditCard, EllipsisVertical, LogOut, Bell, CircleUser } from '@lucide/vue'
+import { EllipsisVertical, LogOut, Settings } from '@lucide/vue'
 
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
@@ -84,9 +84,9 @@ async function logout() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <CircleUser />
-              Meu perfil
+            <DropdownMenuItem @select="navigateTo('/admin/settings')">
+              <Settings />
+              Configurações
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuItem @select="logout">

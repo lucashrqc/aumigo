@@ -112,3 +112,12 @@ export interface InvitationDto {
   expiresAt: string
   createdAt: string
 }
+
+/** The current staff member's editable profile. */
+export interface ProfileDto {
+  /** staff_profile id */
+  id: string
+  /** Display name — kept in sync with the BetterAuth user.name. */
+  name: string
+  phone: string | null
+}

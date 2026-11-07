@@ -14,6 +14,7 @@ import {
 import { AdoptionService } from '../services/adoption.service'
 import { CatalogService } from '../services/catalog.service'
 import { PetService } from '../services/pet.service'
+import { ProfileService } from '../services/profile.service'
 import { StaffService } from '../services/staff.service'
 import { VaccineService } from '../services/vaccine.service'
 import { BetterAuthIdentityProvider } from './identity-provider'
@@ -29,6 +30,7 @@ interface Container {
   adoptionService: AdoptionService
   staffService: StaffService
   catalogService: CatalogService
+  profileService: ProfileService
 }
 
 let _container: Container | undefined
@@ -47,6 +49,7 @@ function buildContainer(): Container {
   const catalogRepo = new DrizzleCatalogRepository(db)
   const invitationRepo = new DrizzleStaffInvitationRepository(db)
   const profileRepo = new DrizzleStaffProfileRepository(db)
+  const identityProvider = new BetterAuthIdentityProvider()
 
   return {
     petService: new PetService(petRepo, imageStorage),
@@ -55,11 +58,12 @@ function buildContainer(): Container {
     staffService: new StaffService(
       invitationRepo,
       profileRepo,
-      new BetterAuthIdentityProvider(),
+      identityProvider,
       emailSender,
       config.public.authBaseUrl,
     ),
     catalogService: new CatalogService(catalogRepo),
+    profileService: new ProfileService(profileRepo, identityProvider),
   }
 }
 
@@ -73,3 +77,4 @@ export const useVaccineService = () => container().vaccineService
 export const useAdoptionService = () => container().adoptionService
 export const useStaffService = () => container().staffService
 export const useCatalogService = () => container().catalogService
+export const useProfileService = () => container().profileService

@@ -5,4 +5,6 @@
 export interface IdentityProvider {
   createUser(input: { email: string; password: string; name: string }): Promise<{ id: string }>
   setRole(userId: string, role: 'admin' | 'staff' | 'adopter'): Promise<void>
+  /** Update the auth user's display name (kept in sync with the staff profile). */
+  updateName(userId: string, name: string): Promise<void>
 }
