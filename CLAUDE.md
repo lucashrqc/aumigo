@@ -42,4 +42,7 @@ First-time local setup and the full command set are in [docs/backend.md](docs/ba
   (`server/utils/session.ts`). Client route middleware is UX, not security.
 - **Swappable adapters:** image/email/identity are behind ports; add/swap adapters in the
   composition root, don't call concrete libs from services.
-- Code style: Prettier (no semicolons, single quotes, width 100) + ESLint. Run both before finishing.
+- Code style: Prettier (no semicolons, single quotes, width 80) + ESLint. Run both before finishing.
+- **Avoid code comments:** prefer clear names and structure over comments. Add a comment only
+  when the code is genuinely hard to understand (non-obvious intent, tricky edge case, a
+  workaround) — explain the *why*, not the *what*.

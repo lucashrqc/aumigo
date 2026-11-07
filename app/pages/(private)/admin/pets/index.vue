@@ -23,6 +23,7 @@ const statCards = computed(() => [
     label: 'Disponíveis',
     value: stats.value?.available ?? 0,
     icon: PawPrint,
+    iconClass: 'text-amber-400',
     hint: 'Pets prontos para adoção',
   },
   {
@@ -30,6 +31,7 @@ const statCards = computed(() => [
     label: 'Adotados',
     value: stats.value?.adopted ?? 0,
     icon: Heart,
+    iconClass: 'text-green-400',
     hint: 'Pets que encontraram um lar',
   },
   {
@@ -37,6 +39,7 @@ const statCards = computed(() => [
     label: 'Castrados',
     value: stats.value?.neutered ?? 0,
     icon: Stethoscope,
+    iconClass: 'text-indigo-400',
     hint: 'Pets ativos já castrados',
   },
 ])
@@ -161,7 +164,7 @@ const columns: ColumnDef<Features, PetDto>[] = [
             {{ card.value }}
           </CardTitle>
           <CardAction>
-            <component :is="card.icon" class="text-muted-foreground size-5" />
+            <component :is="card.icon" class="size-5" :class="card.iconClass" />
           </CardAction>
         </CardHeader>
         <CardFooter class="text-muted-foreground text-sm">

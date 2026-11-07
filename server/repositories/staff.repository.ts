@@ -55,9 +55,15 @@ export interface CreateStaffProfileData {
   phone?: string | null
 }
 
+export interface UpdateStaffProfileData {
+  name?: string
+  phone?: string | null
+}
+
 export interface StaffProfileRepository {
   findByUserId(userId: string): Promise<StaffProfileRow | null>
   create(data: CreateStaffProfileData): Promise<StaffProfileRow>
+  update(userId: string, data: UpdateStaffProfileData): Promise<StaffProfileRow | null>
 }
 
 export class DrizzleStaffProfileRepository implements StaffProfileRepository {
@@ -73,5 +79,14 @@ export class DrizzleStaffProfileRepository implements StaffProfileRepository {
   async create(data: CreateStaffProfileData) {
     const [row] = await this.db.insert(staffProfile).values(data).returning()
     return row!
+  }
+
+  async update(userId: string, data: UpdateStaffProfileData) {
+    const [row] = await this.db
+      .update(staffProfile)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(staffProfile.userId, userId))
+      .returning()
+    return row ?? null
   }
 }

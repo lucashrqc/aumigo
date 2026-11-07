@@ -17,3 +17,10 @@ export const invitationAcceptSchema = z.object({
   phone: z.string().trim().max(30).optional(),
 })
 export type InvitationAcceptInput = z.infer<typeof invitationAcceptSchema>
+
+/** A staff member edits their own profile (name + phone). */
+export const profileUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  phone: z.string().trim().max(30).nullish(),
+})
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
