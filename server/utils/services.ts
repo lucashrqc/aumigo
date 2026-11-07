@@ -4,6 +4,11 @@ import {
   type EmailSender,
 } from '../email/email-sender'
 import { UrlImageStorage, type ImageStorage } from '../storage/image-storage'
+import {
+  DisabledBlobStorage,
+  VercelBlobStorage,
+  type BlobStorage,
+} from '../storage/blob-storage'
 import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
 import { DrizzlePetRepository } from '../repositories/pet.repository'
@@ -35,6 +40,7 @@ interface Container {
   staffService: StaffService
   catalogService: CatalogService
   profileService: ProfileService
+  blobStorage: BlobStorage
 }
 
 let _container: Container | undefined
@@ -47,6 +53,9 @@ function buildContainer(): Container {
   const emailSender: EmailSender = config.resendApiKey
     ? new ResendEmailSender(config.resendApiKey, config.resendFromEmail)
     : new ConsoleEmailSender()
+  const blobStorage: BlobStorage = config.blobReadWriteToken
+    ? new VercelBlobStorage(config.blobReadWriteToken)
+    : new DisabledBlobStorage()
 
   const petRepo = new DrizzlePetRepository(db)
   const vaccineRepo = new DrizzleVaccineRepository(db)
@@ -70,6 +79,7 @@ function buildContainer(): Container {
     ),
     catalogService: new CatalogService(catalogRepo),
     profileService: new ProfileService(profileRepo, identityProvider),
+    blobStorage,
   }
 }
 
@@ -84,3 +94,4 @@ export const useAdoptionService = () => container().adoptionService
 export const useStaffService = () => container().staffService
 export const useCatalogService = () => container().catalogService
 export const useProfileService = () => container().profileService
+export const useBlobStorage = () => container().blobStorage

@@ -24,3 +24,9 @@ export const profileUpdateSchema = z.object({
   phone: z.string().trim().max(30).nullish(),
 })
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
+
+/** A user sets or clears their avatar image URL. */
+export const avatarUpdateSchema = z.object({
+  image: z.string().url().nullable(),
+})
+export type AvatarUpdateInput = z.infer<typeof avatarUpdateSchema>
