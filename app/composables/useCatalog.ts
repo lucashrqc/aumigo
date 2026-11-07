@@ -64,15 +64,6 @@ export function useAdminSpeciesQuery(params: SpeciesListParams = () => ({})) {
   })
 }
 
-/** Admin: single species. */
-export function useSpeciesByIdQuery(id: MaybeRefOrGetter<string>) {
-  const api = useRequestFetch()
-  return useQuery({
-    queryKey: ['admin-species-item', id],
-    queryFn: () => api<SpeciesDto>(`/api/admin/species/${toValue(id)}`),
-  })
-}
-
 /** Admin: paginated breed catalog. */
 export function useAdminBreedsQuery(params: BreedListParams = () => ({})) {
   const api = useRequestFetch()
@@ -80,15 +71,6 @@ export function useAdminBreedsQuery(params: BreedListParams = () => ({})) {
     queryKey: ['admin-breeds', params],
     queryFn: () =>
       api<Paginated<BreedDto>>('/api/admin/breeds', { query: toValue(params) }),
-  })
-}
-
-/** Admin: single breed. */
-export function useBreedByIdQuery(id: MaybeRefOrGetter<string>) {
-  const api = useRequestFetch()
-  return useQuery({
-    queryKey: ['admin-breed-item', id],
-    queryFn: () => api<BreedDto>(`/api/admin/breeds/${toValue(id)}`),
   })
 }
 

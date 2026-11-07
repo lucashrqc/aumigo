@@ -19,9 +19,12 @@ const speciesName = (speciesId: string) =>
   species.value?.find((s) => s.id === speciesId)?.name ?? '—'
 
 const { mutateAsync: createBreed, isPending: creating } = useCreateBreed()
+const { mutateAsync: updateBreed, isPending: saving } = useUpdateBreed()
 const { mutateAsync: deleteBreed } = useDeleteBreed()
 
 const dialogOpen = ref(false)
+const editOpen = ref(false)
+const editing = ref<BreedDto | null>(null)
 
 async function handleCreate(payload: Parameters<typeof createBreed>[0]) {
   try {
@@ -30,6 +33,17 @@ async function handleCreate(payload: Parameters<typeof createBreed>[0]) {
     toast.success('Raça criada')
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível criar a raça'))
+  }
+}
+
+async function handleUpdate(payload: Parameters<typeof updateBreed>[0]['body']) {
+  if (!editing.value) return
+  try {
+    await updateBreed({ id: editing.value.id, body: payload })
+    editOpen.value = false
+    toast.success('Raça atualizada')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a raça'))
   }
 }
 
@@ -47,7 +61,10 @@ const actions: RowAction<BreedDto>[] = [
   {
     label: 'Editar',
     icon: Pencil,
-    onClick: (row) => navigateTo(`/admin/breeds/${row.id}`),
+    onClick: (row) => {
+      editing.value = row
+      editOpen.value = true
+    },
   },
   {
     label: 'Excluir',
@@ -79,19 +96,16 @@ const columns: ColumnDef<Features, BreedDto>[] = [
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Raças</h1>
-      <div class="flex items-center gap-2">
-        <Dialog v-model:open="dialogOpen">
-          <DialogTrigger as-child><Button variant="outline">Nova raça</Button></DialogTrigger>
-          <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nova raça</DialogTitle>
-              <DialogDescription>Adicione uma raça ao catálogo.</DialogDescription>
-            </DialogHeader>
-            <BreedForm :submitting="creating" @submit="handleCreate" />
-          </DialogContent>
-        </Dialog>
-        <Button as-child><NuxtLink to="/admin/breeds/cadastrar">Cadastrar raça</NuxtLink></Button>
-      </div>
+      <Dialog v-model:open="dialogOpen">
+        <DialogTrigger as-child><Button>Nova raça</Button></DialogTrigger>
+        <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nova raça</DialogTitle>
+            <DialogDescription>Adicione uma raça ao catálogo.</DialogDescription>
+          </DialogHeader>
+          <BreedForm :submitting="creating" @submit="handleCreate" />
+        </DialogContent>
+      </Dialog>
     </div>
 
     <DataTable
@@ -107,5 +121,21 @@ const columns: ColumnDef<Features, BreedDto>[] = [
       :total="data.total"
       @update:page="page = $event"
     />
+
+    <Dialog v-model:open="editOpen">
+      <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar raça</DialogTitle>
+          <DialogDescription>Atualize os dados da raça.</DialogDescription>
+        </DialogHeader>
+        <BreedForm
+          v-if="editing"
+          :key="editing.id"
+          :initial="editing"
+          :submitting="saving"
+          @submit="handleUpdate"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

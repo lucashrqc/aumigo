@@ -15,9 +15,12 @@ const { data, isLoading } = useAdminSpeciesQuery(() => ({
   pageSize: 10,
 }))
 const { mutateAsync: createSpecies, isPending: creating } = useCreateSpecies()
+const { mutateAsync: updateSpecies, isPending: saving } = useUpdateSpecies()
 const { mutateAsync: deleteSpecies } = useDeleteSpecies()
 
 const dialogOpen = ref(false)
+const editOpen = ref(false)
+const editing = ref<SpeciesDto | null>(null)
 
 async function handleCreate(payload: Parameters<typeof createSpecies>[0]) {
   try {
@@ -26,6 +29,17 @@ async function handleCreate(payload: Parameters<typeof createSpecies>[0]) {
     toast.success('Espécie criada')
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível criar a espécie'))
+  }
+}
+
+async function handleUpdate(payload: Parameters<typeof updateSpecies>[0]['body']) {
+  if (!editing.value) return
+  try {
+    await updateSpecies({ id: editing.value.id, body: payload })
+    editOpen.value = false
+    toast.success('Espécie atualizada')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a espécie'))
   }
 }
 
@@ -43,7 +57,10 @@ const actions: RowAction<SpeciesDto>[] = [
   {
     label: 'Editar',
     icon: Pencil,
-    onClick: (row) => navigateTo(`/admin/species/${row.id}`),
+    onClick: (row) => {
+      editing.value = row
+      editOpen.value = true
+    },
   },
   {
     label: 'Excluir',
@@ -70,19 +87,16 @@ const columns: ColumnDef<Features, SpeciesDto>[] = [
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Espécies</h1>
-      <div class="flex items-center gap-2">
-        <Dialog v-model:open="dialogOpen">
-          <DialogTrigger as-child><Button variant="outline">Nova espécie</Button></DialogTrigger>
-          <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nova espécie</DialogTitle>
-              <DialogDescription>Adicione uma espécie ao catálogo.</DialogDescription>
-            </DialogHeader>
-            <SpeciesForm :submitting="creating" @submit="handleCreate" />
-          </DialogContent>
-        </Dialog>
-        <Button as-child><NuxtLink to="/admin/species/cadastrar">Cadastrar espécie</NuxtLink></Button>
-      </div>
+      <Dialog v-model:open="dialogOpen">
+        <DialogTrigger as-child><Button>Nova espécie</Button></DialogTrigger>
+        <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nova espécie</DialogTitle>
+            <DialogDescription>Adicione uma espécie ao catálogo.</DialogDescription>
+          </DialogHeader>
+          <SpeciesForm :submitting="creating" @submit="handleCreate" />
+        </DialogContent>
+      </Dialog>
     </div>
 
     <DataTable
@@ -98,5 +112,21 @@ const columns: ColumnDef<Features, SpeciesDto>[] = [
       :total="data.total"
       @update:page="page = $event"
     />
+
+    <Dialog v-model:open="editOpen">
+      <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar espécie</DialogTitle>
+          <DialogDescription>Atualize os dados da espécie.</DialogDescription>
+        </DialogHeader>
+        <SpeciesForm
+          v-if="editing"
+          :key="editing.id"
+          :initial="editing"
+          :submitting="saving"
+          @submit="handleUpdate"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
