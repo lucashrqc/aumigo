@@ -20,5 +20,7 @@ export type AdoptionApplicationReviewInput = z.infer<typeof adoptionApplicationR
 export const adoptionApplicationListQuerySchema = paginationSchema.extend({
   status: z.enum(applicationStatusValues).optional(),
   petId: uuidSchema.optional(),
+  /** Free-text search across the pet name and the adopter name. */
+  search: z.string().trim().max(120).optional(),
 })
 export type AdoptionApplicationListQuery = z.infer<typeof adoptionApplicationListQuerySchema>

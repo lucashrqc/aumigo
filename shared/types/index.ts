@@ -96,6 +96,14 @@ export interface AdoptionApplicationDto {
   adopter: { id: string; name: string; email: string } | null
 }
 
+/** Aggregate counts for the admin adoption-applications dashboard cards. */
+export interface AdoptionApplicationStatsDto {
+  total: number
+  pending: number
+  approved: number
+  rejected: number
+}
+
 export interface InvitationDto {
   id: string
   email: string
