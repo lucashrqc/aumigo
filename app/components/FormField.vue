@@ -1,48 +1,14 @@
 <script setup lang="ts">
 import { Label } from '@/components/ui/label'
 
-/**
- * Presentational wrapper for a single form control.
- *
- * It owns only the layout around a control — label, error message and hint —
- * and is deliberately agnostic about the control itself: put any input in the
- * default slot (text input, Select, Checkbox, a datepicker, a timepicker, a
- * custom widget). Wire the control to TanStack Form's `<form.Field>` scoped
- * slot and feed this component the field's meta:
- *
- * ```vue
- * <form.Field name="name" v-slot="{ field }">
- *   <FormField
- *     label="Nome"
- *     :name="field.name"
- *     :errors="field.state.meta.errors"
- *     :touched="field.state.meta.isTouched"
- *     required
- *   >
- *     <template #default="{ id, invalid }">
- *       <Input :id="id" :aria-invalid="invalid"
- *         :model-value="field.state.value"
- *         @update:model-value="field.handleChange"
- *         @blur="field.handleBlur" />
- *     </template>
- *   </FormField>
- * </form.Field>
- * ```
- */
 const props = defineProps<{
-  /** Field name; used as the label's `for` and exposed to the slot as `id`. */
   name?: string
   label?: string
   hint?: string
   required?: boolean
-  /**
-   * The field's errors — `field.state.meta.errors`. With a Standard Schema
-   * validator (Zod) these are issue objects `{ message }`; plain strings are
-   * also accepted.
-   */
   errors?: unknown[]
-  /** Only show errors once the field has been touched, to avoid noise. */
   touched?: boolean
+  orientation?: 'vertical' | 'horizontal'
 }>()
 
 const errorText = computed(() => {
@@ -61,14 +27,34 @@ const invalid = computed(() => Boolean(errorText.value))
 </script>
 
 <template>
-  <div class="space-y-1.5">
+  <div
+    v-if="orientation === 'horizontal'"
+    class="grid gap-x-8 gap-y-2 py-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-center"
+  >
+    <div class="space-y-1">
+      <Label v-if="label" :for="name" class="font-medium">
+        {{ label }}<span v-if="required" class="text-destructive"> *</span>
+      </Label>
+      <p v-if="hint" class="text-xs text-muted-foreground">{{ hint }}</p>
+    </div>
+    <div class="space-y-1.5 sm:max-w-md">
+      <slot :id="name" :invalid="invalid" />
+      <p v-if="errorText" class="text-xs text-destructive">{{ errorText }}</p>
+    </div>
+  </div>
+
+  <div v-else class="space-y-1.5">
     <Label v-if="label" :for="name">
       {{ label }}<span v-if="required" class="text-destructive"> *</span>
     </Label>
 
     <slot :id="name" :invalid="invalid" />
 
-    <p v-if="errorText" class="text-xs ml-1 text-destructive">{{ errorText }}</p>
-    <p v-else-if="hint" class="text-xs ml-1 text-muted-foreground">{{ hint }}</p>
+    <p v-if="errorText" class="text-xs ml-1 text-destructive">
+      {{ errorText }}
+    </p>
+    <p v-else-if="hint" class="text-xs ml-1 text-muted-foreground">
+      {{ hint }}
+    </p>
   </div>
 </template>

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { adoptionApplicationCreateSchema, petCreateSchema } from '../../shared/schemas'
+import {
+  adoptionApplicationCreateSchema,
+  petCreateSchema,
+  profileUpdateSchema,
+} from '../../shared/schemas'
 
 describe('petCreateSchema', () => {
   it('accepts a minimal valid pet and applies defaults', () => {
@@ -27,5 +31,22 @@ describe('adoptionApplicationCreateSchema', () => {
       petId: '11111111-1111-4111-8111-111111111111',
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('profileUpdateSchema', () => {
+  it('accepts a name and phone, trimming whitespace', () => {
+    const parsed = profileUpdateSchema.parse({ name: '  Ana  ', phone: ' 11999 ' })
+    expect(parsed.name).toBe('Ana')
+    expect(parsed.phone).toBe('11999')
+  })
+
+  it('allows a missing or null phone', () => {
+    expect(profileUpdateSchema.parse({ name: 'Ana' }).phone).toBeUndefined()
+    expect(profileUpdateSchema.parse({ name: 'Ana', phone: null }).phone).toBeNull()
+  })
+
+  it('rejects an empty name', () => {
+    expect(profileUpdateSchema.safeParse({ name: '   ' }).success).toBe(false)
   })
 })

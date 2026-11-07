@@ -14,4 +14,8 @@ export class BetterAuthIdentityProvider implements IdentityProvider {
   async setRole(userId: string, role: 'admin' | 'staff' | 'adopter') {
     await useDb().update(user).set({ role, updatedAt: new Date() }).where(eq(user.id, userId))
   }
+
+  async updateName(userId: string, name: string) {
+    await useDb().update(user).set({ name, updatedAt: new Date() }).where(eq(user.id, userId))
+  }
 }
