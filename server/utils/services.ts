@@ -9,6 +9,7 @@ import {
   VercelBlobStorage,
   type BlobStorage,
 } from '../storage/blob-storage'
+import { DrizzleAddressRepository } from '../repositories/address.repository'
 import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
 import { DrizzleLocationRepository } from '../repositories/location.repository'
@@ -21,6 +22,7 @@ import {
   DrizzleAppliedVaccineRepository,
   DrizzleVaccineRepository,
 } from '../repositories/vaccine.repository'
+import { AddressService } from '../services/address.service'
 import { AdoptionService } from '../services/adoption.service'
 import { CatalogService } from '../services/catalog.service'
 import { LocationService } from '../services/location.service'
@@ -43,6 +45,7 @@ interface Container {
   catalogService: CatalogService
   locationService: LocationService
   profileService: ProfileService
+  addressService: AddressService
   blobStorage: BlobStorage
 }
 
@@ -66,6 +69,7 @@ function buildContainer(): Container {
   const adoptionRepo = new DrizzleAdoptionApplicationRepository(db)
   const catalogRepo = new DrizzleCatalogRepository(db)
   const locationRepo = new DrizzleLocationRepository(db)
+  const addressRepo = new DrizzleAddressRepository(db)
   const invitationRepo = new DrizzleStaffInvitationRepository(db)
   const profileRepo = new DrizzleStaffProfileRepository(db)
   const identityProvider = new BetterAuthIdentityProvider()
@@ -84,6 +88,7 @@ function buildContainer(): Container {
     catalogService: new CatalogService(catalogRepo),
     locationService: new LocationService(locationRepo),
     profileService: new ProfileService(profileRepo, identityProvider),
+    addressService: new AddressService(addressRepo, profileRepo),
     blobStorage,
   }
 }
@@ -100,4 +105,5 @@ export const useStaffService = () => container().staffService
 export const useCatalogService = () => container().catalogService
 export const useLocationService = () => container().locationService
 export const useProfileService = () => container().profileService
+export const useAddressService = () => container().addressService
 export const useBlobStorage = () => container().blobStorage

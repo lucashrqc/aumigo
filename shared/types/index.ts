@@ -133,3 +133,16 @@ export interface ProfileDto {
   name: string
   phone: string | null
 }
+
+/** The current staff member's contact address. */
+export interface AddressDto {
+  id: string
+  cityId: string
+  /** The city's state, so the form can preselect the state and scope cities. */
+  stateId: string
+  street: string
+  number: string | null
+  neighborhood: string | null
+  complement: string | null
+  zipCode: string | null
+}

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { uuidSchema } from './common'
 
 export const invitationRoleValues = ['admin', 'staff'] as const
 
@@ -30,3 +31,14 @@ export const avatarUpdateSchema = z.object({
   image: z.string().url().nullable(),
 })
 export type AvatarUpdateInput = z.infer<typeof avatarUpdateSchema>
+
+/** A staff member sets their own contact address (created on first save). */
+export const addressUpsertSchema = z.object({
+  cityId: uuidSchema,
+  street: z.string().trim().min(1, 'Informe a rua').max(200),
+  number: z.string().trim().max(30).nullish(),
+  neighborhood: z.string().trim().max(120).nullish(),
+  complement: z.string().trim().max(200).nullish(),
+  zipCode: z.string().trim().max(20).nullish(),
+})
+export type AddressUpsertInput = z.infer<typeof addressUpsertSchema>

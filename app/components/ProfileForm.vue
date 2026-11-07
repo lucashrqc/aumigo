@@ -39,18 +39,25 @@ const showErrors = (touched: boolean) => touched || attempts.value > 0
 </script>
 
 <template>
-  <div v-if="isLoading" class="divide-y border-t">
-    <div
-      v-for="n in 3"
-      :key="n"
-      class="grid gap-x-8 gap-y-2 py-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-center"
-    >
-      <div class="space-y-1">
-        <Skeleton class="h-4 w-24" />
+  <div v-if="isLoading">
+    <div class="divide-y border-t">
+      <div
+        v-for="n in 3"
+        :key="n"
+        class="grid gap-x-8 gap-y-2 py-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-center"
+      >
+        <div class="space-y-1">
+          <Skeleton class="h-4 w-24" />
+          <Skeleton v-if="n === 2" class="h-3 w-full" />
+          <Skeleton v-if="n === 2" class="h-3 w-3/5" />
+        </div>
+        <div class="sm:max-w-md">
+          <Skeleton class="h-9 w-full" />
+        </div>
       </div>
-      <div class="sm:max-w-md">
-        <Skeleton class="h-9 w-full" />
-      </div>
+    </div>
+    <div class="flex justify-end pt-6">
+      <Skeleton class="h-9 w-40" />
     </div>
   </div>
 
