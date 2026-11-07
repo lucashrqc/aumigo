@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: 'public' })
 useHead({ title: 'Criar conta — Aumor' })
+useSeoMeta({ robots: 'noindex, nofollow' })
 
 const route = useRoute()
 const auth = useAuthStore()

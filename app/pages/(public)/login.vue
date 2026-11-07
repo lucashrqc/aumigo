@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'public' })
 useHead({ title: 'Entrar — Aumor' })
+useSeoMeta({ robots: 'noindex, nofollow' })
 
 const route = useRoute()
 const auth = useAuthStore()

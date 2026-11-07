@@ -8,10 +8,40 @@ const route = useRoute()
 const auth = useAuthStore()
 const id = computed(() => route.params.id as string)
 
-const { data: pet, isLoading, error } = usePublicPetQuery(id)
-useHead(() => ({
-  title: pet.value ? `${pet.value.name} — Aumor` : 'Pet — Aumor',
-}))
+const {
+  data: pet,
+  status,
+  error,
+} = await useFetch<PetDto>(() => `/api/pets/${id.value}`)
+const isLoading = computed(() => status.value === 'pending')
+
+useSeoMeta({
+  title: () => (pet.value ? `${pet.value.name} — Aumor` : 'Pet — Aumor'),
+  description: () =>
+    pet.value?.description ||
+    'Conheça este pet disponível para adoção na Aumor.',
+  ogTitle: () => (pet.value ? `${pet.value.name} — Aumor` : 'Pet — Aumor'),
+  ogDescription: () => pet.value?.description || undefined,
+  ogImage: () => pet.value?.images?.[0]?.url,
+})
+
+if (pet.value) {
+  useSchemaOrg([
+    defineProduct({
+      name: pet.value.name,
+      description: pet.value.description ?? undefined,
+      image: pet.value.images?.map((img) => img.url) ?? [],
+      offers: [
+        {
+          price: 0,
+          priceCurrency: 'BRL',
+          availability:
+            pet.value.status === 'available' ? 'InStock' : 'SoldOut',
+        },
+      ],
+    }),
+  ])
+}
 
 const dialogOpen = ref(false)
 const phone = ref('')
