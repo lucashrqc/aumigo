@@ -34,7 +34,7 @@ const showErrors = (touched: boolean) => touched || attempts.value > 0
 
 <template>
   <form class="space-y-4" @submit.prevent="form.handleSubmit">
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-4">
       <form.Field
         name="name"
         :validators="{ onChange: z.string().trim().min(1, 'Informe o nome') }"

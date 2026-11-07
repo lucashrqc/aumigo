@@ -22,15 +22,6 @@ export function useAdminVaccinesQuery(params: VaccineListParams = () => ({})) {
   })
 }
 
-/** Admin: single vaccine. */
-export function useVaccineQuery(id: MaybeRefOrGetter<string>) {
-  const api = useRequestFetch()
-  return useQuery({
-    queryKey: ['admin-vaccine', id],
-    queryFn: () => api<VaccineDto>(`/api/admin/vaccines/${toValue(id)}`),
-  })
-}
-
 /** Infinite, searchable vaccine options for `AsyncCombobox`. */
 export function useVaccineOptions() {
   return useInfiniteOptions<VaccineDto>({

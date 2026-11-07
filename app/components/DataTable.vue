@@ -158,7 +158,7 @@ const table = useTable({
           </TableRow>
         </template>
         <TableEmpty v-else :colspan="table.getVisibleFlatColumns().length">
-          <slot name="empty">No records found.</slot>
+          <slot name="empty">Nenhum resultado encontrado.</slot>
         </TableEmpty>
       </TableBody>
     </Table>

@@ -14,10 +14,12 @@ const { data, isLoading } = useAdminVaccinesQuery(() => ({
   pageSize: 10,
 }))
 const { mutateAsync: createVaccine, isPending: creating } = useCreateVaccine()
+const { mutateAsync: updateVaccine, isPending: saving } = useUpdateVaccine()
 const { mutateAsync: deleteVaccine } = useDeleteVaccine()
 
 const dialogOpen = ref(false)
-const NuxtLink = resolveComponent('NuxtLink')
+const editOpen = ref(false)
+const editing = ref<VaccineDto | null>(null)
 
 async function handleCreate(payload: Parameters<typeof createVaccine>[0]) {
   try {
@@ -26,6 +28,17 @@ async function handleCreate(payload: Parameters<typeof createVaccine>[0]) {
     toast.success('Vacina criada')
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível criar a vacina'))
+  }
+}
+
+async function handleUpdate(payload: Parameters<typeof updateVaccine>[0]['body']) {
+  if (!editing.value) return
+  try {
+    await updateVaccine({ id: editing.value.id, body: payload })
+    editOpen.value = false
+    toast.success('Vacina atualizada')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a vacina'))
   }
 }
 
@@ -58,12 +71,15 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
     cell: ({ row }) =>
       h('div', { class: 'flex justify-end gap-2' }, [
         h(
-          NuxtLink,
+          'button',
           {
-            to: `/admin/cadastro/vacinas/${row.original.id}`,
             class: 'text-sm underline',
+            onClick: () => {
+              editing.value = row.original
+              editOpen.value = true
+            },
           },
-          () => 'Editar',
+          'Editar',
         ),
         h(
           'button',
@@ -82,27 +98,18 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Vacinas</h1>
-      <div class="flex items-center gap-2">
-        <Dialog v-model:open="dialogOpen">
-          <DialogTrigger as-child
-            ><Button variant="outline">Nova vacina</Button></DialogTrigger
-          >
-          <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nova vacina</DialogTitle>
-              <DialogDescription
-                >Adicione uma vacina ao catálogo.</DialogDescription
-              >
-            </DialogHeader>
-            <VaccineForm :submitting="creating" @submit="handleCreate" />
-          </DialogContent>
-        </Dialog>
-        <Button as-child
-          ><NuxtLink to="/admin/cadastro/vacinas/cadastrar"
-            >Cadastrar vacina</NuxtLink
-          ></Button
-        >
-      </div>
+      <Dialog v-model:open="dialogOpen">
+        <DialogTrigger as-child><Button>Nova vacina</Button></DialogTrigger>
+        <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nova vacina</DialogTitle>
+            <DialogDescription
+              >Adicione uma vacina ao catálogo.</DialogDescription
+            >
+          </DialogHeader>
+          <VaccineForm :submitting="creating" @submit="handleCreate" />
+        </DialogContent>
+      </Dialog>
     </div>
 
     <DataTable
@@ -117,5 +124,21 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
       :total="data.total"
       @update:page="page = $event"
     />
+
+    <Dialog v-model:open="editOpen">
+      <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar vacina</DialogTitle>
+          <DialogDescription>Atualize os dados da vacina.</DialogDescription>
+        </DialogHeader>
+        <VaccineForm
+          v-if="editing"
+          :key="editing.id"
+          :initial="editing"
+          :submitting="saving"
+          @submit="handleUpdate"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
