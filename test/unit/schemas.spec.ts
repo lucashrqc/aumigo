@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   adoptionApplicationCreateSchema,
+  avatarUpdateSchema,
   petCreateSchema,
   profileUpdateSchema,
 } from '../../shared/schemas'
@@ -48,5 +49,21 @@ describe('profileUpdateSchema', () => {
 
   it('rejects an empty name', () => {
     expect(profileUpdateSchema.safeParse({ name: '   ' }).success).toBe(false)
+  })
+})
+
+describe('avatarUpdateSchema', () => {
+  it('accepts a valid image URL', () => {
+    expect(avatarUpdateSchema.parse({ image: 'https://blob.example/a.jpg' }).image).toBe(
+      'https://blob.example/a.jpg',
+    )
+  })
+
+  it('accepts null to clear the avatar', () => {
+    expect(avatarUpdateSchema.parse({ image: null }).image).toBeNull()
+  })
+
+  it('rejects a non-URL string', () => {
+    expect(avatarUpdateSchema.safeParse({ image: 'not-a-url' }).success).toBe(false)
   })
 })

@@ -49,4 +49,8 @@ export class ProfileService {
 
     return toDto(profile)
   }
+
+  async updateAvatar(userId: string, image: string | null): Promise<void> {
+    await this.identity.updateImage(userId, image)
+  }
 }

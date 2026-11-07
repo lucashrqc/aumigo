@@ -29,4 +29,8 @@ export class BetterAuthIdentityProvider implements IdentityProvider {
   async updateName(userId: string, name: string) {
     await useDb().update(user).set({ name, updatedAt: new Date() }).where(eq(user.id, userId))
   }
+
+  async updateImage(userId: string, image: string | null) {
+    await useDb().update(user).set({ image, updatedAt: new Date() }).where(eq(user.id, userId))
+  }
 }

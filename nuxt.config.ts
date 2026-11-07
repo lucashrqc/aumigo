@@ -55,6 +55,7 @@ export default defineNuxtConfig({
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     resendApiKey: process.env.RESEND_API_KEY || '',
     resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+    blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN || '',
     public: {
       authBaseUrl:
         process.env.NUXT_PUBLIC_AUTH_BASE_URL ||
