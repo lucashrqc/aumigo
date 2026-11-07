@@ -1,7 +1,8 @@
-import { and, count, desc, eq, ne } from 'drizzle-orm'
+import { and, count, desc, eq, exists, ilike, ne, or, sql } from 'drizzle-orm'
 import type { Database } from '../database/client'
-import { adoptionApplication, pet } from '../database/schema'
+import { adoptionApplication, pet, user } from '../database/schema'
 import type { AdoptionApplicationListQuery, Paginated } from '#shared/schemas'
+import type { AdoptionApplicationStatsDto } from '#shared/types'
 
 export type AdoptionApplicationRow = typeof adoptionApplication.$inferSelect
 
@@ -19,6 +20,7 @@ export interface CreateApplicationData {
 
 export interface AdoptionApplicationRepository {
   list(query: AdoptionApplicationListQuery): Promise<Paginated<AdoptionApplicationWithRelations>>
+  stats(): Promise<AdoptionApplicationStatsDto>
   listByAdopter(adopterUserId: string): Promise<AdoptionApplicationWithRelations[]>
   findById(id: string): Promise<AdoptionApplicationWithRelations | null>
   findOpenByPetAndAdopter(
@@ -41,9 +43,33 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
   constructor(private readonly db: Database) {}
 
   async list(query: AdoptionApplicationListQuery) {
+    const search = query.search?.trim()
     const conditions = [
       query.status ? eq(adoptionApplication.status, query.status) : undefined,
       query.petId ? eq(adoptionApplication.petId, query.petId) : undefined,
+      search
+        ? or(
+            exists(
+              this.db
+                .select({ one: sql`1` })
+                .from(pet)
+                .where(
+                  and(eq(pet.id, adoptionApplication.petId), ilike(pet.name, `%${search}%`)),
+                ),
+            ),
+            exists(
+              this.db
+                .select({ one: sql`1` })
+                .from(user)
+                .where(
+                  and(
+                    eq(user.id, adoptionApplication.adopterUserId),
+                    ilike(user.name, `%${search}%`),
+                  ),
+                ),
+            ),
+          )
+        : undefined,
     ].filter(Boolean)
     const where = conditions.length ? and(...conditions) : undefined
     const offset = (query.page - 1) * query.pageSize
@@ -64,6 +90,24 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
       page: query.page,
       pageSize: query.pageSize,
       total: totalRow[0]?.value ?? 0,
+    }
+  }
+
+  async stats(): Promise<AdoptionApplicationStatsDto> {
+    const [row] = await this.db
+      .select({
+        total: count(),
+        pending: count(sql`CASE WHEN ${adoptionApplication.status} = 'pending' THEN 1 END`),
+        approved: count(sql`CASE WHEN ${adoptionApplication.status} = 'approved' THEN 1 END`),
+        rejected: count(sql`CASE WHEN ${adoptionApplication.status} = 'rejected' THEN 1 END`),
+      })
+      .from(adoptionApplication)
+
+    return {
+      total: row?.total ?? 0,
+      pending: row?.pending ?? 0,
+      approved: row?.approved ?? 0,
+      rejected: row?.rejected ?? 0,
     }
   }
 

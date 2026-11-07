@@ -118,7 +118,7 @@ const table = useTable({
             v-for="header in headerGroup.headers"
             :key="header.id"
             :colspan="header.colSpan"
-            :class="header.column.columnDef.meta?.class"
+            :class="['first:pl-4 last:pr-4', header.column.columnDef.meta?.class]"
           >
             <FlexRender v-if="!header.isPlaceholder" :header="header" />
           </TableHead>
@@ -140,7 +140,7 @@ const table = useTable({
             <TableCell
               v-for="column in table.getVisibleFlatColumns()"
               :key="column.id"
-              :class="['text-xs', column.columnDef.meta?.class]"
+              :class="['text-xs first:pl-4 last:pr-4', column.columnDef.meta?.class]"
             >
               <Skeleton class="h-6 w-full" />
             </TableCell>
@@ -151,7 +151,7 @@ const table = useTable({
             <TableCell
               v-for="cell in row.getVisibleCells()"
               :key="cell.id"
-              :class="['text-xs', cell.column.columnDef.meta?.class]"
+              :class="['text-xs first:pl-4 last:pr-4', cell.column.columnDef.meta?.class]"
             >
               <FlexRender :cell="cell" />
             </TableCell>

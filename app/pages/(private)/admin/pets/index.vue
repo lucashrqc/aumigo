@@ -145,15 +145,19 @@ const columns: ColumnDef<Features, PetDto>[] = [
       </Dialog>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+    <div
+      class="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-3"
+    >
       <Card
         v-for="card in statCards"
         :key="card.key"
-        class="from-primary/5 to-card dark:bg-card @container/card bg-gradient-to-t shadow-xs"
+        class="from-primary/5 to-card dark:bg-card @container/card bg-linear-to-t shadow-xs"
       >
         <CardHeader>
           <CardDescription>{{ card.label }}</CardDescription>
-          <CardTitle class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle
+            class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+          >
             {{ card.value }}
           </CardTitle>
           <CardAction>
