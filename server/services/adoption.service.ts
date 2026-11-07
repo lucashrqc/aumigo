@@ -19,6 +19,10 @@ export class AdoptionService {
     return this.applications.list(query)
   }
 
+  stats() {
+    return this.applications.stats()
+  }
+
   listForAdopter(adopterUserId: string) {
     return this.applications.listByAdopter(adopterUserId)
   }
