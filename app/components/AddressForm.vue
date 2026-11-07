@@ -1,101 +1,250 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { addressUpsertSchema, type AddressUpsertInput } from '#shared/schemas'
+import type { AddressDto } from '#shared/types'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useForm } from '@tanstack/vue-form'
+import { toast } from 'vue-sonner'
+import { z } from 'zod'
 
-// TODO: UI scaffold only. The `address` table requires a non-null `cityId` and the
-// city/state catalogs aren't seeded yet, so nothing is submitted. Wire a
-// `useUpdateAddress` mutation and enable Save once the catalogs land.
+const props = defineProps<{
+  initial?: AddressDto | null
+  submitting?: boolean
+  isLoading?: boolean
+}>()
+const emit = defineEmits<{ (e: 'submit', payload: AddressUpsertInput): void }>()
 
-const states = useStateOptions()
-const stateId = ref<string | null>(null)
-const cities = useCityOptions(() => stateId.value ?? undefined)
+const form = useForm({
+  defaultValues: {
+    stateId: props.initial?.stateId ?? '',
+    cityId: props.initial?.cityId ?? '',
+    zipCode: props.initial?.zipCode ?? '',
+    street: props.initial?.street ?? '',
+    number: props.initial?.number ?? '',
+    neighborhood: props.initial?.neighborhood ?? '',
+    complement: props.initial?.complement ?? '',
+  },
+  onSubmit: ({ value }) => {
+    const parsed = addressUpsertSchema.safeParse({
+      cityId: value.cityId,
+      street: value.street,
+      number: value.number || null,
+      neighborhood: value.neighborhood || null,
+      complement: value.complement || null,
+      zipCode: value.zipCode || null,
+    })
 
-const form = reactive({
-  street: '',
-  number: '',
-  neighborhood: '',
-  complement: '',
-  zipCode: '',
-  cityId: null as string | null,
+    if (!parsed.success) {
+      toast.error('Verifique os campos do formulário')
+      return
+    }
+    emit('submit', parsed.data)
+  },
 })
 
-function onStateChange(value: string | null) {
-  stateId.value = value
-  form.cityId = null
+// `stateId` only scopes the city list; the API payload stores `cityId`.
+const stateId = form.useStore((state) => state.values.stateId)
+const attempts = form.useStore((state) => state.submissionAttempts)
+
+const states = useStateOptions()
+const cities = useCityOptions(() => stateId.value || undefined)
+
+function onStateChange(value: string) {
+  form.setFieldValue('stateId', value)
+  form.setFieldValue('cityId', '')
 }
+
+const showErrors = (touched: boolean) => touched || attempts.value > 0
 </script>
 
 <template>
-  <form @submit.prevent>
+  <div v-if="isLoading" class="divide-y border-t">
+    <div
+      v-for="n in 7"
+      :key="n"
+      class="grid gap-x-8 gap-y-2 py-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-center"
+    >
+      <Skeleton class="h-4 w-24" />
+      <div class="sm:max-w-md">
+        <Skeleton class="h-9 w-full" />
+      </div>
+    </div>
+  </div>
+
+  <form v-else @submit.prevent="form.handleSubmit">
     <div class="divide-y border-t">
-      <FormField label="CEP" name="zipCode" orientation="horizontal">
-        <template #default="{ id }">
-          <Input :id="id" v-model="form.zipCode" placeholder="00000-000" />
+      <form.Field name="zipCode">
+        <template #default="{ field }">
+          <FormField
+            label="CEP"
+            orientation="horizontal"
+            :name="field.name"
+            :errors="field.state.meta.errors"
+            :touched="showErrors(field.state.meta.isTouched)"
+          >
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                placeholder="00000-000"
+                :model-value="field.state.value"
+                @update:model-value="field.handleChange(String($event))"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
         </template>
-      </FormField>
+      </form.Field>
 
-      <FormField label="Rua" name="street" orientation="horizontal">
-        <template #default="{ id }">
-          <Input :id="id" v-model="form.street" />
+      <form.Field
+        name="street"
+        :validators="{ onChange: z.string().trim().min(1, 'Informe a rua') }"
+      >
+        <template #default="{ field }">
+          <FormField
+            label="Rua"
+            required
+            orientation="horizontal"
+            :name="field.name"
+            :errors="field.state.meta.errors"
+            :touched="showErrors(field.state.meta.isTouched)"
+          >
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                :model-value="field.state.value"
+                @update:model-value="field.handleChange(String($event))"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
         </template>
-      </FormField>
+      </form.Field>
 
-      <FormField label="Número" name="number" orientation="horizontal">
-        <template #default="{ id }">
-          <Input :id="id" v-model="form.number" />
+      <form.Field name="number">
+        <template #default="{ field }">
+          <FormField label="Número" orientation="horizontal" :name="field.name">
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                :model-value="field.state.value"
+                @update:model-value="field.handleChange(String($event))"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
         </template>
-      </FormField>
+      </form.Field>
 
-      <FormField label="Bairro" name="neighborhood" orientation="horizontal">
-        <template #default="{ id }">
-          <Input :id="id" v-model="form.neighborhood" />
+      <form.Field name="neighborhood">
+        <template #default="{ field }">
+          <FormField label="Bairro" orientation="horizontal" :name="field.name">
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                :model-value="field.state.value"
+                @update:model-value="field.handleChange(String($event))"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
         </template>
-      </FormField>
+      </form.Field>
 
-      <FormField label="Complemento" name="complement" orientation="horizontal">
-        <template #default="{ id }">
-          <Input :id="id" v-model="form.complement" />
+      <form.Field name="complement">
+        <template #default="{ field }">
+          <FormField
+            label="Complemento"
+            orientation="horizontal"
+            :name="field.name"
+          >
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                :model-value="field.state.value"
+                @update:model-value="field.handleChange(String($event))"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
         </template>
-      </FormField>
+      </form.Field>
 
-      <FormField label="Estado" name="state" orientation="horizontal">
-        <AsyncCombobox
-          :model-value="stateId"
-          :items="states.items"
-          :is-fetching="states.isFetching"
-          :is-fetching-next-page="states.isFetchingNextPage"
-          :has-next-page="states.hasNextPage"
-          option-value="id"
-          option-label="name"
-          placeholder="Selecione o estado"
-          search-placeholder="Buscar estado…"
-          @update:model-value="onStateChange($event ?? null)"
-          @search="states.setSearch"
-          @can-load-more="states.loadMore"
-        />
-      </FormField>
+      <form.Field
+        name="stateId"
+        :validators="{ onChange: z.string().min(1, 'Selecione o estado') }"
+      >
+        <template #default="{ field }">
+          <FormField
+            label="Estado"
+            required
+            orientation="horizontal"
+            :name="field.name"
+            :errors="field.state.meta.errors"
+            :touched="showErrors(field.state.meta.isTouched)"
+          >
+            <AsyncCombobox
+              :model-value="field.state.value"
+              :items="states.items"
+              :is-fetching="states.isFetching"
+              :is-fetching-next-page="states.isFetchingNextPage"
+              :has-next-page="states.hasNextPage"
+              :resolve-by-id="states.resolveById"
+              option-value="id"
+              option-label="name"
+              placeholder="Selecione o estado"
+              search-placeholder="Buscar estado…"
+              @update:model-value="onStateChange(String($event ?? ''))"
+              @search="states.setSearch"
+              @can-load-more="states.loadMore"
+            />
+          </FormField>
+        </template>
+      </form.Field>
 
-      <FormField label="Cidade" name="city" orientation="horizontal">
-        <AsyncCombobox
-          :model-value="form.cityId"
-          :items="cities.items"
-          :is-fetching="cities.isFetching"
-          :is-fetching-next-page="cities.isFetchingNextPage"
-          :has-next-page="cities.hasNextPage"
-          :disabled="!stateId"
-          option-value="id"
-          option-label="name"
-          placeholder="Selecione a cidade"
-          search-placeholder="Buscar cidade…"
-          @update:model-value="form.cityId = $event ?? null"
-          @search="cities.setSearch"
-          @can-load-more="cities.loadMore"
-        />
-      </FormField>
+      <form.Field
+        name="cityId"
+        :validators="{ onChange: z.string().min(1, 'Selecione a cidade') }"
+      >
+        <template #default="{ field }">
+          <FormField
+            label="Cidade"
+            required
+            orientation="horizontal"
+            :name="field.name"
+            :errors="field.state.meta.errors"
+            :touched="showErrors(field.state.meta.isTouched)"
+          >
+            <AsyncCombobox
+              :model-value="field.state.value"
+              :items="cities.items"
+              :is-fetching="cities.isFetching"
+              :is-fetching-next-page="cities.isFetchingNextPage"
+              :has-next-page="cities.hasNextPage"
+              :resolve-by-id="cities.resolveById"
+              :disabled="!stateId"
+              option-value="id"
+              option-label="name"
+              placeholder="Selecione a cidade"
+              search-placeholder="Buscar cidade…"
+              @update:model-value="field.handleChange(String($event ?? ''))"
+              @search="cities.setSearch"
+              @can-load-more="cities.loadMore"
+            />
+          </FormField>
+        </template>
+      </form.Field>
     </div>
 
-    <div class="flex items-center justify-end gap-3 pt-6">
-      <p class="text-xs text-muted-foreground">Em breve</p>
-      <Button type="submit" disabled>Salvar endereço</Button>
+    <div class="flex items-center justify-end pt-6">
+      <form.Subscribe>
+        <template #default="{ canSubmit, isSubmitting }">
+          <Button
+            type="submit"
+            :disabled="submitting || isSubmitting || !canSubmit"
+          >
+            Salvar endereço
+          </Button>
+        </template>
+      </form.Subscribe>
     </div>
   </form>
 </template>

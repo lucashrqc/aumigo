@@ -10,27 +10,36 @@ hydration. See [architecture.md](architecture.md) for the full picture.
   (`@tailwindcss/vite`, config-less; entry `app/assets/css/tailwind.css`).
 - **Icons:** lucide-vue-next. **Toasts:** vue-sonner (`<Toaster />` in `app.vue`).
 - **Server state:** TanStack Query (`@tanstack/vue-query`), SSR-hydrated.
-- **Tables:** TanStack Table (`@tanstack/vue-table`) via `DataTable.vue`.
+- **Tables:** TanStack Table v9 (`@tanstack/vue-table`) via `DataTable.vue`.
 - **Client state:** Pinia — `useAuthStore` (the only global store).
 - **Color mode:** `@nuxtjs/color-mode` (system preference, class-based).
+- **Locale:** UI copy is pt-BR (some page/route names too, e.g. `pets/cadastrar`).
 
 ## Folder structure
 
 ```
 app/
   pages/
-    (public)/**       Public routes: index, pets, pets/[id], login, register, applications
-    (private)/admin/** Admin panel: dashboard, pets, vaccines, applications, staff
-  layouts/            public.vue, private.vue (admin shell: sidebar + sign-out)
+    (public)/**        Public routes: index, pets, pets/[id], login, register, applications
+    (private)/admin/** Admin panel: dashboard, pets, species, breeds, vaccines,
+                       applications, staff, settings
+  layouts/             public.vue, private.vue (admin shell: sidebar + sign-out)
   components/
-    ui/**             shadcn-vue primitives (Button, Card, Dialog, Table, Select, …)
-    *.vue             App components: PetCard, PetForm, DataTable, Pagination
-  composables/**      TanStack Query wrappers per domain (usePets, useApplications, …)
-  middleware/         auth.ts, staff.ts, admin.ts (route guards)
-  plugins/            auth.ts (hydrate session), vue-query.ts (SSR hydration)
-  stores/auth.ts      Pinia auth store
-  lib/                auth-client.ts (BetterAuth browser client), utils.ts (cn())
-  utils/errors.ts     resolveErrorMessage()
+    ui/**              shadcn-vue primitives (Button, Card, Dialog, Table, Select, …)
+    *.vue              App components: PetCard, PetForm, DataTable, Pagination,
+                       AsyncCombobox, ImageUploader, AddressForm, ProfileForm,
+                       <Entity>Form, AppDialog* (dialog host)
+    features.ts        TanStack Table v9 feature set + ColumnMeta augmentation
+  composables/**       TanStack Query wrappers per domain (usePets, useApplications,
+                       useCatalog, useVaccines, useLocations, useProfile, useAddress,
+                       useInvitations); useDialog, useInfiniteOptions (UI helpers)
+  middleware/          auth.ts, staff.ts, admin.ts (route guards)
+  plugins/             auth.ts (hydrate session), vue-query.ts (SSR hydration),
+                       cloudflare-analytics.client.ts
+  stores/auth.ts       Pinia auth store
+  lib/                 auth-client.ts (BetterAuth browser client), utils.ts (cn())
+  utils/               errors.ts (resolveErrorMessage), format.ts (dates/values),
+                       labels.ts (pt-BR enum labels), audit-columns.ts (shared table cols)
 ```
 
 ## Code patterns
@@ -59,6 +68,16 @@ app/
 - **Auth state:** read the current user/role from `useAuthStore` (`isAuthenticated`,
   `isStaff`, `isAdmin`, `role`); BetterAuth owns the session. Sign in/out/up via
   `authClient` (`app/lib/auth-client.ts`).
+- **Tables:** admin lists use `DataTable.vue` with server-side pagination
+  (`Pagination.vue`). Share created/updated columns via `auditColumns()`
+  (`app/utils/audit-columns.ts`); column widths via `meta.class` (`features.ts`).
+- **Async selects:** `AsyncCombobox.vue` + `useInfiniteOptions` paginate/search a
+  REST endpoint (`GET {endpoint}?page&pageSize&search`) — used for species,
+  breeds, cities, etc.
+- **Dialogs:** open components imperatively with `useDialog().open(Component, …)`,
+  which returns a Promise resolved on close; `AppDialogProvider` (in a layout)
+  renders the stack and dismisses on route change. Use `ConfirmDialog` for
+  confirmations.
 - **Types:** request types come from `#shared/schemas` (Zod-inferred); response
   DTOs (`PetDto`, …) are globally available from `shared/types`.
 - **Styling:** compose class names with `cn()` from `app/lib/utils.ts`. Prefer
@@ -66,5 +85,6 @@ app/
 
 ## Run locally
 
-See [backend.md](backend.md#run-the-app-locally) — the frontend is served by the
-same `pnpm dev` (http://localhost:3000). The admin panel is at `/admin`.
+See [backend.md](backend.md#run-locally-app--db-in-docker) — the frontend is
+served by the same `pnpm dev` (http://localhost:3000). The admin panel is at
+`/admin`.
