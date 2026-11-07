@@ -5,12 +5,34 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/eslint', '@pinia/nuxt', '@nuxtjs/color-mode', 'shadcn-nuxt'],
+  modules: [
+    '@nuxt/eslint',
+    '@pinia/nuxt',
+    '@nuxtjs/color-mode',
+    'shadcn-nuxt',
+    '@nuxtjs/seo',
+  ],
 
   css: ['~/assets/css/tailwind.css', 'vue-sonner/style.css'],
 
   vite: {
     plugins: [tailwindcss()],
+  },
+
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    name: 'Aumor',
+  },
+
+  ogImage: { enabled: false },
+
+  robots: {
+    disallow: ['/admin', '/applications', '/login', '/register'],
+  },
+
+  sitemap: {
+    exclude: ['/admin/**', '/applications', '/login', '/register'],
+    sources: ['/api/__sitemap__/urls'],
   },
 
   colorMode: {
@@ -36,6 +58,7 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_AUTH_BASE_URL ||
         process.env.BETTER_AUTH_URL ||
         'http://localhost:3000',
+      cfAnalyticsToken: process.env.NUXT_PUBLIC_CF_ANALYTICS_TOKEN || '',
     },
   },
 
