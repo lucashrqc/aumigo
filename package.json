@@ -20,6 +20,7 @@
     "db:migrate": "tsx server/database/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx server/database/seed.ts",
+    "db:seed:locations": "tsx server/database/seed-locations.ts",
     "db:studio": "drizzle-kit studio",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:unit": "vitest run --project unit",

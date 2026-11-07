@@ -1,5 +1,6 @@
 export * from './common'
 export * from './catalog'
+export * from './location'
 export * from './pet'
 export * from './vaccine'
 export * from './adoption'

@@ -11,6 +11,7 @@ import {
 } from '../storage/blob-storage'
 import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
+import { DrizzleLocationRepository } from '../repositories/location.repository'
 import { DrizzlePetRepository } from '../repositories/pet.repository'
 import {
   DrizzleStaffInvitationRepository,
@@ -22,6 +23,7 @@ import {
 } from '../repositories/vaccine.repository'
 import { AdoptionService } from '../services/adoption.service'
 import { CatalogService } from '../services/catalog.service'
+import { LocationService } from '../services/location.service'
 import { PetService } from '../services/pet.service'
 import { ProfileService } from '../services/profile.service'
 import { StaffService } from '../services/staff.service'
@@ -39,6 +41,7 @@ interface Container {
   adoptionService: AdoptionService
   staffService: StaffService
   catalogService: CatalogService
+  locationService: LocationService
   profileService: ProfileService
   blobStorage: BlobStorage
 }
@@ -62,6 +65,7 @@ function buildContainer(): Container {
   const appliedVaccineRepo = new DrizzleAppliedVaccineRepository(db)
   const adoptionRepo = new DrizzleAdoptionApplicationRepository(db)
   const catalogRepo = new DrizzleCatalogRepository(db)
+  const locationRepo = new DrizzleLocationRepository(db)
   const invitationRepo = new DrizzleStaffInvitationRepository(db)
   const profileRepo = new DrizzleStaffProfileRepository(db)
   const identityProvider = new BetterAuthIdentityProvider()
@@ -78,6 +82,7 @@ function buildContainer(): Container {
       config.public.authBaseUrl,
     ),
     catalogService: new CatalogService(catalogRepo),
+    locationService: new LocationService(locationRepo),
     profileService: new ProfileService(profileRepo, identityProvider),
     blobStorage,
   }
@@ -93,5 +98,6 @@ export const useVaccineService = () => container().vaccineService
 export const useAdoptionService = () => container().adoptionService
 export const useStaffService = () => container().staffService
 export const useCatalogService = () => container().catalogService
+export const useLocationService = () => container().locationService
 export const useProfileService = () => container().profileService
 export const useBlobStorage = () => container().blobStorage

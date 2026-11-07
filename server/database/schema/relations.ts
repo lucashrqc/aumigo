@@ -10,6 +10,7 @@ import {
   petImage,
   species,
   staffProfile,
+  state,
   vaccine,
 } from './domain'
 
@@ -26,7 +27,12 @@ export const staffProfileRelations = relations(staffProfile, ({ one, many }) => 
   addresses: many(address),
 }))
 
-export const cityRelations = relations(city, ({ many }) => ({
+export const stateRelations = relations(state, ({ many }) => ({
+  cities: many(city),
+}))
+
+export const cityRelations = relations(city, ({ one, many }) => ({
+  state: one(state, { fields: [city.stateId], references: [state.id] }),
   addresses: many(address),
 }))
 
