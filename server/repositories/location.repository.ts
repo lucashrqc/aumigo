@@ -11,8 +11,10 @@ import type { CityDto, StateDto } from '#shared/types'
 export interface LocationRepository {
   listStates(query: StateListQuery): Promise<Paginated<StateDto>>
   findStateById(id: string): Promise<StateDto | null>
+  findStateByIbgeId(ibgeId: number): Promise<StateDto | null>
   listCities(query: CityListQuery): Promise<Paginated<CityDto>>
   findCityById(id: string): Promise<CityDto | null>
+  findCityByIbgeId(ibgeId: number): Promise<CityDto | null>
 }
 
 export class DrizzleLocationRepository implements LocationRepository {
@@ -45,6 +47,15 @@ export class DrizzleLocationRepository implements LocationRepository {
     return row ?? null
   }
 
+  async findStateByIbgeId(ibgeId: number): Promise<StateDto | null> {
+    const [row] = await this.db
+      .select({ id: state.id, name: state.name, uf: state.uf })
+      .from(state)
+      .where(eq(state.ibgeId, ibgeId))
+      .limit(1)
+    return row ?? null
+  }
+
   async listCities(query: CityListQuery): Promise<Paginated<CityDto>> {
     const where = and(
       eq(city.stateId, query.stateId),
@@ -71,6 +82,15 @@ export class DrizzleLocationRepository implements LocationRepository {
       .select({ id: city.id, name: city.name, stateId: city.stateId })
       .from(city)
       .where(eq(city.id, id))
+      .limit(1)
+    return row ?? null
+  }
+
+  async findCityByIbgeId(ibgeId: number): Promise<CityDto | null> {
+    const [row] = await this.db
+      .select({ id: city.id, name: city.name, stateId: city.stateId })
+      .from(city)
+      .where(eq(city.ibgeId, ibgeId))
       .limit(1)
     return row ?? null
   }

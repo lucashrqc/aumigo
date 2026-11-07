@@ -18,6 +18,11 @@ export interface CityDto {
   stateId: string
 }
 
+export interface IbgeResolveDto {
+  state: StateDto | null
+  city: CityDto | null
+}
+
 export interface PetImageDto {
   id: string
   url: string

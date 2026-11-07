@@ -3,6 +3,8 @@ import { addressUpsertSchema, type AddressUpsertInput } from '#shared/schemas'
 import type { AddressDto } from '#shared/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useForm } from '@tanstack/vue-form'
+import { vMaska } from 'maska/vue'
+import { watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
 
@@ -43,6 +45,7 @@ const form = useForm({
 
 // `stateId` only scopes the city list; the API payload stores `cityId`.
 const stateId = form.useStore((state) => state.values.stateId)
+const zipCode = form.useStore((state) => state.values.zipCode)
 const attempts = form.useStore((state) => state.submissionAttempts)
 
 const states = useStateOptions()
@@ -54,6 +57,26 @@ function onStateChange(value: string) {
 }
 
 const showErrors = (touched: boolean) => touched || attempts.value > 0
+
+const cep = useCep(() => zipCode.value)
+
+watch(
+  () => cep.data.value,
+  (data) => {
+    if (!data) return
+    form.setFieldValue('street', data.street)
+    form.setFieldValue('neighborhood', data.neighborhood)
+    if (data.state) form.setFieldValue('stateId', data.state.id)
+    form.setFieldValue('cityId', data.city?.id ?? '')
+  },
+)
+
+watch(
+  () => cep.isError.value,
+  (isError) => {
+    if (isError) toast.error('CEP não encontrado')
+  },
+)
 </script>
 
 <template>
@@ -89,6 +112,9 @@ const showErrors = (touched: boolean) => touched || attempts.value > 0
             <template #default="{ id }">
               <Input
                 :id="id"
+                v-maska
+                data-maska="#####-###"
+                inputmode="numeric"
                 placeholder="00000-000"
                 :model-value="field.state.value"
                 @update:model-value="field.handleChange(String($event))"
