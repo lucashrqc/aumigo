@@ -6,8 +6,9 @@ import { useDb } from './db'
 
 function buildAuth() {
   const config = useRuntimeConfig()
-
-  const googleConfigured = Boolean(config.googleClientId && config.googleClientSecret)
+  const googleConfigured = Boolean(
+    config.googleClientId && config.googleClientSecret,
+  )
 
   return betterAuth({
     baseURL: config.betterAuthUrl,

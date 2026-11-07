@@ -32,8 +32,8 @@ export type BreedListQuery = z.infer<typeof breedListQuerySchema>
 // --- City ---
 export const cityCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  state: z.string().trim().min(2).max(60),
-  ibgeCode: z.string().trim().max(20).optional(),
+  stateId: uuidSchema,
+  ibgeId: z.coerce.number().int().positive().optional(),
 })
 export const cityUpdateSchema = cityCreateSchema.partial()
 export type CityCreateInput = z.infer<typeof cityCreateSchema>

@@ -34,14 +34,29 @@ export const staffProfile = pgTable('staff_profile', {
   ...timestamps,
 })
 
-/** City (UML: Cidade). */
-export const city = pgTable('city', {
+/** State (UML: Estado) — Brazilian federative unit, seeded from IBGE. */
+export const state = pgTable('state', {
   id: primaryId(),
+  ibgeId: integer('ibge_id').notNull().unique(),
   name: text('name').notNull(),
-  state: text('state').notNull(),
-  ibgeCode: text('ibge_code'),
+  uf: text('uf').notNull().unique(),
   ...timestamps,
 })
+
+/** City (UML: Cidade) — belongs to a state, seeded from IBGE. */
+export const city = pgTable(
+  'city',
+  {
+    id: primaryId(),
+    stateId: uuid('state_id')
+      .notNull()
+      .references(() => state.id, { onDelete: 'restrict' }),
+    name: text('name').notNull(),
+    ibgeId: integer('ibge_id').unique(),
+    ...timestamps,
+  },
+  (t) => [index('city_state_id_idx').on(t.stateId)],
+)
 
 /** Address (UML: Endereco) — belongs to a staff member and a city. */
 export const address = pgTable(

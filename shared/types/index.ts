@@ -6,6 +6,18 @@ export interface AuditUserDto {
   name: string
 }
 
+export interface StateDto {
+  id: string
+  name: string
+  uf: string
+}
+
+export interface CityDto {
+  id: string
+  name: string
+  stateId: string
+}
+
 export interface PetImageDto {
   id: string
   url: string
