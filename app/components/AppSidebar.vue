@@ -16,8 +16,15 @@ import {
   Users,
 } from '@lucide/vue'
 
+import { useEventListener } from '@vueuse/core'
+
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import {
   Sidebar,
   SidebarContent,
@@ -26,10 +33,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const { isMobile, setOpen, setOpenMobile } = useSidebar()
 
 // Session user for NavUser. Avatar isn't implemented on the backend yet, so it
 // falls back to an empty string (AvatarImage then shows the fallback initials).
@@ -165,6 +174,49 @@ const data = {
     },
   ],
 }
+
+const SEARCH_INPUT_ID = 'sidebar-menu-search'
+const searchQuery = ref('')
+
+const isSearching = computed(() => searchQuery.value.trim().length > 0)
+
+const filteredNavMain = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return data.navMain
+
+  return data.navMain.flatMap((item) => {
+    const titleMatch = item.title.toLowerCase().includes(query)
+
+    if (item.items?.length) {
+      if (titleMatch) return [item]
+      const matchingSub = item.items.filter((subItem) =>
+        subItem.title.toLowerCase().includes(query),
+      )
+      return matchingSub.length ? [{ ...item, items: matchingSub }] : []
+    }
+
+    return titleMatch ? [item] : []
+  })
+})
+
+function focusSearch() {
+  if (isMobile.value) setOpenMobile(true)
+  else setOpen(true)
+  nextTick(() => {
+    const el = document.getElementById(
+      SEARCH_INPUT_ID,
+    ) as HTMLInputElement | null
+    el?.focus()
+    el?.select()
+  })
+}
+
+useEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault()
+    focusSearch()
+  }
+})
 </script>
 
 <template>
@@ -174,7 +226,7 @@ const data = {
         <SidebarMenuItem>
           <SidebarMenuButton
             as-child
-            class="data-[slot=sidebar-menu-button]:!p-1.5"
+            class="data-[slot=sidebar-menu-button]:p-1.5!"
           >
             <a href="#">
               <PawPrint class="size-6!" />
@@ -183,9 +235,30 @@ const data = {
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
+      <div class="px-1 pt-1">
+        <InputGroup class="h-9 bg-background dark:bg-background">
+          <InputGroupInput
+            :id="SEARCH_INPUT_ID"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar no menu..."
+            aria-label="Buscar no menu"
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <kbd
+              class="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 items-center gap-1 border px-1.5 font-mono text-[10px] font-medium select-none"
+            >
+              <span class="text-xs">⌘</span>K
+            </kbd>
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :items="data.navMain" />
+      <NavMain :items="filteredNavMain" :searching="isSearching" />
       <!-- <NavDocuments :items="data.documents" /> -->
       <!-- <NavSecondary :items="data.navSecondary" class="mt-auto" /> -->
     </SidebarContent>

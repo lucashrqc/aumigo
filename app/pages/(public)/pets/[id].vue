@@ -50,7 +50,7 @@ async function submit() {
           :src="pet.images[0].url"
           :alt="pet.name"
           class="h-full w-full object-cover"
-        />
+        >
         <div
           v-else
           class="flex h-full items-center justify-center text-muted-foreground"
@@ -65,7 +65,7 @@ async function submit() {
           :src="img.url"
           :alt="pet.name"
           class="aspect-square w-full rounded object-cover"
-        />
+        >
       </div>
     </div>
 
