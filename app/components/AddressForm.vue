@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
+import { vMaska } from 'maska/vue'
+import { toast } from 'vue-sonner'
 
-// TODO: UI scaffold only. The `address` table requires a non-null `cityId` and the
-// city/state catalogs aren't seeded yet, so nothing is submitted. Wire a
-// `useUpdateAddress` mutation and enable Save once the catalogs land.
+// TODO: The `address` table requires a non-null `cityId`, so nothing is submitted
+// yet. Wire a `useUpdateAddress` mutation and enable Save. The CEP field
+// autocompletes the fields below but does not persist them.
 
 const states = useStateOptions()
 const stateId = ref<string | null>(null)
@@ -18,10 +20,42 @@ const form = reactive({
   cityId: null as string | null,
 })
 
+type ComboOption = { value: string; label: string }
+const stateInitial = ref<ComboOption>()
+const cityInitial = ref<ComboOption>()
+
 function onStateChange(value: string | null) {
   stateId.value = value
   form.cityId = null
 }
+
+const cep = useCep(() => form.zipCode)
+
+watch(
+  () => cep.data.value,
+  (data) => {
+    if (!data) return
+    form.street = data.street
+    form.neighborhood = data.neighborhood
+    if (data.state) {
+      stateId.value = data.state.id
+      stateInitial.value = { value: data.state.id, label: data.state.name }
+    }
+    if (data.city) {
+      form.cityId = data.city.id
+      cityInitial.value = { value: data.city.id, label: data.city.name }
+    } else {
+      form.cityId = null
+    }
+  },
+)
+
+watch(
+  () => cep.isError.value,
+  (isError) => {
+    if (isError) toast.error('CEP não encontrado')
+  },
+)
 </script>
 
 <template>
@@ -29,7 +63,14 @@ function onStateChange(value: string | null) {
     <div class="divide-y border-t">
       <FormField label="CEP" name="zipCode" orientation="horizontal">
         <template #default="{ id }">
-          <Input :id="id" v-model="form.zipCode" placeholder="00000-000" />
+          <Input
+            :id="id"
+            v-model="form.zipCode"
+            v-maska
+            data-maska="#####-###"
+            inputmode="numeric"
+            placeholder="00000-000"
+          />
         </template>
       </FormField>
 
@@ -64,6 +105,7 @@ function onStateChange(value: string | null) {
           :is-fetching="states.isFetching"
           :is-fetching-next-page="states.isFetchingNextPage"
           :has-next-page="states.hasNextPage"
+          :initial-option="stateInitial"
           option-value="id"
           option-label="name"
           placeholder="Selecione o estado"
@@ -81,6 +123,7 @@ function onStateChange(value: string | null) {
           :is-fetching="cities.isFetching"
           :is-fetching-next-page="cities.isFetchingNextPage"
           :has-next-page="cities.hasNextPage"
+          :initial-option="cityInitial"
           :disabled="!stateId"
           option-value="id"
           option-label="name"
