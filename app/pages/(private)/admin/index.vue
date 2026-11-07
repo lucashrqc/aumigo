@@ -19,8 +19,8 @@ import SelectValue from '~/components/ui/select/SelectValue.vue'
 definePageMeta({ layout: 'private', middleware: 'staff' })
 useHead({ title: 'Admin — Aumor' })
 
-const { data: pets } = useAdminPetsQuery(() => ({ pageSize: 1 }))
-const { data: applications } = useAdminApplicationsQuery(() => ({ status: 'pending', pageSize: 1 }))
+// const { data: pets } = useAdminPetsQuery(() => ({ pageSize: 1 }))
+// const { data: applications } = useAdminApplicationsQuery(() => ({ status: 'pending', pageSize: 1 }))
 
 const data = [
   {

@@ -1,5 +1,11 @@
 /** Response DTOs shared between the Nuxt server and client. */
 
+/** Minimal staff user reference, used for audit columns (created/updated by). */
+export interface AuditUserDto {
+  id: string
+  name: string
+}
+
 export interface PetImageDto {
   id: string
   url: string
@@ -23,23 +29,44 @@ export interface PetDto {
   status: 'available' | 'pending' | 'adopted'
   createdAt: string
   updatedAt: string
+  createdBy: string | null
+  updatedBy: string | null
   species: { id: string; name: string } | null
   breed: { id: string; name: string } | null
+  creator?: AuditUserDto | null
+  updater?: AuditUserDto | null
   images: PetImageDto[]
 }
 
-export interface SpeciesDto {
+/** Aggregate counts for the admin pets dashboard cards. */
+export interface PetStatsDto {
+  available: number
+  adopted: number
+  neutered: number
+}
+
+/** Audit fields present on all catalog rows (created/updated by + timestamps). */
+export interface AuditFieldsDto {
+  createdAt: string
+  updatedAt: string
+  createdBy: string | null
+  updatedBy: string | null
+  creator?: AuditUserDto | null
+  updater?: AuditUserDto | null
+}
+
+export interface SpeciesDto extends AuditFieldsDto {
   id: string
   name: string
 }
 
-export interface BreedDto {
+export interface BreedDto extends AuditFieldsDto {
   id: string
   speciesId: string
   name: string
 }
 
-export interface VaccineDto {
+export interface VaccineDto extends AuditFieldsDto {
   id: string
   name: string
   description: string | null

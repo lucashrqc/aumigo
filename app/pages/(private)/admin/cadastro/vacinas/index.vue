@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
 import type { Features } from '@/components/features'
+import type { ColumnDef } from '@tanstack/vue-table'
+import { h } from 'vue'
 import { toast } from 'vue-sonner'
+import { auditColumns } from '~/utils/audit-columns'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
 useHead({ title: 'Vacinas — Admin' })
 
 const page = ref(1)
-const { data, isLoading } = useAdminVaccinesQuery(() => ({ page: page.value, pageSize: 10 }))
+const { data, isLoading } = useAdminVaccinesQuery(() => ({
+  page: page.value,
+  pageSize: 10,
+}))
 const { mutateAsync: createVaccine, isPending: creating } = useCreateVaccine()
 const { mutateAsync: deleteVaccine } = useDeleteVaccine()
 
@@ -47,6 +51,7 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
     header: 'Validade',
     cell: ({ row }) => row.original.expirationDate ?? '—',
   },
+  ...auditColumns<VaccineDto>(),
   {
     id: 'actions',
     header: '',
@@ -54,7 +59,10 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
       h('div', { class: 'flex justify-end gap-2' }, [
         h(
           NuxtLink,
-          { to: `/admin/vaccines/${row.original.id}`, class: 'text-sm underline' },
+          {
+            to: `/admin/cadastro/vacinas/${row.original.id}`,
+            class: 'text-sm underline',
+          },
           () => 'Editar',
         ),
         h(
@@ -76,29 +84,38 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
       <h1 class="text-2xl font-bold">Vacinas</h1>
       <div class="flex items-center gap-2">
         <Dialog v-model:open="dialogOpen">
-          <DialogTrigger as-child><Button variant="outline">Nova vacina</Button></DialogTrigger>
+          <DialogTrigger as-child
+            ><Button variant="outline">Nova vacina</Button></DialogTrigger
+          >
           <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Nova vacina</DialogTitle>
-              <DialogDescription>Adicione uma vacina ao catálogo.</DialogDescription>
+              <DialogDescription
+                >Adicione uma vacina ao catálogo.</DialogDescription
+              >
             </DialogHeader>
             <VaccineForm :submitting="creating" @submit="handleCreate" />
           </DialogContent>
         </Dialog>
-        <Button as-child><NuxtLink to="/admin/vaccines/cadastrar">Cadastrar vacina</NuxtLink></Button>
+        <Button as-child
+          ><NuxtLink to="/admin/cadastro/vacinas/cadastrar"
+            >Cadastrar vacina</NuxtLink
+          ></Button
+        >
       </div>
     </div>
 
-    <p v-if="isLoading" class="text-muted-foreground">Carregando…</p>
-    <template v-else>
-      <DataTable :columns="columns" :data="data?.items ?? []" />
-      <Pagination
-        v-if="data"
-        :page="data.page"
-        :page-size="data.pageSize"
-        :total="data.total"
-        @update:page="page = $event"
-      />
-    </template>
+    <DataTable
+      :columns="columns"
+      :data="data?.items ?? []"
+      :is-loading="isLoading"
+    />
+    <Pagination
+      v-if="data"
+      :page="data.page"
+      :page-size="data.pageSize"
+      :total="data.total"
+      @update:page="page = $event"
+    />
   </div>
 </template>

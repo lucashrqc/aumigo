@@ -31,6 +31,15 @@ export function useAdminPetsQuery(params: PetListParams = () => ({})) {
   })
 }
 
+/** Admin: aggregate pet counts for the dashboard cards. */
+export function useAdminPetStatsQuery() {
+  const api = useRequestFetch()
+  return useQuery({
+    queryKey: ['admin-pet-stats'],
+    queryFn: () => api<PetStatsDto>('/api/admin/pets/stats'),
+  })
+}
+
 /** Admin: single pet. */
 export function useAdminPetQuery(id: MaybeRefOrGetter<string>) {
   const api = useRequestFetch()

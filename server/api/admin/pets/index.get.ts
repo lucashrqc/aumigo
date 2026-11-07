@@ -4,5 +4,5 @@ import { petListQuerySchema } from '#shared/schemas'
 export default defineEventHandler(async (event) => {
   await requireStaff(event)
   const query = useValidatedQuery(event, petListQuerySchema)
-  return usePetService().list(query)
+  return usePetService().list(query, { withCreator: true })
 })

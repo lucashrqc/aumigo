@@ -35,19 +35,49 @@ export const addressRelations = relations(address, ({ one }) => ({
   city: one(city, { fields: [address.cityId], references: [city.id] }),
 }))
 
-export const speciesRelations = relations(species, ({ many }) => ({
+export const speciesRelations = relations(species, ({ one, many }) => ({
   breeds: many(breed),
   pets: many(pet),
+  creator: one(user, {
+    fields: [species.createdBy],
+    references: [user.id],
+    relationName: 'speciesCreator',
+  }),
+  updater: one(user, {
+    fields: [species.updatedBy],
+    references: [user.id],
+    relationName: 'speciesUpdater',
+  }),
 }))
 
 export const breedRelations = relations(breed, ({ one, many }) => ({
   species: one(species, { fields: [breed.speciesId], references: [species.id] }),
   pets: many(pet),
+  creator: one(user, {
+    fields: [breed.createdBy],
+    references: [user.id],
+    relationName: 'breedCreator',
+  }),
+  updater: one(user, {
+    fields: [breed.updatedBy],
+    references: [user.id],
+    relationName: 'breedUpdater',
+  }),
 }))
 
 export const petRelations = relations(pet, ({ one, many }) => ({
   species: one(species, { fields: [pet.speciesId], references: [species.id] }),
   breed: one(breed, { fields: [pet.breedId], references: [breed.id] }),
+  creator: one(user, {
+    fields: [pet.createdBy],
+    references: [user.id],
+    relationName: 'petCreator',
+  }),
+  updater: one(user, {
+    fields: [pet.updatedBy],
+    references: [user.id],
+    relationName: 'petUpdater',
+  }),
   images: many(petImage),
   appliedVaccines: many(appliedVaccine),
   applications: many(adoptionApplication),
@@ -57,8 +87,18 @@ export const petImageRelations = relations(petImage, ({ one }) => ({
   pet: one(pet, { fields: [petImage.petId], references: [pet.id] }),
 }))
 
-export const vaccineRelations = relations(vaccine, ({ many }) => ({
+export const vaccineRelations = relations(vaccine, ({ one, many }) => ({
   appliedVaccines: many(appliedVaccine),
+  creator: one(user, {
+    fields: [vaccine.createdBy],
+    references: [user.id],
+    relationName: 'vaccineCreator',
+  }),
+  updater: one(user, {
+    fields: [vaccine.updatedBy],
+    references: [user.id],
+    relationName: 'vaccineUpdater',
+  }),
 }))
 
 export const appliedVaccineRelations = relations(appliedVaccine, ({ one }) => ({

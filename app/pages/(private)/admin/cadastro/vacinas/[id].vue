@@ -28,7 +28,7 @@ async function handleUpdate(payload: Parameters<typeof updateVaccine>[0]['body']
   <div v-else class="space-y-8">
     <div class="flex items-center gap-3">
       <Button as-child variant="ghost" size="sm"
-        ><NuxtLink to="/admin/vaccines">← Voltar</NuxtLink></Button
+        ><NuxtLink to="/admin/cadastro/vacinas">← Voltar</NuxtLink></Button
       >
       <h1 class="text-2xl font-bold">{{ vaccine.name }}</h1>
     </div>

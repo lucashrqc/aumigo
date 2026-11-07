@@ -1,7 +1,8 @@
-import { and, asc, count, desc, eq, ilike } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ilike, sql } from 'drizzle-orm'
 import type { Database } from '../database/client'
 import { pet, petImage } from '../database/schema'
 import type { Paginated, PetCreateInput, PetListQuery, PetUpdateInput } from '#shared/schemas'
+import type { PetStatsDto } from '#shared/types'
 
 export type PetRow = typeof pet.$inferSelect
 export type PetImageRow = typeof petImage.$inferSelect
@@ -9,11 +10,19 @@ export type PetImageRow = typeof petImage.$inferSelect
 export interface PetWithRelations extends PetRow {
   species: { id: string; name: string } | null
   breed: { id: string; name: string } | null
+  creator?: { id: string; name: string } | null
+  updater?: { id: string; name: string } | null
   images: PetImageRow[]
 }
 
+/** Options for pet queries. `withCreator` joins the staff author/editor (admin only). */
+export interface PetListOptions {
+  withCreator?: boolean
+}
+
 export interface PetRepository {
-  list(query: PetListQuery): Promise<Paginated<PetWithRelations>>
+  list(query: PetListQuery, options?: PetListOptions): Promise<Paginated<PetWithRelations>>
+  stats(): Promise<PetStatsDto>
   findById(id: string): Promise<PetWithRelations | null>
   create(data: PetCreateInput, actorId: string): Promise<PetWithRelations>
   update(id: string, data: PetUpdateInput, actorId: string): Promise<PetWithRelations | null>
@@ -33,7 +42,10 @@ function toColumns(data: Partial<PetCreateInput>) {
 export class DrizzlePetRepository implements PetRepository {
   constructor(private readonly db: Database) {}
 
-  async list(query: PetListQuery): Promise<Paginated<PetWithRelations>> {
+  async list(
+    query: PetListQuery,
+    options: PetListOptions = {},
+  ): Promise<Paginated<PetWithRelations>> {
     const conditions = [
       query.status ? eq(pet.status, query.status) : eq(pet.active, true),
       query.speciesId ? eq(pet.speciesId, query.speciesId) : undefined,
@@ -50,6 +62,12 @@ export class DrizzlePetRepository implements PetRepository {
           species: { columns: { id: true, name: true } },
           breed: { columns: { id: true, name: true } },
           images: { orderBy: asc(petImage.position) },
+          ...(options.withCreator
+            ? {
+                creator: { columns: { id: true, name: true } },
+                updater: { columns: { id: true, name: true } },
+              }
+            : {}),
         },
         orderBy: desc(pet.createdAt),
         limit: query.pageSize,
@@ -63,6 +81,23 @@ export class DrizzlePetRepository implements PetRepository {
       page: query.page,
       pageSize: query.pageSize,
       total: totalRow[0]?.value ?? 0,
+    }
+  }
+
+  async stats(): Promise<PetStatsDto> {
+    const [row] = await this.db
+      .select({
+        available: count(sql`CASE WHEN ${pet.status} = 'available' THEN 1 END`),
+        adopted: count(sql`CASE WHEN ${pet.status} = 'adopted' THEN 1 END`),
+        neutered: count(sql`CASE WHEN ${pet.neutered} THEN 1 END`),
+      })
+      .from(pet)
+      .where(eq(pet.active, true))
+
+    return {
+      available: row?.available ?? 0,
+      adopted: row?.adopted ?? 0,
+      neutered: row?.neutered ?? 0,
     }
   }
 

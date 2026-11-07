@@ -12,8 +12,14 @@ import type {
 export type VaccineRow = typeof vaccine.$inferSelect
 export type AppliedVaccineRow = typeof appliedVaccine.$inferSelect
 
+type AuditUser = { id: string; name: string } | null
+export interface VaccineWithAudit extends VaccineRow {
+  creator: AuditUser
+  updater: AuditUser
+}
+
 export interface VaccineRepository {
-  list(query: VaccineListQuery): Promise<Paginated<VaccineRow>>
+  list(query: VaccineListQuery): Promise<Paginated<VaccineWithAudit>>
   findById(id: string): Promise<VaccineRow | null>
   create(data: VaccineCreateInput, actorId: string): Promise<VaccineRow>
   update(id: string, data: VaccineUpdateInput, actorId: string): Promise<VaccineRow | null>
@@ -23,7 +29,7 @@ export interface VaccineRepository {
 export class DrizzleVaccineRepository implements VaccineRepository {
   constructor(private readonly db: Database) {}
 
-  async list(query: VaccineListQuery): Promise<Paginated<VaccineRow>> {
+  async list(query: VaccineListQuery): Promise<Paginated<VaccineWithAudit>> {
     const conditions = [
       eq(vaccine.active, true),
       query.search ? ilike(vaccine.name, `%${query.search}%`) : undefined,
@@ -35,6 +41,10 @@ export class DrizzleVaccineRepository implements VaccineRepository {
     const [items, totalRow] = await Promise.all([
       this.db.query.vaccine.findMany({
         where,
+        with: {
+          creator: { columns: { id: true, name: true } },
+          updater: { columns: { id: true, name: true } },
+        },
         orderBy: asc(vaccine.name),
         limit: query.pageSize,
         offset,

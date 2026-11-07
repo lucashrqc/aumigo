@@ -7,7 +7,9 @@ const route = useRoute()
 const id = computed(() => route.params.id as string)
 
 const { data: pet, isLoading } = useAdminPetQuery(id)
-useHead(() => ({ title: pet.value ? `${pet.value.name} — Admin` : 'Pet — Admin' }))
+useHead(() => ({
+  title: pet.value ? `${pet.value.name} — Admin` : 'Pet — Admin',
+}))
 
 const { mutateAsync: updatePet, isPending: saving } = useUpdatePet()
 
@@ -23,9 +25,16 @@ async function handleUpdate(payload: Parameters<typeof updatePet>[0]['body']) {
 // --- Vaccination records ---
 const { data: applied } = usePetVaccinesQuery(id)
 const { data: vaccines } = useVaccinesQuery()
+const vaccineOptions = useVaccineOptions()
 const { mutateAsync: applyVaccine, isPending: applying } = useApplyVaccine()
 
-const vax = reactive({ vaccineId: '', applicationDate: '', nextDoseDate: '', vetLicense: '', batchNumber: '' })
+const vax = reactive({
+  vaccineId: '',
+  applicationDate: '',
+  nextDoseDate: '',
+  vetLicense: '',
+  batchNumber: '',
+})
 
 async function recordVaccine() {
   try {
@@ -48,7 +57,8 @@ async function recordVaccine() {
   }
 }
 
-const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === vaccineId)?.name ?? vaccineId
+const vaccineName = (vaccineId: string) =>
+  vaccines.value?.find((v) => v.id === vaccineId)?.name ?? vaccineId
 </script>
 
 <template>
@@ -57,7 +67,9 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
 
   <div v-else class="space-y-8">
     <div class="flex items-center gap-3">
-      <Button as-child variant="ghost" size="sm"><NuxtLink to="/admin/pets">← Voltar</NuxtLink></Button>
+      <Button as-child variant="ghost" size="sm"
+        ><NuxtLink to="/admin/pets">← Voltar</NuxtLink></Button
+      >
       <h1 class="text-2xl font-bold">{{ pet.name }}</h1>
     </div>
 
@@ -71,7 +83,9 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
     <Card>
       <CardHeader>
         <CardTitle>Registros de vacinação</CardTitle>
-        <CardDescription>Acompanhe as vacinas aplicadas neste pet.</CardDescription>
+        <CardDescription
+          >Acompanhe as vacinas aplicadas neste pet.</CardDescription
+        >
       </CardHeader>
       <CardContent class="space-y-6">
         <Table>
@@ -90,19 +104,32 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
               <TableCell>{{ a.nextDoseDate ?? '—' }}</TableCell>
               <TableCell>{{ a.batchNumber ?? '—' }}</TableCell>
             </TableRow>
-            <TableEmpty v-if="!applied?.length" :colspan="4">Nenhuma vacina registrada ainda.</TableEmpty>
+            <TableEmpty v-if="!applied?.length" :colspan="4"
+              >Nenhuma vacina registrada ainda.</TableEmpty
+            >
           </TableBody>
         </Table>
 
-        <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" @submit.prevent="recordVaccine">
+        <form
+          class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          @submit.prevent="recordVaccine"
+        >
           <div>
             <Label>Vacina</Label>
-            <Select v-model="vax.vaccineId">
-              <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="v in vaccines ?? []" :key="v.id" :value="v.id">{{ v.name }}</SelectItem>
-              </SelectContent>
-            </Select>
+            <AsyncCombobox
+              v-model="vax.vaccineId"
+              :items="vaccineOptions.items"
+              :is-fetching="vaccineOptions.isFetching"
+              :is-fetching-next-page="vaccineOptions.isFetchingNextPage"
+              :has-next-page="vaccineOptions.hasNextPage"
+              :resolve-by-id="vaccineOptions.resolveById"
+              option-value="id"
+              option-label="name"
+              placeholder="Selecione a vacina"
+              search-placeholder="Buscar vacina…"
+              @search="vaccineOptions.setSearch"
+              @can-load-more="vaccineOptions.loadMore"
+            />
           </div>
           <div>
             <Label>Data de aplicação</Label>
@@ -121,7 +148,9 @@ const vaccineName = (vaccineId: string) => vaccines.value?.find((v) => v.id === 
             <Input v-model="vax.batchNumber" />
           </div>
           <div class="flex items-end">
-            <Button type="submit" :disabled="applying || !vax.vaccineId">Registrar vacina</Button>
+            <Button type="submit" :disabled="applying || !vax.vaccineId"
+              >Registrar vacina</Button
+            >
           </div>
         </form>
       </CardContent>
