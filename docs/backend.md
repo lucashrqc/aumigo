@@ -28,7 +28,7 @@ server/
     migrate.ts        pnpm db:migrate entrypoint
     seed.ts           pnpm db:seed — first admin + reference species (idempotent)
   storage/            ImageStorage port + UrlImageStorage adapter
-  email/              EmailSender port + ConsoleEmailSender adapter
+  email/              EmailSender port + ConsoleEmailSender/ResendEmailSender adapters
   utils/              auth.ts, db.ts, session.ts, services.ts (composition root),
                       validation.ts, identity-provider.ts
 ```
@@ -128,6 +128,10 @@ docker compose up --build        # db + app (Nuxt dev server) on :3000
 ## Environment
 
 Server-only (read in `nuxt.config.ts` runtimeConfig): `DATABASE_URL`,
-`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`.
-Public: `NUXT_PUBLIC_AUTH_BASE_URL`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`.
-See `.env.example`.
+`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
+`RESEND_API_KEY`, `RESEND_FROM_EMAIL`. Public: `NUXT_PUBLIC_AUTH_BASE_URL`.
+Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See `.env.example`.
+
+Email: when `RESEND_API_KEY` is set, `services.ts` wires `ResendEmailSender`
+(from-address `RESEND_FROM_EMAIL`, default `onboarding@resend.dev`); otherwise
+it falls back to `ConsoleEmailSender`, which logs messages to stdout.

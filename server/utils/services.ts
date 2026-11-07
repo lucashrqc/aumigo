@@ -1,4 +1,8 @@
-import { ConsoleEmailSender, type EmailSender } from '../email/email-sender'
+import {
+  ConsoleEmailSender,
+  ResendEmailSender,
+  type EmailSender,
+} from '../email/email-sender'
 import { UrlImageStorage, type ImageStorage } from '../storage/image-storage'
 import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
@@ -40,7 +44,9 @@ function buildContainer(): Container {
   const config = useRuntimeConfig()
 
   const imageStorage: ImageStorage = new UrlImageStorage()
-  const emailSender: EmailSender = new ConsoleEmailSender()
+  const emailSender: EmailSender = config.resendApiKey
+    ? new ResendEmailSender(config.resendApiKey, config.resendFromEmail)
+    : new ConsoleEmailSender()
 
   const petRepo = new DrizzlePetRepository(db)
   const vaccineRepo = new DrizzleVaccineRepository(db)
