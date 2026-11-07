@@ -263,6 +263,9 @@ useEventListener('keydown', (event: KeyboardEvent) => {
       <!-- <NavSecondary :items="data.navSecondary" class="mt-auto" /> -->
     </SidebarContent>
     <SidebarFooter>
+      <div class="flex justify-center px-1 pb-1">
+        <ThemeSwitcher />
+      </div>
       <NavUser :user="user" />
     </SidebarFooter>
   </Sidebar>
