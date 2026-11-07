@@ -1,40 +1,57 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Moon, Sun } from '@lucide/vue'
-import { Switch } from '@/components/ui/switch'
+import { Monitor, Moon, Sun } from '@lucide/vue'
+import { cn } from 'cn'
 
 const colorMode = useColorMode()
 
-const isDark = computed({
-  get: () => colorMode.value === 'dark',
-  set: (value) => {
-    colorMode.preference = value ? 'dark' : 'light'
-  },
-})
+const options = [
+  { value: 'system', label: 'Tema do sistema', icon: Monitor },
+  { value: 'light', label: 'Tema claro', icon: Sun },
+  { value: 'dark', label: 'Tema escuro', icon: Moon },
+] as const
 </script>
 
 <template>
   <ClientOnly>
-    <Switch
-      v-model="isDark"
-      :aria-label="isDark ? 'Ativar tema claro' : 'Ativar tema escuro'"
+    <div
+      role="radiogroup"
+      aria-label="Alternar tema"
+      class="bg-muted inline-flex items-center gap-0.5 rounded-full p-1"
     >
-      <template #thumb>
-        <span class="flex size-full items-center justify-center">
-          <Moon v-if="isDark" class="size-3 text-slate-700" />
-          <Sun v-else class="size-3 text-amber-500" />
-        </span>
-      </template>
-    </Switch>
+      <button
+        v-for="option in options"
+        :key="option.value"
+        type="button"
+        role="radio"
+        :aria-checked="colorMode.preference === option.value"
+        :aria-label="option.label"
+        :title="option.label"
+        :class="
+          cn(
+            'focus-visible:ring-ring flex size-5 items-center justify-center rounded-full transition-colors outline-none focus-visible:ring-2',
+            colorMode.preference === option.value
+              ? 'bg-background text-foreground shadow-xs'
+              : 'text-muted-foreground hover:text-foreground',
+          )
+        "
+        @click="colorMode.preference = option.value"
+      >
+        <component :is="option.icon" class="size-3" />
+      </button>
+    </div>
 
     <template #fallback>
-      <Switch disabled aria-hidden="true">
-        <template #thumb>
-          <span class="flex size-full items-center justify-center">
-            <Sun class="size-3 text-amber-500" />
-          </span>
-        </template>
-      </Switch>
+      <div class="bg-muted inline-flex items-center gap-0.5 rounded-full p-1">
+        <span class="flex size-5 items-center justify-center rounded-full">
+          <Monitor class="text-muted-foreground size-3" />
+        </span>
+        <span class="flex size-5 items-center justify-center rounded-full">
+          <Sun class="text-muted-foreground size-3" />
+        </span>
+        <span class="flex size-5 items-center justify-center rounded-full">
+          <Moon class="text-muted-foreground size-3" />
+        </span>
+      </div>
     </template>
   </ClientOnly>
 </template>
