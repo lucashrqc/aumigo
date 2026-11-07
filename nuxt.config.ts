@@ -53,6 +53,8 @@ export default defineNuxtConfig({
     betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
     public: {
       authBaseUrl:
         process.env.NUXT_PUBLIC_AUTH_BASE_URL ||
