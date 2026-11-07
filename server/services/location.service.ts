@@ -1,5 +1,10 @@
 import type { LocationRepository } from '../repositories/location.repository'
-import type { CityListQuery, StateListQuery } from '#shared/schemas'
+import type {
+  CityListQuery,
+  IbgeResolveQuery,
+  StateListQuery,
+} from '#shared/schemas'
+import type { IbgeResolveDto } from '#shared/types'
 
 export class LocationService {
   constructor(private readonly locations: LocationRepository) {}
@@ -22,5 +27,15 @@ export class LocationService {
     const row = await this.locations.findCityById(id)
     if (!row) throw createError({ statusCode: 404, statusMessage: 'City not found' })
     return row
+  }
+
+  async resolveByIbge(query: IbgeResolveQuery): Promise<IbgeResolveDto> {
+    const [state, city] = await Promise.all([
+      this.locations.findStateByIbgeId(query.stateIbgeId),
+      query.cityIbgeId
+        ? this.locations.findCityByIbgeId(query.cityIbgeId)
+        : Promise.resolve(null),
+    ])
+    return { state, city }
   }
 }
