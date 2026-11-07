@@ -53,7 +53,7 @@ async function handleUpdateProfile(payload: ProfileUpdateInput) {
               :alt="auth.user?.name ?? ''"
             />
             <AvatarFallback>
-              {{ (auth.user?.name ?? '?').charAt(0).toUpperCase() }}
+              {{ getInitials(auth.user?.name) }}
             </AvatarFallback>
           </Avatar>
           <div class="flex flex-col items-start gap-1">
