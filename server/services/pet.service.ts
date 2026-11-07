@@ -1,6 +1,11 @@
 import type { ImageStorage } from '../storage/image-storage'
-import type { PetRepository, PetWithRelations } from '../repositories/pet.repository'
+import type {
+  PetListOptions,
+  PetRepository,
+  PetWithRelations,
+} from '../repositories/pet.repository'
 import type { PetCreateInput, PetListQuery, PetUpdateInput, Paginated } from '#shared/schemas'
+import type { PetStatsDto } from '#shared/types'
 
 export class PetService {
   constructor(
@@ -8,8 +13,12 @@ export class PetService {
     private readonly images: ImageStorage,
   ) {}
 
-  list(query: PetListQuery): Promise<Paginated<PetWithRelations>> {
-    return this.pets.list(query)
+  list(query: PetListQuery, options?: PetListOptions): Promise<Paginated<PetWithRelations>> {
+    return this.pets.list(query, options)
+  }
+
+  stats(): Promise<PetStatsDto> {
+    return this.pets.stats()
   }
 
   async getById(id: string): Promise<PetWithRelations> {

@@ -7,7 +7,15 @@ import { z } from 'zod'
 const props = defineProps<{ initial?: PetDto | null; submitting?: boolean }>()
 const emit = defineEmits<{ (e: 'submit', payload: PetCreateInput): void }>()
 
-const { data: species } = useSpeciesQuery()
+const species = useSpeciesOptions()
+
+// Seed the selected labels from the pet being edited so no extra fetch is needed to show them.
+const initialSpecies = props.initial?.species
+  ? { value: props.initial.species.id, label: props.initial.species.name }
+  : undefined
+const initialBreed = props.initial?.breed
+  ? { value: props.initial.breed.id, label: props.initial.breed.name }
+  : undefined
 
 const form = useForm({
   defaultValues: {
@@ -17,7 +25,8 @@ const form = useForm({
     breedId: props.initial?.breedId ?? '',
     sex: props.initial?.sex ?? 'unknown',
     size: props.initial?.size ?? 'medium',
-    weight: props.initial?.weight != null ? Number(props.initial.weight) : undefined,
+    weight:
+      props.initial?.weight != null ? Number(props.initial.weight) : undefined,
     coat: props.initial?.coat ?? '',
     birthDate: props.initial?.birthDate ?? '',
     neutered: props.initial?.neutered ?? false,
@@ -57,7 +66,7 @@ const form = useForm({
 // Reactive view of the selected species so the breeds query refetches.
 const speciesId = form.useStore((state) => state.values.speciesId)
 const attempts = form.useStore((state) => state.submissionAttempts)
-const { data: breeds } = useBreedsQuery(() => speciesId.value || undefined)
+const breeds = useBreedOptions(() => speciesId.value || undefined)
 
 // Show a field's error once it was touched or a submit was attempted.
 const showErrors = (touched: boolean) => touched || attempts.value > 0
@@ -109,7 +118,9 @@ const sizeOptions = [
             <SelectOptions
               :options="statusOptions"
               :model-value="field.state.value"
-              @update:model-value="field.handleChange($event as typeof field.state.value)"
+              @update:model-value="
+                field.handleChange($event as typeof field.state.value)
+              "
             />
           </FormField>
         </template>
@@ -127,13 +138,21 @@ const sizeOptions = [
             :errors="field.state.meta.errors"
             :touched="showErrors(field.state.meta.isTouched)"
           >
-            <SelectOptions
-              :options="species ?? []"
-              option-label="name"
-              option-value="id"
-              placeholder="Selecione a espécie"
+            <AsyncCombobox
               :model-value="field.state.value"
-              @update:model-value="field.handleChange(String($event))"
+              :items="species.items"
+              :is-fetching="species.isFetching"
+              :is-fetching-next-page="species.isFetchingNextPage"
+              :has-next-page="species.hasNextPage"
+              :resolve-by-id="species.resolveById"
+              :initial-option="initialSpecies"
+              option-value="id"
+              option-label="name"
+              placeholder="Selecione a espécie"
+              search-placeholder="Buscar espécie…"
+              @update:model-value="field.handleChange(String($event ?? ''))"
+              @search="species.setSearch"
+              @can-load-more="species.loadMore"
             />
           </FormField>
         </template>
@@ -142,14 +161,22 @@ const sizeOptions = [
       <form.Field name="breedId">
         <template #default="{ field }">
           <FormField label="Raça (opcional)" :name="field.name">
-            <SelectOptions
-              :options="breeds ?? []"
-              option-label="name"
-              option-value="id"
-              placeholder="Vira-lata / desconhecida"
-              :disabled="!speciesId"
+            <AsyncCombobox
               :model-value="field.state.value"
-              @update:model-value="field.handleChange(String($event))"
+              :items="breeds.items"
+              :is-fetching="breeds.isFetching"
+              :is-fetching-next-page="breeds.isFetchingNextPage"
+              :has-next-page="breeds.hasNextPage"
+              :resolve-by-id="breeds.resolveById"
+              :initial-option="initialBreed"
+              :disabled="!speciesId"
+              option-value="id"
+              option-label="name"
+              placeholder="Vira-lata / desconhecida"
+              search-placeholder="Buscar raça…"
+              @update:model-value="field.handleChange(String($event ?? ''))"
+              @search="breeds.setSearch"
+              @can-load-more="breeds.loadMore"
             />
           </FormField>
         </template>
@@ -162,7 +189,9 @@ const sizeOptions = [
               :options="sizeOptions"
               placeholder="—"
               :model-value="field.state.value"
-              @update:model-value="field.handleChange($event as typeof field.state.value)"
+              @update:model-value="
+                field.handleChange($event as typeof field.state.value)
+              "
             />
           </FormField>
         </template>
@@ -178,7 +207,9 @@ const sizeOptions = [
                 step="0.1"
                 min="0"
                 :model-value="field.state.value"
-                @update:model-value="field.handleChange($event === '' ? undefined : Number($event))"
+                @update:model-value="
+                  field.handleChange($event === '' ? undefined : Number($event))
+                "
                 @blur="field.handleBlur"
               />
             </template>
@@ -214,7 +245,9 @@ const sizeOptions = [
                 :id="id"
                 :model-value="field.state.value"
                 @update:model-value="field.handleChange($event ?? '')"
-                @error="field.setErrorMap({ onChange: ($event ?? undefined) as any })"
+                @error="
+                  field.setErrorMap({ onChange: ($event ?? undefined) as any })
+                "
                 @blur="field.handleBlur"
               />
             </template>
@@ -224,11 +257,17 @@ const sizeOptions = [
 
       <form.Field name="neutered">
         <template #default="{ field }">
-          <FormField label="O pet é castrado?" :name="field.name" class="col-span-2">
+          <FormField
+            label="O pet é castrado?"
+            :name="field.name"
+            class="col-span-2"
+          >
             <RadioGroup
               default-value="0"
               class="flex flex-row gap-4 mt-4"
-              @update:model-value="(ev) => field.handleChange(Boolean(Number(ev)) as any)"
+              @update:model-value="
+                (ev) => field.handleChange(Boolean(Number(ev)) as any)
+              "
             >
               <div class="flex items-center space-x-2">
                 <RadioGroupItem id="sim" value="1" />
@@ -281,7 +320,11 @@ const sizeOptions = [
 
       <form.Field name="specialNeeds">
         <template #default="{ field }">
-          <FormField label="Necessidades especiais" :name="field.name" class="col-span-2">
+          <FormField
+            label="Necessidades especiais"
+            :name="field.name"
+            class="col-span-2"
+          >
             <template #default="{ id }">
               <Textarea
                 :id="id"
@@ -299,7 +342,11 @@ const sizeOptions = [
       <template #default="{ field: images }">
         <div class="space-y-2">
           <Label>URLs das fotos</Label>
-          <div v-for="(_, index) in images.state.value" :key="index" class="flex gap-2">
+          <div
+            v-for="(_, index) in images.state.value"
+            :key="index"
+            class="flex gap-2"
+          >
             <form.Field
               :name="`images[${index}].url`"
               :validators="{ onChange: imageUrlValidator }"
@@ -314,17 +361,31 @@ const sizeOptions = [
                     :value="urlField.state.value"
                     placeholder="https://…"
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    @input="urlField.handleChange(($event.target as HTMLInputElement).value)"
+                    @input="
+                      urlField.handleChange(
+                        ($event.target as HTMLInputElement).value,
+                      )
+                    "
                     @blur="urlField.handleBlur"
-                  />
+                  >
                 </FormField>
               </template>
             </form.Field>
-            <Button type="button" variant="outline" size="sm" @click="images.removeValue(index)">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              @click="images.removeValue(index)"
+            >
               Remover
             </Button>
           </div>
-          <Button type="button" variant="outline" size="sm" @click="images.pushValue({ url: '' })">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            @click="images.pushValue({ url: '' })"
+          >
             Adicionar foto
           </Button>
         </div>
@@ -334,7 +395,9 @@ const sizeOptions = [
     <div class="flex justify-end">
       <form.Subscribe>
         <template #default="{ canSubmit, isSubmitting }">
-          <Button type="submit" :disabled="submitting || isSubmitting || !canSubmit"
+          <Button
+            type="submit"
+            :disabled="submitting || isSubmitting || !canSubmit"
             >Salvar pet</Button
           >
         </template>

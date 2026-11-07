@@ -10,7 +10,7 @@ async function handleCreate(payload: Parameters<typeof createVaccine>[0]) {
   try {
     await createVaccine(payload)
     toast.success('Vacina criada')
-    await navigateTo('/admin/vaccines')
+    await navigateTo('/admin/cadastro/vacinas')
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível criar a vacina'))
   }
@@ -21,7 +21,7 @@ async function handleCreate(payload: Parameters<typeof createVaccine>[0]) {
   <div class="space-y-8">
     <div class="flex items-center gap-3">
       <Button as-child variant="ghost" size="sm"
-        ><NuxtLink to="/admin/vaccines">← Voltar</NuxtLink></Button
+        ><NuxtLink to="/admin/cadastro/vacinas">← Voltar</NuxtLink></Button
       >
       <h1 class="text-2xl font-bold">Cadastrar vacina</h1>
     </div>

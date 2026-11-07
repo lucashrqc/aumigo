@@ -1,25 +1,22 @@
 <script setup lang="ts">
 import {
   Camera,
-  ClipboardList,
   CircleQuestionMark,
-  Command,
+  ClipboardList,
   Database,
   Dog,
   FileChartColumn,
   FileText,
+  FolderPlus,
   LayoutDashboard,
+  PawPrint,
   Search,
   Settings,
   Sparkles,
-  Syringe,
   Users,
-  PawPrint,
 } from '@lucide/vue'
 
-import NavDocuments from '@/components/NavDocuments.vue'
 import NavMain from '@/components/NavMain.vue'
-import NavSecondary from '@/components/NavSecondary.vue'
 import NavUser from '@/components/NavUser.vue'
 import {
   Sidebar,
@@ -55,11 +52,6 @@ const data = {
       icon: Dog,
     },
     {
-      title: 'Vacinas',
-      url: '/admin/vaccines',
-      icon: Syringe,
-    },
-    {
       title: 'Candidaturas',
       url: '/admin/applications',
       icon: ClipboardList,
@@ -69,6 +61,25 @@ const data = {
       url: '/admin/staff',
       icon: Users,
       adminOnly: true,
+    },
+    {
+      title: 'Cadastros',
+      url: '#',
+      icon: FolderPlus,
+      items: [
+        {
+          title: 'Vacinas',
+          url: '/admin/cadastro/vacinas',
+        },
+        {
+          title: 'Espécies',
+          url: '/admin/species',
+        },
+        {
+          title: 'Raças',
+          url: '/admin/breeds',
+        },
+      ],
     },
   ],
   navClouds: [
@@ -161,7 +172,10 @@ const data = {
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton as-child class="data-[slot=sidebar-menu-button]:!p-1.5">
+          <SidebarMenuButton
+            as-child
+            class="data-[slot=sidebar-menu-button]:!p-1.5"
+          >
             <a href="#">
               <PawPrint class="size-6!" />
               <span class="text-base font-semibold">Aumor</span>

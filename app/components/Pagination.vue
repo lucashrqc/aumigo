@@ -6,7 +6,7 @@ const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.page
 </script>
 
 <template>
-  <div v-if="totalPages > 1" class="flex items-center justify-center gap-4">
+  <div v-if="totalPages > 1" class="flex items-center justify-end gap-4">
     <Button variant="outline" size="sm" :disabled="page <= 1" @click="emit('update:page', page - 1)">
       Anterior
     </Button>
