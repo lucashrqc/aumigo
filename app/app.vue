@@ -4,4 +4,5 @@
     <NuxtPage />
   </NuxtLayout>
   <Toaster />
+  <AppDialogProvider />
 </template>

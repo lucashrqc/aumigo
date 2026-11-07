@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
 import { Heart, PawPrint, Pencil, Stethoscope, Trash2 } from '@lucide/vue'
@@ -42,6 +43,7 @@ const statCards = computed(() => [
 const { mutateAsync: createPet, isPending: creating } = useCreatePet()
 const { mutateAsync: deletePet } = useDeletePet()
 
+const dialog = useDialog()
 const dialogOpen = ref(false)
 const selected = ref<PetDto[]>([])
 
@@ -56,7 +58,16 @@ async function handleCreate(payload: Parameters<typeof createPet>[0]) {
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Desativar ${name}? Ele será ocultado do site público.`)) return
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Desativar pet',
+      description: `Desativar ${name}? Ele será ocultado do site público.`,
+      confirmText: 'Desativar',
+      destructive: true,
+    },
+  })
+  if (!ok) return
   try {
     await deletePet(id)
     toast.success('Pet desativado')
