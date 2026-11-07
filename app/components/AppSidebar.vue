@@ -228,10 +228,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             as-child
             class="data-[slot=sidebar-menu-button]:p-1.5!"
           >
-            <a href="#">
+            <NuxtLink href="/admin">
               <PawPrint class="size-6!" />
               <span class="text-base font-semibold">Aumor</span>
-            </a>
+            </NuxtLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
