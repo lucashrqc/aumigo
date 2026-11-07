@@ -21,6 +21,7 @@ function makeIdentity(): IdentityProvider {
     createUser: vi.fn(),
     setRole: vi.fn(),
     updateName: vi.fn().mockResolvedValue(undefined),
+    updateImage: vi.fn().mockResolvedValue(undefined),
   }
 }
 
@@ -67,5 +68,25 @@ describe('ProfileService.updateProfile', () => {
 
     expect(profiles.create).toHaveBeenCalledWith({ userId: 'user-1', name: 'Ana', phone: '11999' })
     expect(dto).toEqual({ id: 'sp-1', name: 'Ana', phone: '11999' })
+  })
+})
+
+describe('ProfileService.updateAvatar', () => {
+  it('forwards the image URL to the identity provider', async () => {
+    const identity = makeIdentity()
+    const service = new ProfileService(makeProfiles(), identity)
+
+    await service.updateAvatar('user-1', 'https://blob.example/a.jpg')
+
+    expect(identity.updateImage).toHaveBeenCalledWith('user-1', 'https://blob.example/a.jpg')
+  })
+
+  it('clears the image when passed null', async () => {
+    const identity = makeIdentity()
+    const service = new ProfileService(makeProfiles(), identity)
+
+    await service.updateAvatar('user-1', null)
+
+    expect(identity.updateImage).toHaveBeenCalledWith('user-1', null)
   })
 })

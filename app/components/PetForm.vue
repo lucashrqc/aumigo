@@ -71,8 +71,6 @@ const breeds = useBreedOptions(() => speciesId.value || undefined)
 // Show a field's error once it was touched or a submit was attempted.
 const showErrors = (touched: boolean) => touched || attempts.value > 0
 
-const imageUrlValidator = z.url('URL inválida').or(z.literal(''))
-
 const statusOptions = [
   { label: 'Disponível', value: 'available' },
   { label: 'Reservado', value: 'pending' },
@@ -341,53 +339,37 @@ const sizeOptions = [
     <form.Field name="images" mode="array">
       <template #default="{ field: images }">
         <div class="space-y-2">
-          <Label>URLs das fotos</Label>
+          <Label>Fotos</Label>
           <div
-            v-for="(_, index) in images.state.value"
-            :key="index"
-            class="flex gap-2"
+            v-if="images.state.value.length"
+            class="flex flex-wrap gap-3"
           >
-            <form.Field
-              :name="`images[${index}].url`"
-              :validators="{ onChange: imageUrlValidator }"
+            <div
+              v-for="(image, index) in images.state.value"
+              :key="index"
+              class="relative h-24 w-24 overflow-hidden rounded-md border"
             >
-              <template #default="{ field: urlField }">
-                <FormField
-                  class="flex-1"
-                  :errors="urlField.state.meta.errors"
-                  :touched="showErrors(urlField.state.meta.isTouched)"
-                >
-                  <input
-                    :value="urlField.state.value"
-                    placeholder="https://…"
-                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    @input="
-                      urlField.handleChange(
-                        ($event.target as HTMLInputElement).value,
-                      )
-                    "
-                    @blur="urlField.handleBlur"
-                  >
-                </FormField>
-              </template>
-            </form.Field>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              @click="images.removeValue(index)"
-            >
-              Remover
-            </Button>
+              <img :src="image.url" alt="" class="h-full w-full object-cover">
+              <button
+                type="button"
+                class="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs leading-5 text-white"
+                @click="images.removeValue(index)"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            @click="images.pushValue({ url: '' })"
-          >
-            Adicionar foto
-          </Button>
+          <ImageUploader
+            handle-upload-url="/api/admin/uploads/pet-image"
+            path-prefix="pets/"
+            label="Adicionar foto"
+            :max-size-mb="5"
+            :disabled="images.state.value.length >= 12"
+            @uploaded="(url) => images.pushValue({ url })"
+          />
+          <p class="text-muted-foreground text-xs">
+            JPG, PNG ou WebP até 5 MB. Máximo de 12 fotos.
+          </p>
         </div>
       </template>
     </form.Field>

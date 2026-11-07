@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import type { ProfileUpdateInput } from '#shared/schemas'
-import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
@@ -11,6 +8,21 @@ useHead({ title: 'Configurações — Admin' })
 const auth = useAuthStore()
 const { data: profile, isLoading } = useProfileQuery()
 const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
+
+const avatarSaving = ref(false)
+
+async function saveAvatar(image: string | null) {
+  avatarSaving.value = true
+  try {
+    await $fetch('/api/me/avatar', { method: 'PATCH', body: { image } })
+    await auth.fetchSession()
+    toast.success('Foto atualizada')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível atualizar a foto'))
+  } finally {
+    avatarSaving.value = false
+  }
+}
 
 async function handleUpdateProfile(payload: ProfileUpdateInput) {
   try {
@@ -33,11 +45,38 @@ async function handleUpdateProfile(payload: ProfileUpdateInput) {
     </div>
 
     <Tabs default-value="profile" class="gap-6 px-4 py-2">
-      <TabsList>
-        <TabsTrigger value="profile">Perfil</TabsTrigger>
-      </TabsList>
-
       <TabsContent value="profile" class="space-y-10">
+        <section class="flex flex-col w-fit items-center gap-4">
+          <Avatar class="h-32 w-32">
+            <AvatarImage
+              :src="auth.user?.image ?? ''"
+              :alt="auth.user?.name ?? ''"
+            />
+            <AvatarFallback>
+              {{ (auth.user?.name ?? '?').charAt(0).toUpperCase() }}
+            </AvatarFallback>
+          </Avatar>
+          <div class="flex flex-col items-start gap-1">
+            <ImageUploader
+              handle-upload-url="/api/me/avatar-upload"
+              path-prefix="avatars/"
+              label="Alterar foto"
+              :max-size-mb="2"
+              :disabled="avatarSaving"
+              @uploaded="saveAvatar"
+            />
+            <button
+              v-if="auth.user?.image"
+              type="button"
+              class="text-muted-foreground px-1 text-xs hover:underline"
+              :disabled="avatarSaving"
+              @click="saveAvatar(null)"
+            >
+              Remover foto
+            </button>
+          </div>
+        </section>
+
         <section>
           <div class="mb-4">
             <h2 class="text-base font-semibold">Informações pessoais</h2>

@@ -27,7 +27,8 @@ server/
     client.ts         createDatabase(url) — driver selection
     migrate.ts        pnpm db:migrate entrypoint
     seed.ts           pnpm db:seed — first admin + reference species (idempotent)
-  storage/            ImageStorage port + UrlImageStorage adapter
+  storage/            ImageStorage port (UrlImageStorage) + BlobStorage port
+                      (VercelBlobStorage / DisabledBlobStorage) for uploads
   email/              EmailSender port + ConsoleEmailSender/ResendEmailSender adapters
   utils/              auth.ts, db.ts, session.ts, services.ts (composition root),
                       validation.ts, identity-provider.ts
@@ -129,9 +130,17 @@ docker compose up --build        # db + app (Nuxt dev server) on :3000
 
 Server-only (read in `nuxt.config.ts` runtimeConfig): `DATABASE_URL`,
 `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
-`RESEND_API_KEY`, `RESEND_FROM_EMAIL`. Public: `NUXT_PUBLIC_AUTH_BASE_URL`.
-Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See `.env.example`.
+`RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `BLOB_READ_WRITE_TOKEN`. Public:
+`NUXT_PUBLIC_AUTH_BASE_URL`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See
+`.env.example`.
 
 Email: when `RESEND_API_KEY` is set, `services.ts` wires `ResendEmailSender`
 (from-address `RESEND_FROM_EMAIL`, default `onboarding@resend.dev`); otherwise
 it falls back to `ConsoleEmailSender`, which logs messages to stdout.
+
+Image uploads: when `BLOB_READ_WRITE_TOKEN` is set, `services.ts` wires
+`VercelBlobStorage`; otherwise `DisabledBlobStorage` (upload endpoints return
+501). Uploads are client-direct — the browser sends bytes straight to Vercel
+Blob after the token endpoints (`/api/admin/uploads/pet-image`,
+`/api/me/avatar-upload`) authorize and scope a token. Create a separate Blob
+store for local dev so uploads stay out of production data.
