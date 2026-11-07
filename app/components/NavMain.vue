@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { ChevronRight } from '@lucide/vue'
 import type { Component } from 'vue'
-import { ChevronRight, CirclePlus } from '@lucide/vue'
 
 import {
   Collapsible,
@@ -31,35 +31,37 @@ interface NavItem {
   items?: NavSubItem[]
 }
 
-defineProps<{
-  items: NavItem[]
-}>()
+withDefaults(
+  defineProps<{
+    items: NavItem[]
+    searching?: boolean
+  }>(),
+  { searching: false },
+)
+
+const route = useRoute()
+
+function isItemActive(url: string) {
+  if (!url || url === '#') return false
+  if (url === '/admin') return route.path === '/admin'
+  return route.path === url || route.path.startsWith(`${url}/`)
+}
 </script>
 
 <template>
   <SidebarGroup>
     <SidebarGroupContent class="flex flex-col gap-2">
       <SidebarMenu>
-        <SidebarMenuItem class="flex items-center gap-2">
-          <SidebarMenuButton
-            as-child
-            tooltip="Cadastrar Pet"
-            class="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-          >
-            <NuxtLink to="/admin/pets/cadastrar">
-              <CirclePlus />
-              <span>Cadastrar Pet</span>
-            </NuxtLink>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-      <SidebarMenu>
         <template v-for="item in items" :key="item.title">
           <!-- Expandable item: reveals its sub-registers on click. -->
           <Collapsible
             v-if="item.items?.length"
             as-child
-            :default-open="item.isActive"
+            :open="searching ? true : undefined"
+            :default-open="
+              item.isActive ||
+              item.items.some((subItem) => isItemActive(subItem.url))
+            "
             class="group/collapsible"
           >
             <SidebarMenuItem>
@@ -74,8 +76,14 @@ defineProps<{
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
-                    <SidebarMenuSubButton as-child>
+                  <SidebarMenuSubItem
+                    v-for="subItem in item.items"
+                    :key="subItem.title"
+                  >
+                    <SidebarMenuSubButton
+                      as-child
+                      :is-active="isItemActive(subItem.url)"
+                    >
                       <NuxtLink :to="subItem.url">
                         <span>{{ subItem.title }}</span>
                       </NuxtLink>
@@ -88,7 +96,11 @@ defineProps<{
 
           <!-- Plain link item. -->
           <SidebarMenuItem v-else>
-            <SidebarMenuButton as-child :tooltip="item.title">
+            <SidebarMenuButton
+              as-child
+              :tooltip="item.title"
+              :is-active="isItemActive(item.url)"
+            >
               <NuxtLink :to="item.url">
                 <component :is="item.icon" v-if="item.icon" />
                 <span>{{ item.title }}</span>
@@ -96,6 +108,12 @@ defineProps<{
             </SidebarMenuButton>
           </SidebarMenuItem>
         </template>
+
+        <SidebarMenuItem v-if="searching && !items.length">
+          <div class="text-muted-foreground px-2 py-1.5 text-sm">
+            Nenhum resultado
+          </div>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroupContent>
   </SidebarGroup>
