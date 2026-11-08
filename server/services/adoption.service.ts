@@ -78,4 +78,21 @@ export class AdoptionService {
 
     return (await this.applications.findById(applicationId))!
   }
+
+  /** Staff cancel an application. A canceled approval frees the pet again. */
+  async cancelApplication(
+    applicationId: string,
+    actorId: string,
+  ): Promise<AdoptionApplicationWithRelations> {
+    const application = await this.applications.findById(applicationId)
+    if (!application) {
+      throw createError({ statusCode: 404, statusMessage: 'Application not found' })
+    }
+    if (application.status === 'canceled') {
+      throw createError({ statusCode: 409, statusMessage: 'Application already canceled' })
+    }
+
+    await this.applications.cancelApplication(applicationId, actorId)
+    return (await this.applications.findById(applicationId))!
+  }
 }

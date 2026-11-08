@@ -18,6 +18,7 @@ import {
   Loader2Icon,
   Plus,
   Search,
+  XIcon,
 } from '@lucide/vue'
 import { useDebounceFn, useInfiniteScroll } from '@vueuse/core'
 import { cn } from 'cn'
@@ -46,6 +47,7 @@ const props = withDefaults(
     minSearchLength?: number
     debounceMs?: number
     disabled?: boolean
+    clearable?: boolean
   }>(),
   {
     isFetching: false,
@@ -62,6 +64,7 @@ const props = withDefaults(
     minSearchLength: 2,
     debounceMs: 400,
     disabled: false,
+    clearable: false,
   },
 )
 
@@ -140,6 +143,10 @@ function select(option: T) {
   open.value = false
 }
 
+function clear() {
+  model.value = null
+}
+
 const showEmpty = computed(() => !props.isFetching && props.items.length === 0)
 </script>
 
@@ -156,7 +163,17 @@ const showEmpty = computed(() => !props.isFetching && props.items.length === 0)
         <span :class="cn('truncate', !model && 'text-muted-foreground')">{{
           triggerLabel
         }}</span>
-        <ChevronsUpDownIcon class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        <span
+          v-if="clearable && model && !disabled"
+          role="button"
+          aria-label="Limpar seleção"
+          class="ml-2 shrink-0 opacity-50 hover:opacity-100"
+          @pointerdown.stop.prevent
+          @click.stop.prevent="clear"
+        >
+          <XIcon class="h-4 w-4" />
+        </span>
+        <ChevronsUpDownIcon v-else class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
     <PopoverContent

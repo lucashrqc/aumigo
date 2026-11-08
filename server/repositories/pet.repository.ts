@@ -1,7 +1,12 @@
-import { and, asc, count, desc, eq, ilike, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ilike, lt, sql } from 'drizzle-orm'
 import type { Database } from '../database/client'
 import { pet, petImage } from '../database/schema'
-import type { Paginated, PetCreateInput, PetListQuery, PetUpdateInput } from '#shared/schemas'
+import type {
+  Paginated,
+  PetCreateInput,
+  PetListQuery,
+  PetUpdateInput,
+} from '#shared/schemas'
 import type { PetStatsDto } from '#shared/types'
 
 export type PetRow = typeof pet.$inferSelect
@@ -21,12 +26,27 @@ export interface PetListOptions {
 }
 
 export interface PetRepository {
-  list(query: PetListQuery, options?: PetListOptions): Promise<Paginated<PetWithRelations>>
+  list(
+    query: PetListQuery,
+    options?: PetListOptions,
+  ): Promise<Paginated<PetWithRelations>>
   stats(): Promise<PetStatsDto>
   findById(id: string): Promise<PetWithRelations | null>
   create(data: PetCreateInput, actorId: string): Promise<PetWithRelations>
-  update(id: string, data: PetUpdateInput, actorId: string): Promise<PetWithRelations | null>
-  setStatus(id: string, status: PetRow['status'], actorId: string): Promise<void>
+  update(
+    id: string,
+    data: PetUpdateInput,
+    actorId: string,
+  ): Promise<PetWithRelations | null>
+  setStatus(
+    id: string,
+    status: PetRow['status'],
+    actorId: string,
+  ): Promise<void>
+  /** Publish a pet: status 'available' + published audit stamp. */
+  publish(id: string, actorId: string): Promise<void>
+  /** Unpublish a pet: status 'pending' + unpublished audit stamp. */
+  unpublish(id: string, actorId: string): Promise<void>
   softDelete(id: string, actorId: string): Promise<void>
 }
 
@@ -35,7 +55,9 @@ function toColumns(data: Partial<PetCreateInput>) {
   const { images: _images, weight, ...rest } = data
   return {
     ...rest,
-    ...(weight !== undefined ? { weight: weight === null ? null : String(weight) } : {}),
+    ...(weight !== undefined
+      ? { weight: weight === null ? null : String(weight) }
+      : {}),
   }
 }
 
@@ -50,6 +72,10 @@ export class DrizzlePetRepository implements PetRepository {
       query.status ? eq(pet.status, query.status) : eq(pet.active, true),
       query.speciesId ? eq(pet.speciesId, query.speciesId) : undefined,
       query.search ? ilike(pet.name, `%${query.search}%`) : undefined,
+      query.from ? gte(pet.createdAt, new Date(query.from)) : undefined,
+      query.to
+        ? lt(pet.createdAt, new Date(new Date(query.to).getTime() + 86_400_000))
+        : undefined,
     ].filter(Boolean)
 
     const where = conditions.length ? and(...conditions) : undefined
@@ -113,7 +139,10 @@ export class DrizzlePetRepository implements PetRepository {
     return (row as PetWithRelations) ?? null
   }
 
-  async create(data: PetCreateInput, actorId: string): Promise<PetWithRelations> {
+  async create(
+    data: PetCreateInput,
+    actorId: string,
+  ): Promise<PetWithRelations> {
     const id = await this.db.transaction(async (tx) => {
       const [created] = await tx
         .insert(pet)
@@ -157,7 +186,11 @@ export class DrizzlePetRepository implements PetRepository {
         await tx.delete(petImage).where(eq(petImage.petId, id))
         if (data.images.length) {
           await tx.insert(petImage).values(
-            data.images.map((img) => ({ petId: id, url: img.url, position: img.position })),
+            data.images.map((img) => ({
+              petId: id,
+              url: img.url,
+              position: img.position,
+            })),
           )
         }
       }
@@ -165,10 +198,42 @@ export class DrizzlePetRepository implements PetRepository {
     return this.findById(id)
   }
 
-  async setStatus(id: string, status: PetRow['status'], actorId: string): Promise<void> {
+  async setStatus(
+    id: string,
+    status: PetRow['status'],
+    actorId: string,
+  ): Promise<void> {
     await this.db
       .update(pet)
       .set({ status, updatedBy: actorId, updatedAt: new Date() })
+      .where(eq(pet.id, id))
+  }
+
+  async publish(id: string, actorId: string): Promise<void> {
+    const now = new Date()
+    await this.db
+      .update(pet)
+      .set({
+        status: 'available',
+        publishedAt: now,
+        publishedBy: actorId,
+        updatedBy: actorId,
+        updatedAt: now,
+      })
+      .where(eq(pet.id, id))
+  }
+
+  async unpublish(id: string, actorId: string): Promise<void> {
+    const now = new Date()
+    await this.db
+      .update(pet)
+      .set({
+        status: 'pending',
+        unpublishedAt: now,
+        unpublishedBy: actorId,
+        updatedBy: actorId,
+        updatedAt: now,
+      })
       .where(eq(pet.id, id))
   }
 

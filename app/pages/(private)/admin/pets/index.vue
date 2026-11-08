@@ -2,7 +2,17 @@
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
-import { Heart, PawPrint, Pencil, Stethoscope, Trash2 } from '@lucide/vue'
+import {
+  CircleCheck,
+  EyeOff,
+  Heart,
+  Megaphone,
+  PawPrint,
+  Pencil,
+  Stethoscope,
+  Trash2,
+  Undo2,
+} from '@lucide/vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h, type Component } from 'vue'
 import { toast } from 'vue-sonner'
@@ -45,6 +55,9 @@ const statCards = computed(() => [
 ])
 const { mutateAsync: createPet, isPending: creating } = useCreatePet()
 const { mutateAsync: deletePet } = useDeletePet()
+const { mutateAsync: publishPet } = usePublishPet()
+const { mutateAsync: unpublishPet } = useUnpublishPet()
+const { mutateAsync: markAdopted } = useMarkPetAdopted()
 
 const dialog = useDialog()
 const dialogOpen = ref(false)
@@ -79,7 +92,92 @@ async function handleDelete(id: string, name: string) {
   }
 }
 
+async function handlePublish(pet: PetDto) {
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Publicar pet',
+      icon: Megaphone,
+      description: `Publicar ${pet.name}? Ele ficará visível no site público para adoção.`,
+      confirmText: 'Publicar',
+    },
+  })
+  if (!ok) return
+  try {
+    await publishPet(pet.id)
+    toast.success('Pet publicado')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível publicar o pet'))
+  }
+}
+
+async function handleUnpublish(pet: PetDto) {
+  const adopted = pet.status === 'adopted'
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: adopted ? 'Cancelar adoção' : 'Despublicar pet',
+      icon: adopted ? Undo2 : EyeOff,
+      description: adopted
+        ? `Cancelar a adoção de ${pet.name}? Ele voltará para pendente e as candidaturas relacionadas serão reabertas.`
+        : `Despublicar ${pet.name}? Ele será ocultado do site público e voltará para pendente.`,
+      confirmText: adopted ? 'Cancelar adoção' : 'Despublicar',
+      destructive: adopted,
+    },
+  })
+  if (!ok) return
+  try {
+    await unpublishPet(pet.id)
+    toast.success(adopted ? 'Adoção cancelada' : 'Pet despublicado')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err))
+  }
+}
+
+async function handleMarkAdopted(pet: PetDto) {
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Marcar como adotado',
+      icon: CircleCheck,
+      description: `Confirmar a adoção de ${pet.name}? As candidaturas em aberto deste pet serão rejeitadas.`,
+      confirmText: 'Adotado!',
+    },
+  })
+  if (!ok) return
+  try {
+    await markAdopted(pet.id)
+    toast.success('Pet marcado como adotado')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível marcar como adotado'))
+  }
+}
+
 const actions: RowAction<PetDto>[] = [
+  {
+    label: 'Publicar',
+    icon: Megaphone,
+    hidden: (row) => row.status !== 'pending',
+    onClick: handlePublish,
+  },
+  {
+    label: 'Adotado!',
+    icon: CircleCheck,
+    hidden: (row) => row.status !== 'available',
+    onClick: handleMarkAdopted,
+  },
+  {
+    label: 'Despublicar pet',
+    icon: EyeOff,
+    hidden: (row) => row.status !== 'available',
+    onClick: handleUnpublish,
+  },
+  {
+    label: 'Cancelar adoção',
+    icon: Undo2,
+    hidden: (row) => row.status !== 'adopted',
+    onClick: handleUnpublish,
+  },
   {
     label: 'Editar',
     icon: Pencil,

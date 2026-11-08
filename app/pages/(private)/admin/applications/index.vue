@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
 import {
+  Ban,
   Check,
   CircleCheck,
   CircleSlash,
@@ -32,6 +34,9 @@ const params = computed(() => ({
 const { data, isLoading } = useAdminApplicationsQuery(params)
 const { data: stats } = useAdminApplicationStatsQuery()
 const { mutateAsync: review } = useReviewApplication()
+const { mutateAsync: cancelApplication } = useCancelApplication()
+
+const dialog = useDialog()
 
 watch([search, statusFilter], () => {
   page.value = 1
@@ -87,12 +92,33 @@ async function decide(id: string, decision: 'approved' | 'rejected') {
   }
 }
 
+async function handleCancel(row: AdoptionApplicationDto) {
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Cancelar candidatura',
+      icon: Ban,
+      description: `Cancelar a candidatura de ${row.adopter?.name ?? 'adotante'} para ${row.pet?.name ?? 'o pet'}? O pet voltará a ficar disponível e as candidaturas rejeitadas serão reabertas.`,
+      confirmText: 'Cancelar candidatura',
+      destructive: true,
+    },
+  })
+  if (!ok) return
+  try {
+    await cancelApplication(row.id)
+    toast.success('Candidatura cancelada')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err, 'Não foi possível cancelar a candidatura'))
+  }
+}
+
 const statusClass: Record<string, string> = {
   approved:
     'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
   rejected: 'bg-destructive/10 text-destructive',
   pending:
     'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  canceled: 'bg-muted text-muted-foreground',
 }
 
 const actions: RowAction<AdoptionApplicationDto>[] = [
@@ -100,6 +126,7 @@ const actions: RowAction<AdoptionApplicationDto>[] = [
     label: 'Aprovar',
     icon: Check,
     iconClass: 'h-4 w-4 text-emerald-600',
+    hidden: (row) => row.status !== 'pending',
     onClick: (row) => decide(row.id, 'approved'),
   },
   {
@@ -107,7 +134,16 @@ const actions: RowAction<AdoptionApplicationDto>[] = [
     icon: X,
     iconClass: 'h-4 w-4',
     class: 'text-destructive',
+    hidden: (row) => row.status !== 'pending',
     onClick: (row) => decide(row.id, 'rejected'),
+  },
+  {
+    label: 'Cancelar',
+    icon: Ban,
+    iconClass: 'h-4 w-4',
+    class: 'text-destructive',
+    hidden: (row) => row.status !== 'approved',
+    onClick: (row) => handleCancel(row),
   },
 ]
 
@@ -191,7 +227,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     header: 'Ações',
     meta: { class: 'w-32 text-center whitespace-nowrap' },
     cell: ({ row }) =>
-      row.original.status === 'pending'
+      row.original.status === 'pending' || row.original.status === 'approved'
         ? h(DataTableRowActions as Component, { row: row.original, actions })
         : h('span', { class: 'text-muted-foreground text-xs' }, 'Analisada'),
   },
