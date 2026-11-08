@@ -451,7 +451,7 @@ onMounted(() => {
               v-for="pet in pets"
               :key="pet.name"
               ref="petCards"
-              class="flex flex-col items-center gap-10 lg:gap-6"
+              class="flex flex-col items-center gap-10 lg:gap-44"
               :class="pet.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'"
             >
               <div data-reveal class="flex w-full justify-center lg:w-113.75">

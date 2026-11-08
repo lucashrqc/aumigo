@@ -104,7 +104,7 @@ export function usePawTrail({ section, desktop, mobile }: UsePawTrailParams) {
     }
     trigger = ScrollTrigger.create({
       trigger: section.value,
-      start: 'top 75%',
+      start: 'top 45%',
       end: 'bottom 65%',
       scrub: true,
       onUpdate: (self) => {
