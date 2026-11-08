@@ -4,6 +4,7 @@ import type {
   PetRepository,
   PetWithRelations,
 } from '../repositories/pet.repository'
+import type { AdoptionApplicationRepository } from '../repositories/adoption.repository'
 import type { PetCreateInput, PetListQuery, PetUpdateInput, Paginated } from '#shared/schemas'
 import type { PetStatsDto } from '#shared/types'
 
@@ -11,6 +12,7 @@ export class PetService {
   constructor(
     private readonly pets: PetRepository,
     private readonly images: ImageStorage,
+    private readonly applications: AdoptionApplicationRepository,
   ) {}
 
   list(query: PetListQuery, options?: PetListOptions): Promise<Paginated<PetWithRelations>> {
@@ -28,7 +30,11 @@ export class PetService {
   }
 
   async create(input: PetCreateInput, actorId: string): Promise<PetWithRelations> {
-    const data = { ...input, images: await this.normalizeImages(input.images) }
+    const data = {
+      ...input,
+      status: 'pending' as const,
+      images: await this.normalizeImages(input.images),
+    }
     return this.pets.create(data, actorId)
   }
 
@@ -46,6 +52,40 @@ export class PetService {
   async remove(id: string, actorId: string): Promise<void> {
     await this.getById(id)
     await this.pets.softDelete(id, actorId)
+  }
+
+  /** Publish a pending pet so it shows on the public site. */
+  async publish(id: string, actorId: string): Promise<PetWithRelations> {
+    const pet = await this.getById(id)
+    if (pet.status !== 'pending') {
+      throw createError({ statusCode: 409, statusMessage: 'Only pending pets can be published' })
+    }
+    await this.pets.publish(id, actorId)
+    return this.getById(id)
+  }
+
+  /**
+   * Take a pet off the public site. An adopted pet goes back to pending and its
+   * applications are re-opened; an available pet simply returns to pending.
+   */
+  async unpublish(id: string, actorId: string): Promise<PetWithRelations> {
+    const pet = await this.getById(id)
+    if (pet.status === 'adopted') {
+      await this.applications.revertPetAdoption(id, actorId)
+    } else {
+      await this.pets.unpublish(id, actorId)
+    }
+    return this.getById(id)
+  }
+
+  /** Mark an available pet as adopted and auto-reject its open applications. */
+  async markAdopted(id: string, actorId: string): Promise<PetWithRelations> {
+    const pet = await this.getById(id)
+    if (pet.status !== 'available') {
+      throw createError({ statusCode: 409, statusMessage: 'Only available pets can be marked adopted' })
+    }
+    await this.applications.markPetAdopted(id, actorId)
+    return this.getById(id)
   }
 
   private async normalizeImages(images: PetCreateInput['images']) {

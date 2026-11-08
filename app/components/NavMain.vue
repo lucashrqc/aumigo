@@ -27,6 +27,7 @@ interface NavItem {
   title: string
   url: string
   icon?: Component
+  iconClass?: string
   isActive?: boolean
   items?: NavSubItem[]
 }
@@ -67,7 +68,11 @@ function isItemActive(url: string) {
             <SidebarMenuItem>
               <CollapsibleTrigger as-child>
                 <SidebarMenuButton :tooltip="item.title">
-                  <component :is="item.icon" v-if="item.icon" />
+                  <component
+                    :is="item.icon"
+                    v-if="item.icon"
+                    :class="item.iconClass"
+                  />
                   <span>{{ item.title }}</span>
                   <ChevronRight
                     class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
@@ -102,7 +107,11 @@ function isItemActive(url: string) {
               :is-active="isItemActive(item.url)"
             >
               <NuxtLink :to="item.url">
-                <component :is="item.icon" v-if="item.icon" />
+                <component
+                  :is="item.icon"
+                  v-if="item.icon"
+                  :class="item.iconClass"
+                />
                 <span>{{ item.title }}</span>
               </NuxtLink>
             </SidebarMenuButton>

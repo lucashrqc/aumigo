@@ -20,7 +20,7 @@ const initialBreed = props.initial?.breed
 const form = useForm({
   defaultValues: {
     name: props.initial?.name ?? '',
-    status: props.initial?.status ?? 'available',
+    status: props.initial?.status ?? 'pending',
     speciesId: props.initial?.speciesId ?? '',
     breedId: props.initial?.breedId ?? '',
     sex: props.initial?.sex ?? 'unknown',
@@ -49,7 +49,6 @@ const form = useForm({
       neutered: value.neutered,
       birthDate: value.birthDate || null,
       specialNeeds: value.specialNeeds || null,
-      status: value.status,
       images: value.images
         .filter((i) => i.url.trim())
         .map((i, position) => ({ url: i.url.trim(), position })),
@@ -71,11 +70,6 @@ const breeds = useBreedOptions(() => speciesId.value || undefined)
 // Show a field's error once it was touched or a submit was attempted.
 const showErrors = (touched: boolean) => touched || attempts.value > 0
 
-const statusOptions = [
-  { label: 'Disponível', value: 'available' },
-  { label: 'Reservado', value: 'pending' },
-  { label: 'Adotado', value: 'adopted' },
-]
 const sizeOptions = [
   { label: 'Pequeno', value: 'small' },
   { label: 'Médio', value: 'medium' },
@@ -113,13 +107,14 @@ const sizeOptions = [
       <form.Field name="status">
         <template #default="{ field }">
           <FormField label="Status" :name="field.name">
-            <SelectOptions
-              :options="statusOptions"
-              :model-value="field.state.value"
-              @update:model-value="
-                field.handleChange($event as typeof field.state.value)
-              "
-            />
+            <template #default="{ id }">
+              <Input
+                :id="id"
+                :model-value="petStatusLabel(field.state.value)"
+                readonly
+                disabled
+              />
+            </template>
           </FormField>
         </template>
       </form.Field>

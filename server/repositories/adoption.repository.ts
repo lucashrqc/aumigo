@@ -1,8 +1,25 @@
-import { and, count, desc, eq, exists, ilike, ne, or, sql } from 'drizzle-orm'
+import {
+  and,
+  count,
+  desc,
+  eq,
+  exists,
+  ilike,
+  ne,
+  notExists,
+  notInArray,
+  or,
+  sql,
+} from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import type { Database } from '../database/client'
 import { adoptionApplication, pet, user } from '../database/schema'
 import type { AdoptionApplicationListQuery, Paginated } from '#shared/schemas'
 import type { AdoptionApplicationStatsDto } from '#shared/types'
+
+/** Standard reason stored on applications auto-rejected when a pet is adopted. */
+export const ADOPTED_REJECT_REASON =
+  'Este pet já foi adotado, mas você ainda pode aplicar para outros pets.'
 
 export type AdoptionApplicationRow = typeof adoptionApplication.$inferSelect
 
@@ -32,6 +49,12 @@ export interface AdoptionApplicationRepository {
   approve(applicationId: string, petId: string, reviewerId: string): Promise<void>
   /** Reject a single application. */
   reject(applicationId: string, reviewerId: string): Promise<void>
+  /** Mark the pet adopted and auto-reject its still-open applications. */
+  markPetAdopted(petId: string, actorId: string): Promise<void>
+  /** Undo an adoption at the pet level: pet back to pending, re-open applications. */
+  revertPetAdoption(petId: string, actorId: string): Promise<void>
+  /** Cancel an application; free the pet and re-open siblings when it was the approved one. */
+  cancelApplication(applicationId: string, actorId: string): Promise<void>
 }
 
 const withRelations = {
@@ -154,7 +177,14 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
       // Auto-reject the other open applications for the same pet.
       await tx
         .update(adoptionApplication)
-        .set({ status: 'rejected', reviewedBy: reviewerId, reviewedAt, updatedAt: reviewedAt })
+        .set({
+          status: 'rejected',
+          reviewedBy: reviewerId,
+          reviewedAt,
+          rejectedBy: reviewerId,
+          rejectedAt: reviewedAt,
+          updatedAt: reviewedAt,
+        })
         .where(
           and(
             eq(adoptionApplication.petId, petId),
@@ -174,7 +204,131 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
     const reviewedAt = new Date()
     await this.db
       .update(adoptionApplication)
-      .set({ status: 'rejected', reviewedBy: reviewerId, reviewedAt, updatedAt: reviewedAt })
+      .set({
+        status: 'rejected',
+        reviewedBy: reviewerId,
+        reviewedAt,
+        rejectedBy: reviewerId,
+        rejectedAt: reviewedAt,
+        updatedAt: reviewedAt,
+      })
       .where(eq(adoptionApplication.id, applicationId))
+  }
+
+  async markPetAdopted(petId: string, actorId: string) {
+    await this.db.transaction(async (tx) => {
+      const now = new Date()
+      await tx
+        .update(adoptionApplication)
+        .set({
+          status: 'rejected',
+          rejectedBy: actorId,
+          rejectedAt: now,
+          rejectReason: ADOPTED_REJECT_REASON,
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(adoptionApplication.petId, petId),
+            notInArray(adoptionApplication.status, ['approved', 'canceled']),
+          ),
+        )
+
+      await tx
+        .update(pet)
+        .set({ status: 'adopted', adoptedBy: actorId, adoptedAt: now, updatedBy: actorId, updatedAt: now })
+        .where(eq(pet.id, petId))
+    })
+  }
+
+  async revertPetAdoption(petId: string, actorId: string) {
+    await this.db.transaction(async (tx) => {
+      const now = new Date()
+      await tx
+        .update(pet)
+        .set({ status: 'pending', canceledBy: actorId, canceledAt: now, updatedBy: actorId, updatedAt: now })
+        .where(eq(pet.id, petId))
+
+      await tx
+        .update(adoptionApplication)
+        .set({ status: 'pending', reviewedBy: null, reviewedAt: null, updatedAt: now })
+        .where(
+          and(
+            eq(adoptionApplication.petId, petId),
+            eq(adoptionApplication.status, 'approved'),
+          ),
+        )
+
+      await tx
+        .update(adoptionApplication)
+        .set(this.reopenRejectedValues(now))
+        .where(this.reopenRejectedWhere(petId))
+    })
+  }
+
+  async cancelApplication(applicationId: string, actorId: string) {
+    await this.db.transaction(async (tx) => {
+      const now = new Date()
+      const app = await tx.query.adoptionApplication.findFirst({
+        where: eq(adoptionApplication.id, applicationId),
+        with: { pet: { columns: { id: true, status: true } } },
+      })
+      if (!app) return
+
+      await tx
+        .update(adoptionApplication)
+        .set({ status: 'canceled', canceledBy: actorId, canceledAt: now, updatedAt: now })
+        .where(eq(adoptionApplication.id, applicationId))
+
+      if (app.status === 'approved' && app.pet?.status === 'adopted') {
+        await tx
+          .update(pet)
+          .set({ status: 'available', updatedBy: actorId, updatedAt: now })
+          .where(eq(pet.id, app.petId))
+
+        await tx
+          .update(adoptionApplication)
+          .set(this.reopenRejectedValues(now))
+          .where(this.reopenRejectedWhere(app.petId))
+      }
+    })
+  }
+
+  /** Column values that re-open a rejected application back to 'pending'. */
+  private reopenRejectedValues(now: Date) {
+    return {
+      status: 'pending' as const,
+      reviewedBy: null,
+      reviewedAt: null,
+      rejectedBy: null,
+      rejectedAt: null,
+      rejectReason: null,
+      updatedAt: now,
+    }
+  }
+
+  /**
+   * Match a pet's rejected applications, skipping adopters who already hold a
+   * pending application for the pet so the partial unique index
+   * `adoption_application_open_uq` is never violated.
+   */
+  private reopenRejectedWhere(petId: string) {
+    const open = alias(adoptionApplication, 'open_app')
+    return and(
+      eq(adoptionApplication.petId, petId),
+      eq(adoptionApplication.status, 'rejected'),
+      notExists(
+        this.db
+          .select({ one: sql`1` })
+          .from(open)
+          .where(
+            and(
+              eq(open.petId, adoptionApplication.petId),
+              eq(open.adopterUserId, adoptionApplication.adopterUserId),
+              eq(open.status, 'pending'),
+            ),
+          ),
+      ),
+    )
   }
 }

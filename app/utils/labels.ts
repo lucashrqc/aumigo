@@ -2,7 +2,7 @@
 
 const petStatusLabels: Record<string, string> = {
   available: 'Disponível',
-  pending: 'Reservado',
+  pending: 'Pendente',
   adopted: 'Adotado',
 }
 
@@ -10,6 +10,7 @@ const applicationStatusLabels: Record<string, string> = {
   pending: 'Pendente',
   approved: 'Aprovada',
   rejected: 'Rejeitada',
+  canceled: 'Cancelada',
 }
 
 const petSexLabels: Record<string, string> = {

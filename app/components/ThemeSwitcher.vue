@@ -16,7 +16,7 @@ const options = [
     <div
       role="radiogroup"
       aria-label="Alternar tema"
-      class="bg-muted inline-flex items-center gap-0.5 rounded-full p-1"
+      class="bg-brand dark:bg-muted inline-flex items-center gap-0.5 rounded-full p-1"
     >
       <button
         v-for="option in options"
