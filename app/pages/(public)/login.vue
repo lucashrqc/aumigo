@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: false })
-useHead({ title: 'Entrar — Aumor' })
+useHead({ title: 'Entrar — Aumigo' })
 useSeoMeta({ robots: 'noindex, nofollow' })
 
 const route = useRoute()
@@ -42,7 +42,7 @@ async function submit() {
     >
       <NuxtLink to="/" class="flex items-center gap-2.5">
         <PawPrint class="size-7.5 text-forest" />
-        <span class="text-[30px] tracking-[-1.4px] text-forest">aumor</span>
+        <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
       </NuxtLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
@@ -52,7 +52,7 @@ async function submit() {
               Entrar
             </h1>
             <p class="text-[15px] leading-normal text-forest/70">
-              Bem-vindo de volta à Aumor.
+              Bem-vindo de volta à Aumigo.
             </p>
           </div>
 
@@ -124,7 +124,7 @@ async function submit() {
       <footer
         class="mt-8 flex items-center justify-between text-[12px] text-forest/60 lg:mt-0"
       >
-        <span>© 2026 Aumor</span>
+        <span>© 2026 Aumigo</span>
         <span class="flex items-center gap-1.5">
           <Heart class="size-3" />
           O amor encontra um lar.

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'public' })
-useHead({ title: 'Adote um pet — Aumor' })
+useHead({ title: 'Adote um pet — Aumigo' })
 
 const search = ref('')
 const speciesFilter = ref('all')

@@ -17,7 +17,7 @@ import { h, type Component } from 'vue'
 import { presetRange, type DateRange } from '@/utils/date-range'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
-useHead({ title: 'Admin — Aumor' })
+useHead({ title: 'Admin — Aumigo' })
 
 const range = ref<DateRange>(presetRange('last-12-months'))
 const speciesId = ref<string | null>(null)

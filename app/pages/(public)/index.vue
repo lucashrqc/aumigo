@@ -38,7 +38,7 @@ const pets = [
     bio: 'Sou curioso, carinhoso e sempre topo uma voltinha. Depois, meu lugar preferido é pertinho de você.',
     caption: 'Especialista em abanar o rabo',
     cta: 'Quero conhecer o Bento',
-    photo: '/images/aumor/pet-bento.avif',
+    photo: '/images/aumigo/pet-bento.avif',
     cardClass: 'bg-cream-soft lg:-rotate-2',
     badgeClass: 'bg-cream-soft',
     reverse: false,
@@ -68,7 +68,7 @@ const pets = [
     bio: 'Tenho meu tempo para confiar. Mas, quando me sinto em casa, retribuo com ronrons e longas sonecas ao seu lado.',
     caption: 'Ronrons são minha linguagem do amor',
     cta: 'Quero conhecer a Amora',
-    photo: '/images/aumor/pet-amora.avif',
+    photo: '/images/aumigo/pet-amora.avif',
     cardClass: 'bg-[#e8e2f2] lg:rotate-2',
     badgeClass: 'bg-[#e8e2f2]',
     reverse: true,
@@ -98,7 +98,7 @@ const pets = [
     bio: 'Troco a pressa por um bom cafuné. Procuro um lar tranquilo para aproveitar a vida com calma e muito carinho.',
     caption: 'Cafuné nunca é demais',
     cta: 'Quero conhecer o Chico',
-    photo: '/images/aumor/pet-chico.avif',
+    photo: '/images/aumigo/pet-chico.avif',
     cardClass: 'bg-[#f6d8c9] lg:-rotate-2',
     badgeClass: 'bg-[#f6d8c9]',
     reverse: false,
@@ -366,7 +366,7 @@ onMounted(() => {
             class="relative mx-auto aspect-528/550 w-full max-w-132 overflow-hidden rounded-b-[20px] rounded-t-[170px]"
           >
             <img
-              src="/images/aumor/dog-cat-home.avif"
+              src="/images/aumigo/dog-cat-home.avif"
               alt="Um cão e um gato juntos em casa"
               class="h-full w-full object-cover"
             >
@@ -732,7 +732,7 @@ onMounted(() => {
           class="w-55 shrink-0 overflow-hidden rounded-b-[24px] rounded-t-[110px] lg:w-65.5"
         >
           <img
-            src="/images/aumor/carinho.avif"
+            src="/images/aumigo/carinho.avif"
             alt="Pessoa fazendo carinho em um cão"
             class="aspect-square w-full object-cover"
           >

@@ -36,10 +36,10 @@ export class StaffService {
     const link = `${this.appBaseUrl}/register?invite=${token}`
     await this.email.send({
       to: input.email,
-      subject: 'Seu convite para a equipe Aumor',
-      html: `<p>Você foi convidado para fazer parte da Aumor como <strong>${input.role}</strong>.</p>
+      subject: 'Seu convite para a equipe Aumigo',
+      html: `<p>Você foi convidado para fazer parte da Aumigo como <strong>${input.role}</strong>.</p>
              <p><a href="${link}">Aceitar convite</a></p>`,
-      text: `Você foi convidado para fazer parte da Aumor como ${input.role}. Aceite: ${link}`,
+      text: `Você foi convidado para fazer parte da Aumigo como ${input.role}. Aceite: ${link}`,
     })
 
     return invitation

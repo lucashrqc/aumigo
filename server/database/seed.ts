@@ -10,9 +10,9 @@ async function main() {
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) throw new Error('DATABASE_URL is not set')
 
-  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@aumor.local'
+  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@aumigo.local'
   const password = process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMe123!'
-  const name = process.env.SEED_ADMIN_NAME ?? 'Aumor Admin'
+  const name = process.env.SEED_ADMIN_NAME ?? 'Aumigo Admin'
 
   const db = createDatabase(databaseUrl)
 

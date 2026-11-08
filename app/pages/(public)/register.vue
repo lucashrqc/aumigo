@@ -5,7 +5,7 @@ import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: false })
-useHead({ title: 'Criar conta — Aumor' })
+useHead({ title: 'Criar conta — Aumigo' })
 useSeoMeta({ robots: 'noindex, nofollow' })
 
 const route = useRoute()
@@ -67,14 +67,14 @@ async function submit() {
     >
       <NuxtLink to="/" class="flex items-center gap-2.5">
         <PawPrint class="size-[30px] text-forest" />
-        <span class="text-[30px] tracking-[-1.4px] text-forest">aumor</span>
+        <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
       </NuxtLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
         <div class="mx-auto w-full max-w-[400px]">
           <div class="flex flex-col gap-3">
             <h1 class="text-[32px] font-semibold tracking-[-1px] text-forest">
-              {{ isStaffInvite ? 'Junte-se à equipe Aumor' : 'Crie sua conta' }}
+              {{ isStaffInvite ? 'Junte-se à equipe Aumigo' : 'Crie sua conta' }}
             </h1>
             <p class="text-[15px] leading-[1.5] text-forest/70">
               {{
@@ -184,7 +184,7 @@ async function submit() {
       <footer
         class="mt-8 flex items-center justify-between text-[12px] text-forest/60 lg:mt-0"
       >
-        <span>© 2026 Aumor</span>
+        <span>© 2026 Aumigo</span>
         <span class="flex items-center gap-1.5">
           <Heart class="size-3" />
           O amor encontra um lar.

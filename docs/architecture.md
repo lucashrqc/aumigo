@@ -1,6 +1,6 @@
 # Architecture
 
-Aumor is a **Nuxt 4 fullstack app** (Vue 3 SPA + Nitro server) with a Postgres
+Aumigo is a **Nuxt 4 fullstack app** (Vue 3 SPA + Nitro server) with a Postgres
 database via Drizzle ORM. The public browses adoptable pets and submits adoption
 applications; staff manage pets, vaccines, applications, and invitations from a
 gated admin panel.

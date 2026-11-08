@@ -28,7 +28,7 @@ import { Heart } from '@lucide/vue'
         class="h-[184px] w-[126px] shrink-0 self-center overflow-hidden rounded-b-[12px] rounded-t-[60px] lg:h-[506px] lg:w-full lg:rounded-t-[220px]"
       >
         <img
-          src="/images/aumor/dog-cat-home.avif"
+          src="/images/aumigo/dog-cat-home.avif"
           alt="Um cão e um gato juntos em casa"
           class="h-full w-full object-cover"
         >
