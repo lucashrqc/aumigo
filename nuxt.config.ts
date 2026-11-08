@@ -13,7 +13,11 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
   ],
 
-  css: ['~/assets/css/tailwind.css', 'vue-sonner/style.css'],
+  css: [
+    '~/assets/css/tailwind.css',
+    'vue-sonner/style.css',
+    'vue-advanced-cropper/dist/style.css',
+  ],
 
   vite: {
     plugins: [tailwindcss()],

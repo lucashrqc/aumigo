@@ -77,6 +77,10 @@ async function handleUpdateAddress(payload: AddressUpsertInput) {
               path-prefix="avatars/"
               label="Alterar foto"
               :max-size-mb="2"
+              :aspect-ratio="1"
+              circular
+              :crop-width="240"
+              :crop-height="240"
               :disabled="avatarSaving"
               @uploaded="saveAvatar"
             />

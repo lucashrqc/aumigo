@@ -364,6 +364,9 @@ const sizeOptions = [
             path-prefix="pets/"
             label="Adicionar foto"
             :max-size-mb="5"
+            :aspect-ratio="16 / 9"
+            :crop-width="1600"
+            :crop-height="900"
             :disabled="images.state.value.length >= 12"
             @uploaded="(url) => images.pushValue({ url })"
           />
