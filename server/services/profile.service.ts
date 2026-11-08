@@ -23,7 +23,7 @@ export class ProfileService {
   async getProfile(userId: string): Promise<ProfileDto> {
     const profile = await this.profiles.findByUserId(userId)
     if (!profile) {
-      throw createError({ statusCode: 404, statusMessage: 'Profile not found' })
+      throw createError({ statusCode: 404, statusMessage: 'Perfil não encontrado' })
     }
     return toDto(profile)
   }

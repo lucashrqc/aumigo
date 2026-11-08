@@ -30,7 +30,7 @@ export class AddressService {
   private async resolveStaffId(userId: string): Promise<string> {
     const profile = await this.profiles.findByUserId(userId)
     if (!profile) {
-      throw createError({ statusCode: 404, statusMessage: 'Profile not found' })
+      throw createError({ statusCode: 404, statusMessage: 'Perfil não encontrado' })
     }
     return profile.id
   }

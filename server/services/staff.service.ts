@@ -36,10 +36,10 @@ export class StaffService {
     const link = `${this.appBaseUrl}/register?invite=${token}`
     await this.email.send({
       to: input.email,
-      subject: 'Your Aumor staff invitation',
-      html: `<p>You have been invited to join Aumor as <strong>${input.role}</strong>.</p>
-             <p><a href="${link}">Accept your invitation</a></p>`,
-      text: `You have been invited to join Aumor as ${input.role}. Accept: ${link}`,
+      subject: 'Seu convite para a equipe Aumor',
+      html: `<p>Você foi convidado para fazer parte da Aumor como <strong>${input.role}</strong>.</p>
+             <p><a href="${link}">Aceitar convite</a></p>`,
+      text: `Você foi convidado para fazer parte da Aumor como ${input.role}. Aceite: ${link}`,
     })
 
     return invitation
@@ -49,7 +49,7 @@ export class StaffService {
   async acceptInvitation(input: InvitationAcceptInput) {
     const invitation = await this.invitations.findValidByToken(input.token)
     if (!invitation || invitation.expiresAt.getTime() < Date.now()) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid or expired invitation' })
+      throw createError({ statusCode: 400, statusMessage: 'Convite inválido ou expirado' })
     }
 
     const { id: userId } = await this.identity.createUser({

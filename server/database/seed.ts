@@ -40,7 +40,7 @@ async function main() {
   }
 
   // --- Reference species (idempotent) ---
-  for (const speciesName of ['Dog', 'Cat']) {
+  for (const speciesName of ['Cachorro', 'Gato']) {
     await db.insert(species).values({ name: speciesName }).onConflictDoNothing()
   }
 

@@ -8,7 +8,7 @@ export async function useValidatedBody<T>(event: H3Event, schema: ZodType<T>): P
   if (!result.success) {
     throw createError({
       statusCode: 422,
-      statusMessage: 'Validation failed',
+      statusMessage: 'Falha na validação',
       data: result.error.flatten(),
     })
   }
@@ -21,7 +21,7 @@ export function useValidatedQuery<T>(event: H3Event, schema: ZodType<T>): T {
   if (!result.success) {
     throw createError({
       statusCode: 422,
-      statusMessage: 'Validation failed',
+      statusMessage: 'Falha na validação',
       data: result.error.flatten(),
     })
   }
@@ -32,7 +32,7 @@ export function useValidatedQuery<T>(event: H3Event, schema: ZodType<T>): T {
 export function useUuidParam(event: H3Event, name: string): string {
   const value = getRouterParam(event, name)
   if (!value || !/^[0-9a-f-]{36}$/i.test(value)) {
-    throw createError({ statusCode: 400, statusMessage: `Invalid ${name}` })
+    throw createError({ statusCode: 400, statusMessage: `${name} inválido` })
   }
   return value
 }

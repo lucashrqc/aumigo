@@ -1,8 +1,45 @@
+import type { DatasetComponentOption } from 'echarts'
+
 export type DeepPartial<T> = T extends (infer U)[]
   ? DeepPartial<U>[]
   : T extends object
     ? { [P in keyof T]?: DeepPartial<T[P]> }
     : T
+
+function isMeaningfulNumber(value: unknown): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value !== 0
+}
+
+function rowHasValue(row: unknown): boolean {
+  if (Array.isArray(row))
+    return row.some(isMeaningfulNumber)
+  if (row && typeof row === 'object')
+    return Object.values(row).some(isMeaningfulNumber)
+  return isMeaningfulNumber(row)
+}
+
+export function hasChartData(
+  dataset: DatasetComponentOption['source'] | undefined,
+  options?: Record<string, any>,
+): boolean {
+  if (Array.isArray(dataset)) {
+    const rows = dataset as unknown[]
+    const dataRows = rows.every((row) => Array.isArray(row))
+      ? rows.slice(1)
+      : rows
+    if (dataRows.some(rowHasValue))
+      return true
+  }
+
+  const series = options?.series
+  if (series) {
+    const list = Array.isArray(series) ? series : [series]
+    if (list.some((s) => Array.isArray(s?.data) && s.data.some(rowHasValue)))
+      return true
+  }
+
+  return false
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

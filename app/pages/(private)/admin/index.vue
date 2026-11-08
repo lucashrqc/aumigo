@@ -29,7 +29,9 @@ const filters = computed(() => ({
   speciesId: speciesId.value ?? undefined,
 }))
 
-const { data: analytics } = useAdminAnalyticsQuery(() => filters.value)
+const { data: analytics, isLoading: analyticsLoading } = useAdminAnalyticsQuery(
+  () => filters.value,
+)
 const { data: pets, isLoading: petsLoading } = useAdminPetsQuery(() => ({
   page: 1,
   pageSize: 10,
@@ -210,6 +212,7 @@ const columns: ColumnDef<Features, PetDto>[] = [
         <BarChart
           :dataset="analytics?.petsPerMonth ?? []"
           :options="chartOptions"
+          :loading="analyticsLoading"
           class="aspect-auto h-[300px] w-full"
         />
       </CardFooter>
