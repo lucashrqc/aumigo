@@ -126,6 +126,17 @@ export interface AdoptionApplicationStatsDto {
   rejected: number
 }
 
+/** Admin dashboard analytics: KPI cards + pets registered/adopted per month. */
+export interface AdminAnalyticsDto {
+  cards: {
+    adopted: number
+    available: number
+    pendingApplications: number
+    vaccinated: number
+  }
+  petsPerMonth: { month: string; created: number; adopted: number }[]
+}
+
 export interface InvitationDto {
   id: string
   email: string

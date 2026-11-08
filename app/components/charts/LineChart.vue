@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { EChartsOption } from 'echarts'
+import type { DatasetComponentOption, EChartsOption } from 'echarts'
 import type { HTMLAttributes } from 'vue'
 import type { DeepPartial } from './utils'
 import BaseChart from './BaseChart.vue'
 import { deepMerge, withDefaultSeriesType } from './utils'
 
 const props = defineProps<{
-  dataset?: unknown[]
+  dataset?: DatasetComponentOption['source']
   options?: DeepPartial<EChartsOption>
   class?: HTMLAttributes['class']
 }>()

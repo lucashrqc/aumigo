@@ -36,5 +36,7 @@ export const petListQuerySchema = paginationSchema.extend({
   status: z.enum(petStatusValues).optional(),
   speciesId: uuidSchema.optional(),
   search: z.string().trim().max(120).optional(),
+  from: z.string().date().optional(),
+  to: z.string().date().optional(),
 })
 export type PetListQuery = z.infer<typeof petListQuerySchema>

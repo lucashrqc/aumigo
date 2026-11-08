@@ -11,6 +11,7 @@ import {
 } from '../storage/blob-storage'
 import { DrizzleAddressRepository } from '../repositories/address.repository'
 import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.repository'
+import { DrizzleAnalyticsRepository } from '../repositories/analytics.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
 import { DrizzleLocationRepository } from '../repositories/location.repository'
 import { DrizzlePetRepository } from '../repositories/pet.repository'
@@ -24,6 +25,7 @@ import {
 } from '../repositories/vaccine.repository'
 import { AddressService } from '../services/address.service'
 import { AdoptionService } from '../services/adoption.service'
+import { AnalyticsService } from '../services/analytics.service'
 import { CatalogService } from '../services/catalog.service'
 import { LocationService } from '../services/location.service'
 import { PetService } from '../services/pet.service'
@@ -41,6 +43,7 @@ interface Container {
   petService: PetService
   vaccineService: VaccineService
   adoptionService: AdoptionService
+  analyticsService: AnalyticsService
   staffService: StaffService
   catalogService: CatalogService
   locationService: LocationService
@@ -67,6 +70,7 @@ function buildContainer(): Container {
   const vaccineRepo = new DrizzleVaccineRepository(db)
   const appliedVaccineRepo = new DrizzleAppliedVaccineRepository(db)
   const adoptionRepo = new DrizzleAdoptionApplicationRepository(db)
+  const analyticsRepo = new DrizzleAnalyticsRepository(db)
   const catalogRepo = new DrizzleCatalogRepository(db)
   const locationRepo = new DrizzleLocationRepository(db)
   const addressRepo = new DrizzleAddressRepository(db)
@@ -78,6 +82,7 @@ function buildContainer(): Container {
     petService: new PetService(petRepo, imageStorage, adoptionRepo),
     vaccineService: new VaccineService(vaccineRepo, appliedVaccineRepo),
     adoptionService: new AdoptionService(adoptionRepo, petRepo),
+    analyticsService: new AnalyticsService(analyticsRepo),
     staffService: new StaffService(
       invitationRepo,
       profileRepo,
@@ -101,6 +106,7 @@ function container(): Container {
 export const usePetService = () => container().petService
 export const useVaccineService = () => container().vaccineService
 export const useAdoptionService = () => container().adoptionService
+export const useAnalyticsService = () => container().analyticsService
 export const useStaffService = () => container().staffService
 export const useCatalogService = () => container().catalogService
 export const useLocationService = () => container().locationService
