@@ -19,13 +19,17 @@ export default defineNuxtConfig({
     'vue-advanced-cropper/dist/style.css',
   ],
 
+  build: {
+    transpile: ['gsap', 'lenis'],
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
 
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-    name: 'Aumor',
+    name: 'Aumigo',
   },
 
   ogImage: { enabled: false },
@@ -66,6 +70,8 @@ export default defineNuxtConfig({
         process.env.BETTER_AUTH_URL ||
         'http://localhost:3000',
       cfAnalyticsToken: process.env.NUXT_PUBLIC_CF_ANALYTICS_TOKEN || '',
+      respectReducedMotion:
+        process.env.NUXT_PUBLIC_RESPECT_REDUCED_MOTION === 'true',
     },
   },
 

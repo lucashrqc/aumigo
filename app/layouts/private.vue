@@ -6,16 +6,19 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 <template>
   <SidebarProvider
+    class="h-svh"
     :style="{
       '--sidebar-width': 'calc(var(--spacing) * 64)',
       '--header-height': 'calc(var(--spacing) * 12)',
     }"
   >
     <AppSidebar variant="inset" />
-    <SidebarInset>
+    <SidebarInset class="min-h-0 overflow-hidden">
       <SiteHeader />
-      <div class="flex flex-1 flex-col">
-        <div class="@container/main flex flex-1 flex-col gap-2 px-4 py-4 md:py-6 lg:px-6">
+      <div class="min-h-0 flex-1 overflow-y-auto">
+        <div
+          class="@container/main flex flex-1 flex-col gap-2 px-4 py-4 md:py-6 lg:px-6"
+        >
           <NuxtPage />
         </div>
       </div>

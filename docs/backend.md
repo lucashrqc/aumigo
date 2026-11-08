@@ -118,7 +118,7 @@ pnpm db:seed:locations           # BR states + cities (optional, from IBGE API)
 pnpm dev                         # http://localhost:3000
 ```
 
-Seeded admin (override in `.env`): `admin@aumor.local` / `ChangeMe123!`.
+Seeded admin (override in `.env`): `admin@aumigo.local` / `ChangeMe123!`.
 
 ## Run everything in Docker
 
@@ -127,7 +127,7 @@ repo bind-mounted, so host edits hot-reload inside the container:
 
 ```bash
 docker compose up --build        # db + app on :3000
-docker compose down              # stop (volume aumor_pgdata persists data)
+docker compose down              # stop (volume aumigo_pgdata persists data)
 ```
 
 `node_modules` and `.nuxt` live in anonymous volumes (not bind-mounted from the

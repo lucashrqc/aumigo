@@ -158,7 +158,7 @@ const showEmpty = computed(() => !props.isFetching && props.items.length === 0)
         role="combobox"
         :aria-expanded="open"
         :disabled="disabled"
-        class="w-full justify-between font-normal"
+        class="w-full justify-between font-normal hover:bg-background hover:text-foreground"
       >
         <span :class="cn('truncate', !model && 'text-muted-foreground')">{{
           triggerLabel

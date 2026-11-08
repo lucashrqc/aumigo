@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { EllipsisVertical, LogOut, Settings } from '@lucide/vue'
 
-import { authClient } from '@/lib/auth-client'
-import { useAuthStore } from '@/stores/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -19,6 +17,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { authClient } from '@/lib/auth-client'
+import { useAuthStore } from '@/stores/auth'
 
 interface User {
   name: string
@@ -95,7 +95,7 @@ async function logout() {
           </DropdownMenuGroup>
           <DropdownMenuItem @select="logout">
             <LogOut class="text-red-600 dark:text-red-400" />
-            Log out
+            Sair
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

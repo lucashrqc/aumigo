@@ -16,10 +16,10 @@ export class UrlImageStorage implements ImageStorage {
     try {
       parsed = new URL(url)
     } catch {
-      throw createError({ statusCode: 422, statusMessage: 'Invalid image URL' })
+      throw createError({ statusCode: 422, statusMessage: 'URL de imagem inválida' })
     }
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      throw createError({ statusCode: 422, statusMessage: 'Image URL must be http(s)' })
+      throw createError({ statusCode: 422, statusMessage: 'A URL da imagem deve ser http(s)' })
     }
     return parsed.toString()
   }

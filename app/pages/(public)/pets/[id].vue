@@ -16,11 +16,11 @@ const {
 const isLoading = computed(() => status.value === 'pending')
 
 useSeoMeta({
-  title: () => (pet.value ? `${pet.value.name} — Aumor` : 'Pet — Aumor'),
+  title: () => (pet.value ? `${pet.value.name} — Aumigo` : 'Pet — Aumigo'),
   description: () =>
     pet.value?.description ||
-    'Conheça este pet disponível para adoção na Aumor.',
-  ogTitle: () => (pet.value ? `${pet.value.name} — Aumor` : 'Pet — Aumor'),
+    'Conheça este pet disponível para adoção na Aumigo.',
+  ogTitle: () => (pet.value ? `${pet.value.name} — Aumigo` : 'Pet — Aumigo'),
   ogDescription: () => pet.value?.description || undefined,
   ogImage: () => pet.value?.images?.[0]?.url,
 })

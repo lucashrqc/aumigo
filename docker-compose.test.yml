@@ -2,15 +2,15 @@ services:
   test-db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: aumor_test
-      POSTGRES_PASSWORD: aumor_test
-      POSTGRES_DB: aumor_test
+      POSTGRES_USER: aumigo_test
+      POSTGRES_PASSWORD: aumigo_test
+      POSTGRES_DB: aumigo_test
     ports:
       - '5433:5432'
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U aumor_test -d aumor_test']
+      test: ['CMD-SHELL', 'pg_isready -U aumigo_test -d aumigo_test']
       interval: 3s
       timeout: 3s
       retries: 15

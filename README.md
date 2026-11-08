@@ -1,4 +1,4 @@
-# Aumor — Pet Adoption Platform
+# Aumigo — Pet Adoption Platform
 
 A Nuxt 4 fullstack app where the public browses adoptable pets and submits
 adoption applications, and company staff manage pets, vaccines, applications,
@@ -38,7 +38,7 @@ Composition root: server/utils/services.ts
 - Images are URL-only in v1 behind the `ImageStorage` port (swap to Vercel Blob
   later via one adapter).
 
-See [docs/plans/aumor-plan.md](docs/plans/aumor-plan.md) for the full design.
+See [docs/plans/aumigo-plan.md](docs/plans/aumigo-plan.md) for the full design.
 
 ## Prerequisites
 
@@ -55,7 +55,7 @@ pnpm db:seed                    # create the first admin + reference species
 pnpm dev                        # http://localhost:3000
 ```
 
-Default seeded admin (override via `.env`): `admin@aumor.local` / `ChangeMe123!`.
+Default seeded admin (override via `.env`): `admin@aumigo.local` / `ChangeMe123!`.
 
 ### Run everything in Docker
 
@@ -75,7 +75,7 @@ docker compose up --build       # db + app (Nuxt dev server) on :3000
 ```bash
 pnpm test:unit                  # services (mocked repos), schemas, store
 docker compose -f docker-compose.test.yml up -d   # test Postgres on :5433
-TEST_DATABASE_URL=postgresql://aumor_test:aumor_test@localhost:5433/aumor_test \
+TEST_DATABASE_URL=postgresql://aumigo_test:aumigo_test@localhost:5433/aumigo_test \
   pnpm test:integration         # repositories against real Postgres
 pnpm test:e2e                   # Playwright (needs a built + seeded app)
 ```
