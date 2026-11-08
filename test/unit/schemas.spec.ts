@@ -13,7 +13,7 @@ describe('petCreateSchema', () => {
       speciesId: '11111111-1111-4111-8111-111111111111',
     })
     expect(parsed.sex).toBe('unknown')
-    expect(parsed.status).toBe('available')
+    expect(parsed.status).toBe('pending')
     expect(parsed.neutered).toBe(false)
     expect(parsed.images).toEqual([])
   })

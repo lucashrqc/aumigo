@@ -22,12 +22,14 @@ export const petCreateSchema = z.object({
   specialNeeds: z.string().trim().max(2000).nullish(),
   neutered: z.boolean().default(false),
   birthDate: z.string().date().nullish(),
-  status: z.enum(petStatusValues).default('available'),
+  status: z.enum(petStatusValues).default('pending'),
   images: z.array(petImageInputSchema).max(12).default([]),
 })
 export type PetCreateInput = z.infer<typeof petCreateSchema>
 
-export const petUpdateSchema = petCreateSchema.partial()
+// Status is never set through the generic create/update form — new pets are
+// always 'pending' and transitions go through the dedicated action endpoints.
+export const petUpdateSchema = petCreateSchema.omit({ status: true }).partial()
 export type PetUpdateInput = z.infer<typeof petUpdateSchema>
 
 export const petListQuerySchema = paginationSchema.extend({

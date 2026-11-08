@@ -1,7 +1,12 @@
 import { z } from 'zod'
 import { paginationSchema, uuidSchema } from './common'
 
-export const applicationStatusValues = ['pending', 'approved', 'rejected'] as const
+export const applicationStatusValues = [
+  'pending',
+  'approved',
+  'rejected',
+  'canceled',
+] as const
 
 /** Adopter-submitted application (from the public site). */
 export const adoptionApplicationCreateSchema = z.object({

@@ -75,7 +75,7 @@ function buildContainer(): Container {
   const identityProvider = new BetterAuthIdentityProvider()
 
   return {
-    petService: new PetService(petRepo, imageStorage),
+    petService: new PetService(petRepo, imageStorage, adoptionRepo),
     vaccineService: new VaccineService(vaccineRepo, appliedVaccineRepo),
     adoptionService: new AdoptionService(adoptionRepo, petRepo),
     staffService: new StaffService(

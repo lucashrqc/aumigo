@@ -67,3 +67,19 @@ export function useReviewApplication() {
     },
   })
 }
+
+/** Admin: cancel an application; a canceled approval frees the pet. */
+export function useCancelApplication() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<AdoptionApplicationDto>(`/api/admin/applications/${id}/cancel`, { method: 'POST' }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-applications'] })
+      qc.invalidateQueries({ queryKey: ['admin-application-stats'] })
+      qc.invalidateQueries({ queryKey: ['admin-pets'] })
+      qc.invalidateQueries({ queryKey: ['admin-pet-stats'] })
+    },
+  })
+}

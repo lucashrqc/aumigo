@@ -80,3 +80,50 @@ export function useDeletePet() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-pets'] }),
   })
 }
+
+function invalidatePetLists(qc: ReturnType<typeof useQueryClient>, id: string) {
+  qc.invalidateQueries({ queryKey: ['admin-pets'] })
+  qc.invalidateQueries({ queryKey: ['admin-pet', id] })
+  qc.invalidateQueries({ queryKey: ['admin-pet-stats'] })
+}
+
+function invalidateApplicationLists(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ['admin-applications'] })
+  qc.invalidateQueries({ queryKey: ['admin-application-stats'] })
+}
+
+/** Admin: publish a pending pet (status -> available). */
+export function usePublishPet() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api<PetDto>(`/api/admin/pets/${id}/publish`, { method: 'POST' }),
+    onSuccess: (_data, id) => invalidatePetLists(qc, id),
+  })
+}
+
+/** Admin: unpublish a pet (status -> pending); an adopted pet is also reverted. */
+export function useUnpublishPet() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api<PetDto>(`/api/admin/pets/${id}/unpublish`, { method: 'POST' }),
+    onSuccess: (_data, id) => {
+      invalidatePetLists(qc, id)
+      invalidateApplicationLists(qc)
+    },
+  })
+}
+
+/** Admin: mark a pet as adopted; open applications are auto-rejected. */
+export function useMarkPetAdopted() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api<PetDto>(`/api/admin/pets/${id}/adopt`, { method: 'POST' }),
+    onSuccess: (_data, id) => {
+      invalidatePetLists(qc, id)
+      invalidateApplicationLists(qc)
+    },
+  })
+}

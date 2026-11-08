@@ -54,27 +54,32 @@ const data = {
       title: 'Dashboard',
       url: '/admin',
       icon: LayoutDashboard,
+      iconClass: 'text-blue-400',
     },
     {
       title: 'Pets',
       url: '/admin/pets',
       icon: Dog,
+      iconClass: 'text-emerald-500',
     },
     {
       title: 'Candidaturas',
       url: '/admin/applications',
       icon: ClipboardList,
+      iconClass: 'text-amber-400',
     },
     {
       title: 'Staff',
       url: '/admin/staff',
       icon: Users,
+      iconClass: 'text-indigo-400',
       adminOnly: true,
     },
     {
       title: 'Cadastros',
       url: '#',
       icon: FolderPlus,
+      iconClass: 'text-cyan-400 dark:text-cyan-600',
       items: [
         {
           title: 'Vacinas',
@@ -229,8 +234,10 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             class="data-[slot=sidebar-menu-button]:p-1.5!"
           >
             <NuxtLink href="/admin">
-              <PawPrint class="size-6!" />
-              <span class="text-base font-semibold">Aumor</span>
+              <PawPrint class="size-6! text-primary dark:text-brand" />
+              <span class="text-base text-primary dark:text-brand font-semibold"
+                >Aumor</span
+              >
             </NuxtLink>
           </SidebarMenuButton>
         </SidebarMenuItem>

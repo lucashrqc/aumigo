@@ -44,6 +44,8 @@ export interface PetDto {
   active: boolean
   birthDate: string | null
   status: 'available' | 'pending' | 'adopted'
+  publishedAt: string | null
+  adoptedAt: string | null
   createdAt: string
   updatedAt: string
   createdBy: string | null
@@ -106,8 +108,11 @@ export interface AdoptionApplicationDto {
   adopterUserId: string
   contactPhone: string | null
   message: string | null
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'pending' | 'approved' | 'rejected' | 'canceled'
   reviewedAt: string | null
+  rejectReason: string | null
+  rejectedAt: string | null
+  canceledAt: string | null
   createdAt: string
   pet: { id: string; name: string; status: string } | null
   adopter: { id: string; name: string; email: string } | null

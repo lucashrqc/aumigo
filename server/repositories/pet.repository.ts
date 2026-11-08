@@ -27,6 +27,10 @@ export interface PetRepository {
   create(data: PetCreateInput, actorId: string): Promise<PetWithRelations>
   update(id: string, data: PetUpdateInput, actorId: string): Promise<PetWithRelations | null>
   setStatus(id: string, status: PetRow['status'], actorId: string): Promise<void>
+  /** Publish a pet: status 'available' + published audit stamp. */
+  publish(id: string, actorId: string): Promise<void>
+  /** Unpublish a pet: status 'pending' + unpublished audit stamp. */
+  unpublish(id: string, actorId: string): Promise<void>
   softDelete(id: string, actorId: string): Promise<void>
 }
 
@@ -169,6 +173,34 @@ export class DrizzlePetRepository implements PetRepository {
     await this.db
       .update(pet)
       .set({ status, updatedBy: actorId, updatedAt: new Date() })
+      .where(eq(pet.id, id))
+  }
+
+  async publish(id: string, actorId: string): Promise<void> {
+    const now = new Date()
+    await this.db
+      .update(pet)
+      .set({
+        status: 'available',
+        publishedAt: now,
+        publishedBy: actorId,
+        updatedBy: actorId,
+        updatedAt: now,
+      })
+      .where(eq(pet.id, id))
+  }
+
+  async unpublish(id: string, actorId: string): Promise<void> {
+    const now = new Date()
+    await this.db
+      .update(pet)
+      .set({
+        status: 'pending',
+        unpublishedAt: now,
+        unpublishedBy: actorId,
+        updatedBy: actorId,
+        updatedAt: now,
+      })
       .where(eq(pet.id, id))
   }
 

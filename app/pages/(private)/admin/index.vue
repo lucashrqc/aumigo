@@ -314,7 +314,8 @@ const columns = columnHelper.columns([
         modelValue:
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && 'indeterminate'),
-        'onUpdate:modelValue': (value) => table.toggleAllPageRowsSelected(!!value),
+        'onUpdate:modelValue': (value) =>
+          table.toggleAllPageRowsSelected(!!value),
         'aria-label': 'Select all',
       }),
     cell: ({ row }) =>
@@ -364,7 +365,13 @@ const columns = columnHelper.columns([
           size: 'sm',
           class: 'h-auto p-1 text-xs font-mono',
         },
-        () => [h('span', { class: 'ml-1 font-semibold' }, String(row.getValue('target')))],
+        () => [
+          h(
+            'span',
+            { class: 'ml-1 font-semibold' },
+            String(row.getValue('target')),
+          ),
+        ],
       ),
   }),
   columnHelper.accessor('limit', {
@@ -377,7 +384,13 @@ const columns = columnHelper.columns([
           size: 'sm',
           class: 'h-auto p-1 text-xs font-mono',
         },
-        () => [h('span', { class: 'ml-1 font-semibold' }, String(row.getValue('limit')))],
+        () => [
+          h(
+            'span',
+            { class: 'ml-1 font-semibold' },
+            String(row.getValue('limit')),
+          ),
+        ],
       ),
   }),
   columnHelper.accessor('reviewer', {
@@ -397,7 +410,8 @@ const columns = columnHelper.columns([
               SelectTrigger,
               { class: 'w-full' },
               {
-                default: () => h(SelectValue, { placeholder: 'Assign reviewer' }),
+                default: () =>
+                  h(SelectValue, { placeholder: 'Assign reviewer' }),
               },
             ),
             h(
@@ -467,7 +481,10 @@ const columns = columnHelper.columns([
   <div class="flex flex-col gap-4 md:gap-6">
     <SectionCards />
     <div class="flex flex-col gap-6">
-      <ChartAreaInteractive />
+      <div class="grid md:grid-cols-2 gap-4">
+        <ChartAreaInteractive />
+        <ChartAreaInteractive />
+      </div>
       <DataTable :columns="columns" :data="data" />
     </div>
   </div>
