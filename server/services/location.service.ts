@@ -15,7 +15,7 @@ export class LocationService {
 
   async getStateById(id: string) {
     const row = await this.locations.findStateById(id)
-    if (!row) throw createError({ statusCode: 404, statusMessage: 'State not found' })
+    if (!row) throw createError({ statusCode: 404, statusMessage: 'Estado não encontrado' })
     return row
   }
 
@@ -25,7 +25,7 @@ export class LocationService {
 
   async getCityById(id: string) {
     const row = await this.locations.findCityById(id)
-    if (!row) throw createError({ statusCode: 404, statusMessage: 'City not found' })
+    if (!row) throw createError({ statusCode: 404, statusMessage: 'Cidade não encontrada' })
     return row
   }
 

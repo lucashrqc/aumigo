@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Aumor is a Nuxt 4 fullstack pet-adoption platform (Vue 3 + Nitro server + Postgres/Drizzle).
+Aumigo is a Nuxt 4 fullstack pet-adoption platform (Vue 3 + Nitro server + Postgres/Drizzle).
 
 ## Read before working
 
@@ -13,7 +13,7 @@ Use these as context for any change, improvement, or question — read the ones 
 - [docs/frontend.md](docs/frontend.md) — Nuxt/Vue stack, folder layout, data-fetching & route-guard patterns.
 - [docs/testing.md](docs/testing.md) — unit/integration/E2E suites and how to run a single test.
 
-The full original design is in [docs/plans/aumor-plan.md](docs/plans/aumor-plan.md).
+The full original design is in [docs/plans/aumigo-plan.md](docs/plans/aumigo-plan.md).
 
 ## Essential commands
 

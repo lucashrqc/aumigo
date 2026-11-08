@@ -236,7 +236,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             <NuxtLink href="/admin">
               <PawPrint class="size-6! text-primary dark:text-brand" />
               <span class="text-base text-primary dark:text-brand font-semibold"
-                >Aumor</span
+                >Aumigo</span
               >
             </NuxtLink>
           </SidebarMenuButton>

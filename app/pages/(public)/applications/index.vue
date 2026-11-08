@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'public', middleware: 'auth' })
-useHead({ title: 'Minhas candidaturas — Aumor' })
+useHead({ title: 'Minhas candidaturas — Aumigo' })
 useSeoMeta({ robots: 'noindex, nofollow' })
 
 const { data, isLoading } = useMyApplicationsQuery()

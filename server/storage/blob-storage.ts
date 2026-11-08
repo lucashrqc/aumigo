@@ -38,7 +38,7 @@ export class VercelBlobStorage implements BlobStorage {
         if (!pathname.startsWith(pathPrefix)) {
           throw createError({
             statusCode: 422,
-            statusMessage: 'Invalid upload path',
+            statusMessage: 'Caminho de upload inválido',
           })
         }
         return { allowedContentTypes, maximumSizeInBytes, addRandomSuffix: true }
@@ -52,7 +52,7 @@ export class DisabledBlobStorage implements BlobStorage {
   async handleClientUpload(): Promise<never> {
     throw createError({
       statusCode: 501,
-      statusMessage: 'File uploads are not configured',
+      statusMessage: 'Upload de arquivos não está configurado',
     })
   }
 }

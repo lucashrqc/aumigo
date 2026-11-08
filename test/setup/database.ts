@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm'
 import pg from 'pg'
 
 export const TEST_DATABASE_URL =
-  process.env.TEST_DATABASE_URL ?? 'postgresql://aumor:aumor@localhost:5432/aumor_test'
+  process.env.TEST_DATABASE_URL ?? 'postgresql://aumigo:aumigo@localhost:5432/aumigo_test'
 
 /**
  * Vitest globalSetup: resets the test schema and applies all migrations once

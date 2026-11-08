@@ -3,15 +3,21 @@ import type { DatasetComponentOption, EChartsOption } from 'echarts'
 import type { HTMLAttributes } from 'vue'
 import type { DeepPartial } from './utils'
 import BaseChart from './BaseChart.vue'
-import { deepMerge, withDefaultSeriesType } from './utils'
+import ChartEmpty from './ChartEmpty.vue'
+import { deepMerge, hasChartData, withDefaultSeriesType } from './utils'
 
 const props = defineProps<{
   dataset?: DatasetComponentOption['source']
   options?: DeepPartial<EChartsOption>
   class?: HTMLAttributes['class']
+  loading?: boolean
 }>()
 
 const theme = useChartTheme()
+
+const isEmpty = computed(
+  () => !props.loading && !hasChartData(props.dataset, props.options),
+)
 
 const option = computed<EChartsOption>(() => {
   const base: EChartsOption = {
@@ -47,5 +53,6 @@ const option = computed<EChartsOption>(() => {
 </script>
 
 <template>
-  <BaseChart :option="option" :class="props.class" />
+  <ChartEmpty v-if="isEmpty" :class="props.class" />
+  <BaseChart v-else :option="option" :class="props.class" />
 </template>

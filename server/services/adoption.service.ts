@@ -31,17 +31,17 @@ export class AdoptionService {
   async apply(input: AdoptionApplicationCreateInput, adopterUserId: string) {
     const pet = await this.pets.findById(input.petId)
     if (!pet || !pet.active) {
-      throw createError({ statusCode: 404, statusMessage: 'Pet not found' })
+      throw createError({ statusCode: 404, statusMessage: 'Pet não encontrado' })
     }
     if (pet.status === 'adopted') {
-      throw createError({ statusCode: 409, statusMessage: 'This pet has already been adopted' })
+      throw createError({ statusCode: 409, statusMessage: 'Este pet já foi adotado' })
     }
 
     const existing = await this.applications.findOpenByPetAndAdopter(input.petId, adopterUserId)
     if (existing) {
       throw createError({
         statusCode: 409,
-        statusMessage: 'You already have an open application for this pet',
+        statusMessage: 'Você já tem uma candidatura aberta para este pet',
       })
     }
 
@@ -61,15 +61,15 @@ export class AdoptionService {
   ): Promise<AdoptionApplicationWithRelations> {
     const application = await this.applications.findById(applicationId)
     if (!application) {
-      throw createError({ statusCode: 404, statusMessage: 'Application not found' })
+      throw createError({ statusCode: 404, statusMessage: 'Candidatura não encontrada' })
     }
     if (application.status !== 'pending') {
-      throw createError({ statusCode: 409, statusMessage: 'Application already reviewed' })
+      throw createError({ statusCode: 409, statusMessage: 'Candidatura já foi avaliada' })
     }
 
     if (input.decision === 'approved') {
       if (application.pet?.status === 'adopted') {
-        throw createError({ statusCode: 409, statusMessage: 'Pet has already been adopted' })
+        throw createError({ statusCode: 409, statusMessage: 'Este pet já foi adotado' })
       }
       await this.applications.approve(applicationId, application.petId, reviewerId)
     } else {
@@ -86,10 +86,10 @@ export class AdoptionService {
   ): Promise<AdoptionApplicationWithRelations> {
     const application = await this.applications.findById(applicationId)
     if (!application) {
-      throw createError({ statusCode: 404, statusMessage: 'Application not found' })
+      throw createError({ statusCode: 404, statusMessage: 'Candidatura não encontrada' })
     }
     if (application.status === 'canceled') {
-      throw createError({ statusCode: 409, statusMessage: 'Application already canceled' })
+      throw createError({ statusCode: 409, statusMessage: 'Candidatura já foi cancelada' })
     }
 
     await this.applications.cancelApplication(applicationId, actorId)

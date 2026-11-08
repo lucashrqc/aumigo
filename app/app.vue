@@ -1,23 +1,23 @@
 <script setup lang="ts">
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
-  titleTemplate: (title) => title || 'Aumor',
+  titleTemplate: (title) => title || 'Aumigo',
 })
 
 useSeoMeta({
   description:
-    'Aumor é uma plataforma de adoção de pets. Encontre cães e gatos à espera de um novo lar.',
-  ogSiteName: 'Aumor',
+    'Aumigo é uma plataforma de adoção de pets. Encontre cães e gatos à espera de um novo lar.',
+  ogSiteName: 'Aumigo',
   ogType: 'website',
   twitterCard: 'summary_large_image',
 })
 
 useSchemaOrg([
   defineOrganization({
-    name: 'Aumor',
+    name: 'Aumigo',
     description: 'Plataforma de adoção de pets.',
   }),
-  defineWebSite({ name: 'Aumor' }),
+  defineWebSite({ name: 'Aumigo' }),
 ])
 </script>
 

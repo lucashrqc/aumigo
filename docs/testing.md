@@ -36,14 +36,14 @@ container is provided:
 
 ```bash
 docker compose -f docker-compose.test.yml up -d       # test Postgres on :5433 (tmpfs, ephemeral)
-TEST_DATABASE_URL=postgresql://aumor_test:aumor_test@localhost:5433/aumor_test \
+TEST_DATABASE_URL=postgresql://aumigo_test:aumigo_test@localhost:5433/aumigo_test \
   pnpm test:integration
 ```
 
 `test/setup/database.ts` (Vitest `globalSetup`) **drops and recreates** the
 `public` + `drizzle` schemas, then applies all migrations once before the suite.
 Integration files run serially (`fileParallelism: false`) since they share one
-schema. Defaults to `…/aumor_test` on :5432 if `TEST_DATABASE_URL` is unset.
+schema. Defaults to `…/aumigo_test` on :5432 if `TEST_DATABASE_URL` is unset.
 
 ## E2E tests
 

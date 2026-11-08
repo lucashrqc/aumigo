@@ -13,7 +13,7 @@ export function getAuthSession(event: H3Event) {
 export async function requireUser(event: H3Event): Promise<AuthSession> {
   const session = await getAuthSession(event)
   if (!session) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Não autenticado' })
   }
   return session
 }
@@ -24,7 +24,7 @@ const STAFF_ROLES = new Set(['admin', 'staff'])
 export async function requireStaff(event: H3Event): Promise<AuthSession> {
   const session = await requireUser(event)
   if (!STAFF_ROLES.has(session.user.role ?? '')) {
-    throw createError({ statusCode: 403, statusMessage: 'Staff access required' })
+    throw createError({ statusCode: 403, statusMessage: 'Acesso restrito à equipe' })
   }
   return session
 }
@@ -33,7 +33,7 @@ export async function requireStaff(event: H3Event): Promise<AuthSession> {
 export async function requireAdmin(event: H3Event): Promise<AuthSession> {
   const session = await requireUser(event)
   if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, statusMessage: 'Admin access required' })
+    throw createError({ statusCode: 403, statusMessage: 'Acesso restrito a administradores' })
   }
   return session
 }

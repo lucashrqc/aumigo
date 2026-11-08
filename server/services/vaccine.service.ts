@@ -22,7 +22,7 @@ export class VaccineService {
 
   async getById(id: string): Promise<VaccineRow> {
     const vaccine = await this.vaccines.findById(id)
-    if (!vaccine) throw createError({ statusCode: 404, statusMessage: 'Vaccine not found' })
+    if (!vaccine) throw createError({ statusCode: 404, statusMessage: 'Vacina não encontrada' })
     return vaccine
   }
 
@@ -32,7 +32,7 @@ export class VaccineService {
 
   async update(id: string, input: VaccineUpdateInput, actorId: string) {
     const updated = await this.vaccines.update(id, input, actorId)
-    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Vaccine not found' })
+    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Vacina não encontrada' })
     return updated
   }
 
@@ -47,7 +47,7 @@ export class VaccineService {
 
   async applyToPet(input: AppliedVaccineCreateInput, actorId: string) {
     const vaccine = await this.vaccines.findById(input.vaccineId)
-    if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Unknown vaccine' })
+    if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Vacina desconhecida' })
     return this.appliedVaccines.create(input, actorId)
   }
 

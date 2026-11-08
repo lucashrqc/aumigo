@@ -25,7 +25,7 @@ export class PetService {
 
   async getById(id: string): Promise<PetWithRelations> {
     const pet = await this.pets.findById(id)
-    if (!pet) throw createError({ statusCode: 404, statusMessage: 'Pet not found' })
+    if (!pet) throw createError({ statusCode: 404, statusMessage: 'Pet não encontrado' })
     return pet
   }
 
@@ -45,7 +45,7 @@ export class PetService {
         ? { ...input, images: await this.normalizeImages(input.images) }
         : input
     const updated = await this.pets.update(id, data, actorId)
-    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Pet not found' })
+    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Pet não encontrado' })
     return updated
   }
 
@@ -58,7 +58,7 @@ export class PetService {
   async publish(id: string, actorId: string): Promise<PetWithRelations> {
     const pet = await this.getById(id)
     if (pet.status !== 'pending') {
-      throw createError({ statusCode: 409, statusMessage: 'Only pending pets can be published' })
+      throw createError({ statusCode: 409, statusMessage: 'Apenas pets pendentes podem ser publicados' })
     }
     await this.pets.publish(id, actorId)
     return this.getById(id)
@@ -82,7 +82,7 @@ export class PetService {
   async markAdopted(id: string, actorId: string): Promise<PetWithRelations> {
     const pet = await this.getById(id)
     if (pet.status !== 'available') {
-      throw createError({ statusCode: 409, statusMessage: 'Only available pets can be marked adopted' })
+      throw createError({ statusCode: 409, statusMessage: 'Apenas pets disponíveis podem ser marcados como adotados' })
     }
     await this.applications.markPetAdopted(id, actorId)
     return this.getById(id)
