@@ -19,7 +19,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: false })
-useHead({ title: 'Aumor — Adoção de pets' })
+useHead({ title: 'Aumigo — Adoção de pets' })
 
 const auth = useAuthStore()
 
@@ -160,7 +160,7 @@ const essentials = [
 
 const faqs = [
   {
-    q: 'Como faço para adotar pela Aumor?',
+    q: 'Como faço para adotar pela Aumigo?',
     a: 'Comece pelos perfis e escolha um pet que combine com você. Depois, crie sua conta e entre em contato com o responsável para conversar, conhecer o pet e entender as próximas etapas da adoção.',
   },
   {
@@ -199,7 +199,7 @@ const footerColumns = [
     ],
   },
   {
-    title: 'Sua Aumor',
+    title: 'Sua Aumigo',
     links: [
       { label: 'Entrar', to: '/login' },
       { label: 'Criar conta', to: '/register' },
@@ -211,10 +211,47 @@ const openIndex = ref(0)
 function toggleFaq(i: number) {
   openIndex.value = openIndex.value === i ? -1 : i
 }
+
+useLenisScroll()
+const { revealHeading, revealGroup } = useScrollReveal()
+
+const ready = ref(false)
+const heroTitle = ref<HTMLElement | null>(null)
+const trailTitle = ref<HTMLElement | null>(null)
+const adoptTitle = ref<HTMLElement | null>(null)
+const respTitle = ref<HTMLElement | null>(null)
+const faqTitle = ref<HTMLElement | null>(null)
+const ctaTitle = ref<HTMLElement | null>(null)
+const petCards = ref<HTMLElement[]>([])
+
+onMounted(() => {
+  ready.value = true
+  for (const heading of [
+    heroTitle,
+    trailTitle,
+    adoptTitle,
+    respTitle,
+    faqTitle,
+    ctaTitle,
+  ]) {
+    revealHeading(heading.value)
+  }
+  for (const card of petCards.value) {
+    const parts = card.querySelectorAll<HTMLElement>('[data-reveal]')
+    revealGroup(Array.from(parts), { y: 40, stagger: 0.14 })
+  }
+})
 </script>
 
 <template>
-  <div class="bg-white text-forest">
+  <div
+    class="landing-cursor-none bg-white text-forest"
+    :class="{ 'landing-anim-ready': ready }"
+  >
+    <ClientOnly>
+      <LandingPawCursor />
+    </ClientOnly>
+
     <!-- Navegação -->
     <header class="px-6 md:px-10 lg:px-20">
       <div
@@ -222,7 +259,7 @@ function toggleFaq(i: number) {
       >
         <NuxtLink to="/" class="flex items-center gap-2.5">
           <PawPrint class="size-7 text-forest" />
-          <span class="text-[30px] tracking-[-1.4px] text-forest">aumor</span>
+          <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
         </NuxtLink>
 
         <nav class="hidden items-center gap-8 text-[14px] text-forest lg:flex">
@@ -289,6 +326,7 @@ function toggleFaq(i: number) {
             </span>
           </div>
           <h1
+            ref="heroTitle"
             class="text-[44px] font-medium leading-[1.08] tracking-[-2px] text-forest sm:text-[56px] lg:text-[68px] lg:tracking-[-3px]"
           >
             Seu próximo amor tem quatro patas.
@@ -376,6 +414,7 @@ function toggleFaq(i: number) {
             UM ENCONTRO PODE MUDAR TUDO
           </span>
           <h2
+            ref="trailTitle"
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             Pequenas patas.<br >Grandes histórias de amor.
@@ -404,27 +443,18 @@ function toggleFaq(i: number) {
         </div>
 
         <div class="relative w-full py-4">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 179 1632.14"
-            fill="none"
-            preserveAspectRatio="none"
-            class="pointer-events-none absolute left-1/2 top-0 hidden h-full w-44 -translate-x-1/2 opacity-80 lg:block"
+          <LandingPawTrail />
+          <div
+            class="relative z-10 flex flex-col gap-16 pr-12 sm:pr-16 lg:gap-22 lg:pr-0"
           >
-            <path
-              d="M90.5895 1.09222C196.824 101.092 204.201 171.092 93.5405 281.092C-31.8746 406.092 -24.4973 511.092 89.1141 596.092C211.578 691.092 202.725 791.092 87.6386 886.092C-28.9237 981.092 -25.9727 1091.09 89.1141 1196.09C201.25 1301.09 202.725 1411.09 90.5895 1511.09C41.899 1554.09 56.6537 1596.09 90.5895 1631.09"
-              stroke="#ebdab9"
-              stroke-width="3"
-            />
-          </svg>
-          <div class="flex flex-col gap-16 lg:gap-22">
             <article
               v-for="pet in pets"
               :key="pet.name"
+              ref="petCards"
               class="flex flex-col items-center gap-10 lg:gap-6"
               :class="pet.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'"
             >
-              <div class="flex w-full justify-center lg:w-113.75">
+              <div data-reveal class="flex w-full justify-center lg:w-113.75">
                 <div
                   class="w-full max-w-110 rounded-[24px] p-3"
                   :class="pet.cardClass"
@@ -453,6 +483,7 @@ function toggleFaq(i: number) {
               </div>
 
               <div
+                data-reveal
                 class="flex w-full max-w-110 flex-col gap-4.5 lg:w-110"
               >
                 <div class="flex items-center gap-3">
@@ -542,12 +573,13 @@ function toggleFaq(i: number) {
             DO PRIMEIRO OI AO NOVO LAR
           </span>
           <h2
+            ref="adoptTitle"
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             O caminho é mais simples juntos.
           </h2>
           <p class="max-w-157.5 text-[17px] leading-[1.6] text-text-soft">
-            A Aumor aproxima você de quem está esperando um lar. Cada adoção
+            A Aumigo aproxima você de quem está esperando um lar. Cada adoção
             acontece com conversa, cuidado e tempo.
           </p>
         </div>
@@ -595,6 +627,7 @@ function toggleFaq(i: number) {
             CARINHO TAMBÉM É COMPROMISSO
           </span>
           <h2
+            ref="respTitle"
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.7px] text-forest md:text-[44px]"
           >
             Mais que abrir a porta.<br >É abrir espaço na vida.
@@ -647,6 +680,7 @@ function toggleFaq(i: number) {
             PODE PERGUNTAR
           </span>
           <h2
+            ref="faqTitle"
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             Todo começo<br >vem com dúvidas.
@@ -710,6 +744,7 @@ function toggleFaq(i: number) {
             UM LAR MUDA TUDO
           </span>
           <h2
+            ref="ctaTitle"
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-white md:text-[46px]"
           >
             Tem um novo melhor amigo esperando pelo seu oi.
@@ -736,7 +771,7 @@ function toggleFaq(i: number) {
             <div class="flex items-center gap-2.5">
               <PawPrint class="size-7 text-forest" />
               <span class="text-[30px] tracking-[-1.4px] text-forest"
-                >aumor</span
+                >aumigo</span
               >
             </div>
             <p class="text-[14px] leading-[1.6] text-text-soft">
@@ -766,7 +801,7 @@ function toggleFaq(i: number) {
         <div
           class="mt-12 flex flex-col gap-4 border-t border-brand pt-6 text-[12px] text-text-soft sm:flex-row sm:items-center sm:justify-between"
         >
-          <span>© 2026 Aumor</span>
+          <span>© 2026 Aumigo</span>
           <div class="flex gap-6">
             <a href="#" class="transition-colors hover:text-forest"
               >Privacidade</a

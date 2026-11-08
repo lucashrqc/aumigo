@@ -160,3 +160,48 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Landing word-reveal (padding/margin leave room for accents + descenders) */
+.reveal-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding: 0.12em 0.04em 0.22em;
+  margin: -0.12em -0.04em -0.22em;
+}
+.reveal-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Landing custom paw cursor: hide native cursor only when JS is active */
+@media (pointer: fine) {
+  .landing-anim-ready.landing-cursor-none,
+  .landing-anim-ready.landing-cursor-none * {
+    cursor: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-cursor-none,
+  .landing-cursor-none * {
+    cursor: auto !important;
+  }
+}
