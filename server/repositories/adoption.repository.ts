@@ -1,5 +1,6 @@
 import {
   and,
+  asc,
   count,
   desc,
   eq,
@@ -13,9 +14,20 @@ import {
 } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { Database } from '../database/client'
-import { adoptionApplication, pet, user } from '../database/schema'
+import {
+  adoptionApplication,
+  appliedVaccine,
+  pet,
+  petImage,
+  user,
+} from '../database/schema'
+import { distinctVaccines } from './pet.repository'
 import type { AdoptionApplicationListQuery, Paginated } from '#shared/schemas'
-import type { AdoptionApplicationStatsDto } from '#shared/types'
+import type {
+  AdoptionApplicationStatsDto,
+  PetImageDto,
+  PetVaccineDto,
+} from '#shared/types'
 
 /** Standard reason stored on applications auto-rejected when a pet is adopted. */
 export const ADOPTED_REJECT_REASON =
@@ -24,7 +36,18 @@ export const ADOPTED_REJECT_REASON =
 export type AdoptionApplicationRow = typeof adoptionApplication.$inferSelect
 
 export interface AdoptionApplicationWithRelations extends AdoptionApplicationRow {
-  pet: { id: string; name: string; status: string } | null
+  pet:
+    | {
+        id: string
+        name: string
+        status: string
+        description?: string | null
+        size?: 'small' | 'medium' | 'large' | null
+        birthDate?: string | null
+        images?: PetImageDto[]
+        vaccines?: PetVaccineDto[]
+      }
+    | null
   adopter: { id: string; name: string; email: string } | null
 }
 
@@ -59,6 +82,28 @@ export interface AdoptionApplicationRepository {
 
 const withRelations = {
   pet: { columns: { id: true, name: true, status: true } },
+  adopter: { columns: { id: true, name: true, email: true } },
+} as const
+
+/** Richer pet embed for the adopter's own list: photos + vaccines + card meta. */
+const withPetDetails = {
+  pet: {
+    columns: {
+      id: true,
+      name: true,
+      status: true,
+      description: true,
+      size: true,
+      birthDate: true,
+    },
+    with: {
+      images: { orderBy: asc(petImage.position) },
+      appliedVaccines: {
+        orderBy: desc(appliedVaccine.applicationDate),
+        with: { vaccine: { columns: { id: true, name: true } } },
+      },
+    },
+  },
   adopter: { columns: { id: true, name: true, email: true } },
 } as const
 
@@ -134,12 +179,21 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
     }
   }
 
-  listByAdopter(adopterUserId: string) {
-    return this.db.query.adoptionApplication.findMany({
+  async listByAdopter(adopterUserId: string) {
+    const rows = await this.db.query.adoptionApplication.findMany({
       where: eq(adoptionApplication.adopterUserId, adopterUserId),
-      with: withRelations,
+      with: withPetDetails,
       orderBy: desc(adoptionApplication.createdAt),
-    }) as Promise<AdoptionApplicationWithRelations[]>
+    })
+
+    return rows.map(({ pet: petRow, ...rest }) => {
+      if (!petRow) return { ...rest, pet: null } as AdoptionApplicationWithRelations
+      const { appliedVaccines, ...petRest } = petRow
+      return {
+        ...rest,
+        pet: { ...petRest, vaccines: distinctVaccines(appliedVaccines) },
+      } as AdoptionApplicationWithRelations
+    })
   }
 
   async findById(id: string) {

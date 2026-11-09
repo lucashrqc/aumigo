@@ -52,7 +52,7 @@ export interface PetRepository {
 }
 
 /** Collapse a pet's applied-vaccine rows into the distinct vaccines received. */
-function distinctVaccines(
+export function distinctVaccines(
   applied: { vaccine: { id: string; name: string } | null }[],
 ): { id: string; name: string }[] {
   const seen = new Set<string>()

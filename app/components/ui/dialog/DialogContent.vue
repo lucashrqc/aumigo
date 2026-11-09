@@ -39,6 +39,7 @@ function onInteractOutside(event: Event) {
     <DialogOverlay />
     <DialogContent
       data-slot="dialog-content"
+      data-lenis-prevent
       v-bind="{ ...$attrs, ...forwarded }"
       :class="
         cn(

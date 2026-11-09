@@ -133,7 +133,7 @@ onMounted(() => {
           data-reveal-heading
           class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
         >
-          Pequenas patas.<br />Grandes histórias de amor.
+          Pequenas patas.<br >Grandes histórias de amor.
         </h2>
         <p class="max-w-157.5 text-[17px] leading-[1.6] text-text-soft">
           Cada jeitinho é único. Conheça personalidades que podem combinar com a
@@ -180,7 +180,7 @@ onMounted(() => {
                     :src="pet.photo"
                     :alt="pet.name"
                     class="aspect-416/370 w-full object-cover"
-                  />
+                  >
                   <div
                     class="absolute right-4 top-4 flex size-10 items-center justify-center rounded-[20px] bg-white"
                   >

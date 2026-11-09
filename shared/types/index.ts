@@ -121,7 +121,18 @@ export interface AdoptionApplicationDto {
   rejectedAt: string | null
   canceledAt: string | null
   createdAt: string
-  pet: { id: string; name: string; status: string } | null
+  pet:
+    | {
+        id: string
+        name: string
+        status: string
+        description?: string | null
+        size?: 'small' | 'medium' | 'large' | null
+        birthDate?: string | null
+        images?: PetImageDto[]
+        vaccines?: PetVaccineDto[]
+      }
+    | null
   adopter: { id: string; name: string; email: string } | null
 }
 
