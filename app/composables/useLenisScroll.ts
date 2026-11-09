@@ -5,6 +5,7 @@ import { onBeforeUnmount, onMounted } from 'vue'
 
 export function useLenisScroll() {
   const lenis = shallowRef<Lenis | null>(null)
+  const { public: config } = useRuntimeConfig()
   const reducedMotion = usePrefersReducedMotion()
 
   function tick(time: number) {
@@ -18,6 +19,7 @@ export function useLenisScroll() {
       duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - 2 ** (-10 * t)),
       smoothWheel: true,
+      respectReducedMotion: config.respectReducedMotion,
     })
     lenis.value = instance
 
