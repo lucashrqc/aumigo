@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ArrowRight, ArrowUpRight, Heart, PawPrint } from '@lucide/vue'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Heart,
+  ImageIcon,
+  PawPrint,
+} from '@lucide/vue'
+import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
+import useDialog from '@/composables/useDialog'
 
 const placeholder = '/images/aumigo/pet-placeholder.jpeg'
 
@@ -36,7 +44,19 @@ function metaLine(pet: PetDto) {
 }
 
 const { startApplication } = useAdoptionFlow()
+const dialog = useDialog()
 const { revealHeading, revealGroup } = useScrollReveal()
+
+function openGallery(pet: PetDto) {
+  dialog.open(PetGalleryDialog, {
+    dialogProps: {
+      class:
+        'max-w-[calc(100%-2rem)] p-0 bg-white text-forest border-brand sm:max-w-2xl',
+      showCloseButton: false,
+    },
+    props: { pet },
+  })
+}
 
 const trailTitle = ref<HTMLElement | null>(null)
 const petCards = ref<HTMLElement[]>([])
@@ -64,7 +84,7 @@ onMounted(() => {
 <template>
   <!-- Trilha de encontros (pets do banco) -->
   <section v-if="hasPets" class="px-6 pb-20 pt-22 md:px-10 lg:px-20">
-    <div class="mx-auto flex max-w-6xl flex-col items-center gap-12">
+    <div class="mx-auto flex max-w-6xl flex-col items-center gap-14">
       <div class="flex flex-col items-center gap-4 text-center">
         <span class="text-[11px] font-semibold tracking-[1.6px] text-forest">
           UM ENCONTRO PODE MUDAR TUDO
@@ -145,14 +165,25 @@ onMounted(() => {
               >
                 {{ pet.description }}
               </p>
-              <button
-                type="button"
-                class="mt-1 inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
-                @click="startApplication({ id: pet.id, name: pet.name })"
-              >
-                Quero conhecer {{ articleArticle[pet.sex] }}{{ pet.name }}
-                <ArrowUpRight class="size-4.5" />
-              </button>
+              <div class="mt-1 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+                  @click="startApplication({ id: pet.id, name: pet.name })"
+                >
+                  Quero conhecer {{ articleArticle[pet.sex] }}{{ pet.name }}
+                  <ArrowUpRight class="size-4.5" />
+                </button>
+                <button
+                  v-if="pet.images.length"
+                  type="button"
+                  class="inline-flex h-12 w-fit items-center gap-2.5 rounded-xl border border-brand bg-white px-5 text-[14px] font-semibold text-forest transition-colors hover:bg-cream-soft"
+                  @click="openGallery(pet)"
+                >
+                  <ImageIcon class="size-4.5" />
+                  Ver galeria
+                </button>
+              </div>
             </div>
           </article>
         </div>

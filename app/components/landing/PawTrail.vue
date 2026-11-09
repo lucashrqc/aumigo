@@ -20,14 +20,14 @@ const { desktopPaws, mobilePaws, stampProgress } = usePawTrail({
     path: desktopPath,
     box: desktopBox,
     viewBox: { w: 179, h: 1632.14 },
-    spacing: 110,
+    spacing: 70,
     lateral: 11,
   },
   mobile: {
     path: mobilePath,
     box: mobileBox,
     viewBox: { w: 60, h: 1200 },
-    spacing: 84,
+    spacing: 56,
     lateral: 6,
   },
 })
