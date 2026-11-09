@@ -35,13 +35,13 @@ async function logout() {
             <Button as-child variant="ghost" size="sm">
               <NuxtLink to="/applications">Minhas candidaturas</NuxtLink>
             </Button>
-            <Button variant="outline" size="xs" @click="logout">Sair</Button>
+            <Button variant="outline" size="sm" @click="logout">Sair</Button>
           </template>
           <template v-else>
             <Button as-child variant="ghost" size="sm">
               <NuxtLink to="/login">Entrar</NuxtLink>
             </Button>
-            <Button as-child size="xs">
+            <Button as-child size="sm">
               <NuxtLink to="/register">Cadastrar</NuxtLink>
             </Button>
           </template>

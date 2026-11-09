@@ -255,7 +255,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="landing-cursor-none bg-white text-forest"
+    class="bg-white text-forest"
     :class="{ 'landing-anim-ready': ready }"
   >
     <!-- <ClientOnly>
