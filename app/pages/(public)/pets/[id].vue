@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'public' })
 
@@ -43,27 +42,7 @@ if (pet.value) {
   ])
 }
 
-const dialogOpen = ref(false)
-const phone = ref('')
-const message = ref('')
-const { mutateAsync: apply, isPending } = useApplyForPet()
-
-async function submit() {
-  try {
-    await apply({
-      petId: id.value,
-      contactPhone: phone.value,
-      message: message.value || undefined,
-    })
-    dialogOpen.value = false
-    toast.success('Candidatura enviada! Nossa equipe entrará em contato.')
-    await navigateTo('/applications')
-  } catch (err) {
-    toast.error(
-      resolveErrorMessage(err, 'Não foi possível enviar a candidatura'),
-    )
-  }
-}
+const { startApplication } = useAdoptionFlow()
 </script>
 
 <template>
@@ -147,57 +126,11 @@ async function submit() {
       <div v-if="pet.status === 'adopted'" class="text-muted-foreground">
         Este pet já encontrou um lar. 🎉
       </div>
-      <template v-else>
-        <Dialog
-          v-if="auth.isAuthenticated && !auth.isStaff"
-          v-model:open="dialogOpen"
-        >
-          <DialogTrigger as-child>
-            <Button size="lg">Candidatar-se para adotar</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adotar {{ pet.name }}</DialogTitle>
-              <DialogDescription>
-                Informe um telefone de contato e uma breve mensagem. Nossa
-                equipe analisa cada candidatura.
-              </DialogDescription>
-            </DialogHeader>
-            <form class="space-y-4" @submit.prevent="submit">
-              <div>
-                <Label for="phone">Telefone de contato</Label>
-                <Input
-                  id="phone"
-                  v-model="phone"
-                  required
-                  placeholder="+55 11 99999-9999"
-                />
-              </div>
-              <div>
-                <Label for="message">Mensagem (opcional)</Label>
-                <Textarea
-                  id="message"
-                  v-model="message"
-                  placeholder="Conte-nos sobre o seu lar…"
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit" :disabled="isPending"
-                  >Enviar candidatura</Button
-                >
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <div v-else-if="!auth.isAuthenticated" class="space-y-2">
-          <Button as-child size="lg">
-            <NuxtLink :to="`/login?redirect=/pets/${pet.id}`"
-              >Entrar para adotar</NuxtLink
-            >
-          </Button>
-        </div>
-      </template>
+      <div v-else-if="!auth.isStaff">
+        <Button size="lg" @click="startApplication({ id: pet.id, name: pet.name })">
+          Candidatar-se para adotar
+        </Button>
+      </div>
     </div>
   </div>
 </template>

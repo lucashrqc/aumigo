@@ -222,6 +222,8 @@ const footerColumns = [
 
 const faqValue = ref('faq-0')
 
+const { startApplication } = useAdoptionFlow()
+
 useLenisScroll()
 const { revealHeading, revealGroup } = useScrollReveal()
 
@@ -553,13 +555,14 @@ onMounted(() => {
                     </div>
                   </div>
                 </div>
-                <NuxtLink
-                  to="/pets"
+                <button
+                  type="button"
                   class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+                  @click="startApplication({ name: pet.name, demo: true })"
                 >
                   {{ pet.cta }}
                   <ArrowUpRight class="size-4.5" />
-                </NuxtLink>
+                </button>
               </div>
             </article>
           </div>
