@@ -69,7 +69,8 @@ export class DrizzlePetRepository implements PetRepository {
     options: PetListOptions = {},
   ): Promise<Paginated<PetWithRelations>> {
     const conditions = [
-      query.status ? eq(pet.status, query.status) : eq(pet.active, true),
+      eq(pet.active, true),
+      query.status ? eq(pet.status, query.status) : undefined,
       query.speciesId ? eq(pet.speciesId, query.speciesId) : undefined,
       query.search ? ilike(pet.name, `%${query.search}%`) : undefined,
       query.from ? gte(pet.createdAt, new Date(query.from)) : undefined,
