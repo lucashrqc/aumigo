@@ -330,6 +330,7 @@ onMounted(() => {
           </div>
           <h1
             ref="heroTitle"
+            data-reveal-heading
             class="text-[44px] font-medium leading-[1.08] tracking-[-2px] text-forest sm:text-[56px] lg:text-[68px] lg:tracking-[-3px]"
           >
             Seu próximo amor tem quatro patas.
@@ -418,6 +419,7 @@ onMounted(() => {
           </span>
           <h2
             ref="trailTitle"
+            data-reveal-heading
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             Pequenas patas.<br >Grandes histórias de amor.
@@ -577,6 +579,7 @@ onMounted(() => {
           </span>
           <h2
             ref="adoptTitle"
+            data-reveal-heading
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             O caminho é mais simples juntos.
@@ -631,6 +634,7 @@ onMounted(() => {
           </span>
           <h2
             ref="respTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.7px] text-forest md:text-[44px]"
           >
             Mais que abrir a porta.<br >É abrir espaço na vida.
@@ -684,6 +688,7 @@ onMounted(() => {
           </span>
           <h2
             ref="faqTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             Todo começo<br >vem com dúvidas.
@@ -744,6 +749,7 @@ onMounted(() => {
           </span>
           <h2
             ref="ctaTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-white md:text-[46px]"
           >
             Tem um novo melhor amigo esperando pelo seu oi.
