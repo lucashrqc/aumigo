@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, gte, ilike, lt, sql } from 'drizzle-orm'
 import type { Database } from '../database/client'
-import { pet, petImage } from '../database/schema'
+import { appliedVaccine, pet, petImage } from '../database/schema'
 import type {
   Paginated,
   PetCreateInput,
@@ -18,6 +18,7 @@ export interface PetWithRelations extends PetRow {
   creator?: { id: string; name: string } | null
   updater?: { id: string; name: string } | null
   images: PetImageRow[]
+  vaccines?: { id: string; name: string }[]
 }
 
 /** Options for pet queries. `withCreator` joins the staff author/editor (admin only). */
@@ -50,6 +51,20 @@ export interface PetRepository {
   softDelete(id: string, actorId: string): Promise<void>
 }
 
+/** Collapse a pet's applied-vaccine rows into the distinct vaccines received. */
+function distinctVaccines(
+  applied: { vaccine: { id: string; name: string } | null }[],
+): { id: string; name: string }[] {
+  const seen = new Set<string>()
+  const result: { id: string; name: string }[] = []
+  for (const { vaccine } of applied) {
+    if (!vaccine || seen.has(vaccine.id)) continue
+    seen.add(vaccine.id)
+    result.push(vaccine)
+  }
+  return result
+}
+
 /** Serialize domain input into Drizzle column values. */
 function toColumns(data: Partial<PetCreateInput>) {
   const { images: _images, weight, ...rest } = data
@@ -69,7 +84,8 @@ export class DrizzlePetRepository implements PetRepository {
     options: PetListOptions = {},
   ): Promise<Paginated<PetWithRelations>> {
     const conditions = [
-      query.status ? eq(pet.status, query.status) : eq(pet.active, true),
+      eq(pet.active, true),
+      query.status ? eq(pet.status, query.status) : undefined,
       query.speciesId ? eq(pet.speciesId, query.speciesId) : undefined,
       query.search ? ilike(pet.name, `%${query.search}%`) : undefined,
       query.from ? gte(pet.createdAt, new Date(query.from)) : undefined,
@@ -134,9 +150,16 @@ export class DrizzlePetRepository implements PetRepository {
         species: { columns: { id: true, name: true } },
         breed: { columns: { id: true, name: true } },
         images: { orderBy: asc(petImage.position) },
+        appliedVaccines: {
+          orderBy: desc(appliedVaccine.applicationDate),
+          with: { vaccine: { columns: { id: true, name: true } } },
+        },
       },
     })
-    return (row as PetWithRelations) ?? null
+    if (!row) return null
+
+    const { appliedVaccines, ...rest } = row
+    return { ...rest, vaccines: distinctVaccines(appliedVaccines) }
   }
 
   async create(

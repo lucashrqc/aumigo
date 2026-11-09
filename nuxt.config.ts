@@ -54,6 +54,17 @@ export default defineNuxtConfig({
     componentDir: '~/components/ui',
   },
 
+  app: {
+    head: {
+      script: [
+        {
+          innerHTML: "document.documentElement.classList.add('js')",
+          tagPosition: 'head',
+        },
+      ],
+    },
+  },
+
   runtimeConfig: {
     // Server-only. Defaults read from process.env so names stay friendly.
     databaseUrl: process.env.DATABASE_URL || '',

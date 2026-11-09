@@ -45,6 +45,7 @@ export function useScrollReveal() {
   function revealHeading(el: HTMLElement | null, start = 'top 85%') {
     if (!el || !import.meta.client) return
     const words = wrapWordsInMask(el)
+    gsap.set(el, { autoAlpha: 1 })
     if (reducedMotion.value || words.length === 0) return
 
     ctx?.add(() => {
@@ -60,7 +61,11 @@ export function useScrollReveal() {
   }
 
   function reveal(el: HTMLElement | null, options: RevealOptions = {}) {
-    if (!el || !import.meta.client || reducedMotion.value) return
+    if (!el || !import.meta.client) return
+    if (reducedMotion.value) {
+      gsap.set(el, { autoAlpha: 1 })
+      return
+    }
 
     const {
       y = 36,
@@ -74,7 +79,7 @@ export function useScrollReveal() {
     ctx?.add(() => {
       gsap.from(el, {
         y,
-        opacity,
+        autoAlpha: opacity,
         duration,
         delay,
         stagger,
@@ -86,7 +91,11 @@ export function useScrollReveal() {
 
   function revealGroup(els: Array<HTMLElement | null>, options: RevealOptions = {}) {
     const targets = els.filter((el): el is HTMLElement => el != null)
-    if (targets.length === 0 || !import.meta.client || reducedMotion.value) return
+    if (targets.length === 0 || !import.meta.client) return
+    if (reducedMotion.value) {
+      gsap.set(targets, { autoAlpha: 1 })
+      return
+    }
 
     const { y = 24, opacity = 0, duration = 0.7, stagger = 0.1, start = 'top 85%' } =
       options
@@ -94,7 +103,7 @@ export function useScrollReveal() {
     ctx?.add(() => {
       gsap.from(targets, {
         y,
-        opacity,
+        autoAlpha: opacity,
         duration,
         stagger,
         ease: 'power3.out',
