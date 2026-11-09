@@ -5,7 +5,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
 import { authClient } from '@/lib/auth-client'
+import useDialog from '@/composables/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import {
   ArrowUpRight,
@@ -23,6 +25,17 @@ definePageMeta({ layout: false })
 useHead({ title: 'Aumigo — Adoção de pets' })
 
 const auth = useAuthStore()
+const dialog = useDialog()
+
+function openAdoptionGuide() {
+  dialog.open(AdoptionGuideDialog, {
+    dialogProps: {
+      class:
+        'max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 bg-white text-forest border-brand sm:max-w-4xl',
+      showCloseButton: false,
+    },
+  })
+}
 
 async function logout() {
   await authClient.signOut()
@@ -41,7 +54,7 @@ const steps = [
     icon: Search,
     number: '01',
     title: 'Encontre sua conexão',
-    body: 'Explore os perfis e conheça a história, o temperamento e as necessidades de cada pet.',
+    body: 'Explore os perfis e conheça a história, o personalidade e as necessidades de cada pet.',
   },
   {
     icon: MessagesSquare,
@@ -83,7 +96,7 @@ const faqs = [
   },
   {
     q: 'Como sei se um pet combina com a minha rotina?',
-    a: 'Cada perfil traz o temperamento, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
+    a: 'Cada perfil traz o personalidade, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
   },
   {
     q: 'Posso conhecer o pet antes da adoção?',
@@ -288,7 +301,7 @@ onMounted(() => {
             </p>
           </div>
           <div
-            class="absolute -left-1 bottom-10 flex -rotate-3 items-center gap-3 rounded-[24px] border border-brand bg-white px-6 py-4.5 lg:bottom-16"
+            class="absolute -left-1 bottom-4 flex items-center gap-3 rounded-[24px] border border-brand bg-white px-6 py-4.5 lg:bottom-16"
           >
             <Heart class="size-5.5 text-forest" />
             <span class="text-[15px] font-medium text-forest"
@@ -394,13 +407,14 @@ onMounted(() => {
             encontro, pense no que você pode oferecer todos os dias — por muitos
             anos.
           </p>
-          <NuxtLink
-            to="/pets"
+          <button
+            type="button"
             class="inline-flex h-12 w-fit items-center gap-3 rounded-xl border border-brand bg-white px-5.5 text-[14px] font-semibold text-forest transition-colors hover:bg-cream-soft"
+            @click="openAdoptionGuide"
           >
             Quero me preparar para adotar
             <ArrowUpRight class="size-4.5" />
-          </NuxtLink>
+          </button>
         </div>
         <div
           class="flex flex-1 flex-col gap-6 rounded-[24px] bg-sage p-6 md:p-8"
@@ -524,7 +538,7 @@ onMounted(() => {
             <div class="flex items-center gap-2.5">
               <PawPrint class="size-7 text-forest" />
               <span class="text-[30px] tracking-[-1.4px] text-forest"
-                >aumigo</span
+                >Aumigo</span
               >
             </div>
             <p class="text-[14px] leading-[1.6] text-text-soft">
