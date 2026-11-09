@@ -15,7 +15,9 @@ async function logout() {
 <template>
   <div class="flex min-h-screen flex-col">
     <header class="border-b">
-      <div class="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+      <div
+        class="container mx-auto flex h-16 items-center justify-between gap-4 px-4"
+      >
         <NuxtLink to="/" class="flex items-center gap-2 font-bold">
           <PawPrint class="h-5 w-5" />
           <span>Aumigo</span>
@@ -33,13 +35,13 @@ async function logout() {
             <Button as-child variant="ghost" size="sm">
               <NuxtLink to="/applications">Minhas candidaturas</NuxtLink>
             </Button>
-            <Button variant="outline" size="sm" @click="logout">Sair</Button>
+            <Button variant="outline" size="xs" @click="logout">Sair</Button>
           </template>
           <template v-else>
             <Button as-child variant="ghost" size="sm">
               <NuxtLink to="/login">Entrar</NuxtLink>
             </Button>
-            <Button as-child size="sm">
+            <Button as-child size="xs">
               <NuxtLink to="/register">Cadastrar</NuxtLink>
             </Button>
           </template>

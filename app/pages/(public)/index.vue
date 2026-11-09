@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { authClient } from '@/lib/auth-client'
+import { useAuthStore } from '@/stores/auth'
+import {
   ArrowRight,
   ArrowUpRight,
   Check,
@@ -16,18 +24,17 @@ import {
   Stethoscope,
   Sun,
 } from '@lucide/vue'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: false })
 useHead({ title: 'Aumigo — Adoção de pets' })
 
 const auth = useAuthStore()
+
+async function logout() {
+  await authClient.signOut()
+  auth.setUser(null)
+  await navigateTo('/')
+}
 
 const principles = [
   'Cada pet tem sua história',
@@ -251,9 +258,9 @@ onMounted(() => {
     class="landing-cursor-none bg-white text-forest"
     :class="{ 'landing-anim-ready': ready }"
   >
-    <ClientOnly>
+    <!-- <ClientOnly>
       <LandingPawCursor />
-    </ClientOnly>
+    </ClientOnly> -->
 
     <!-- Navegação -->
     <header class="px-6 md:px-10 lg:px-20">
@@ -262,13 +269,13 @@ onMounted(() => {
       >
         <NuxtLink to="/" class="flex items-center gap-2.5">
           <PawPrint class="size-7 text-forest" />
-          <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
+          <span class="text-[30px] tracking-[-1.4px] text-forest">Aumigo</span>
         </NuxtLink>
 
         <nav class="hidden items-center gap-8 text-[14px] text-forest lg:flex">
-          <NuxtLink to="/pets" class="transition-opacity hover:opacity-70"
-            >Encontre um pet</NuxtLink
-          >
+          <NuxtLink to="/pets" class="transition-opacity hover:opacity-70">
+            Encontre um pet
+          </NuxtLink>
           <a href="#como-adotar" class="transition-opacity hover:opacity-70"
             >Como adotar</a
           >
@@ -283,18 +290,25 @@ onMounted(() => {
         <div class="flex items-center gap-4 lg:gap-6">
           <template v-if="auth.isAuthenticated">
             <NuxtLink
+              to="/applications"
+              class="hidden text-[14px] font-medium text-forest sm:block"
+            >
+              Minhas candidaturas
+            </NuxtLink>
+            <NuxtLink
               v-if="auth.isStaff"
               to="/admin"
               class="hidden text-[14px] font-medium text-forest sm:block"
             >
               Admin
             </NuxtLink>
-            <NuxtLink
-              :to="auth.isStaff ? '/admin' : '/applications'"
-              class="inline-flex h-12 items-center rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+            <button
+              type="button"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              @click="logout"
             >
-              Minha conta
-            </NuxtLink>
+              Sair
+            </button>
           </template>
           <template v-else>
             <NuxtLink
@@ -305,7 +319,7 @@ onMounted(() => {
             </NuxtLink>
             <NuxtLink
               to="/register"
-              class="inline-flex h-12 items-center rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
             >
               Criar conta
             </NuxtLink>
@@ -373,7 +387,7 @@ onMounted(() => {
               src="/images/aumigo/dog-cat-home.avif"
               alt="Um cão e um gato juntos em casa"
               class="h-full w-full object-cover"
-            >
+            />
           </div>
           <div
             class="absolute right-2 top-6 flex size-30 rotate-12 items-center justify-center rounded-full bg-[#f6d8c9] p-4 text-center lg:right-6"
@@ -422,7 +436,7 @@ onMounted(() => {
             data-reveal-heading
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
-            Pequenas patas.<br >Grandes histórias de amor.
+            Pequenas patas.<br />Grandes histórias de amor.
           </h2>
           <p class="max-w-157.5 text-[17px] leading-[1.6] text-text-soft">
             Cada jeitinho é único. Conheça personalidades que podem combinar com
@@ -469,7 +483,7 @@ onMounted(() => {
                       :src="pet.photo"
                       :alt="pet.name"
                       class="aspect-416/370 w-full object-cover"
-                    >
+                    />
                     <div
                       class="absolute right-4 top-4 flex size-10 items-center justify-center rounded-[20px] bg-white"
                     >
@@ -637,7 +651,7 @@ onMounted(() => {
             data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.7px] text-forest md:text-[44px]"
           >
-            Mais que abrir a porta.<br >É abrir espaço na vida.
+            Mais que abrir a porta.<br />É abrir espaço na vida.
           </h2>
           <p class="text-[16px] leading-[1.65] text-text-soft">
             Adotar é acolher uma vida com tudo o que ela precisa. Antes do
@@ -679,9 +693,7 @@ onMounted(() => {
 
     <!-- Dúvidas frequentes -->
     <section id="duvidas" class="px-6 pb-20 pt-10 md:px-10 lg:px-24">
-      <div
-        class="mx-auto flex max-w-312 flex-col gap-12 lg:flex-row lg:gap-24"
-      >
+      <div class="mx-auto flex max-w-312 flex-col gap-12 lg:flex-row lg:gap-24">
         <div class="flex flex-col gap-5 lg:w-99">
           <span class="text-[11px] font-semibold tracking-[1.6px] text-forest">
             PODE PERGUNTAR
@@ -691,7 +703,7 @@ onMounted(() => {
             data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
-            Todo começo<br >vem com dúvidas.
+            Todo começo<br />vem com dúvidas.
           </h2>
           <p class="text-[16px] leading-[1.6] text-text-soft">
             E tudo bem. O importante é dar esse passo com informação e
@@ -739,7 +751,7 @@ onMounted(() => {
             src="/images/aumigo/carinho.avif"
             alt="Pessoa fazendo carinho em um cão"
             class="aspect-square w-full object-cover"
-          >
+          />
         </div>
         <div
           class="flex flex-1 flex-col items-center gap-5 text-center lg:items-start lg:text-left"
