@@ -15,7 +15,9 @@ async function logout() {
 <template>
   <div class="flex min-h-screen flex-col">
     <header class="border-b">
-      <div class="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+      <div
+        class="container mx-auto flex h-16 items-center justify-between gap-4 px-4"
+      >
         <NuxtLink to="/" class="flex items-center gap-2 font-bold">
           <PawPrint class="h-5 w-5" />
           <span>Aumigo</span>

@@ -14,11 +14,15 @@ export function usePublicPetsQuery(params: PetListParams = () => ({})) {
 }
 
 /** Public: single pet detail. */
-export function usePublicPetQuery(id: MaybeRefOrGetter<string>) {
+export function usePublicPetQuery(
+  id: MaybeRefOrGetter<string | undefined>,
+  options: { enabled?: MaybeRefOrGetter<boolean> } = {},
+) {
   const api = useRequestFetch()
   return useQuery({
     queryKey: ['public-pet', id],
     queryFn: () => api<PetDto>(`/api/pets/${toValue(id)}`),
+    enabled: options.enabled,
   })
 }
 

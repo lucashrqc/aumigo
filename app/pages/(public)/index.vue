@@ -1,125 +1,39 @@
 <script setup lang="ts">
 import {
-  ArrowRight,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { authClient } from '@/lib/auth-client'
+import { useAuthStore } from '@/stores/auth'
+import {
   ArrowUpRight,
   Check,
-  Coffee,
   Heart,
   House,
   MessagesSquare,
   Minus,
-  Moon,
   PawPrint,
   Plus,
   Search,
-  ShieldCheck,
-  Stethoscope,
-  Sun,
 } from '@lucide/vue'
-import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: false })
 useHead({ title: 'Aumigo — Adoção de pets' })
 
 const auth = useAuthStore()
 
+async function logout() {
+  await authClient.signOut()
+  auth.setUser(null)
+  await navigateTo('/')
+}
+
 const principles = [
   'Cada pet tem sua história',
   'Toda conexão tem seu tempo',
   'Adotar é cuidar por toda a vida',
-]
-
-const pets = [
-  {
-    name: 'Bento',
-    species: 'Cão',
-    meta: 'Macho · 2 anos · Porte médio',
-    tagline: ['Um parceiro para', 'todos os passeios.'],
-    bio: 'Sou curioso, carinhoso e sempre topo uma voltinha. Depois, meu lugar preferido é pertinho de você.',
-    caption: 'Especialista em abanar o rabo',
-    cta: 'Quero conhecer o Bento',
-    photo: '/images/aumigo/pet-bento.avif',
-    cardClass: 'bg-cream-soft lg:-rotate-2',
-    badgeClass: 'bg-cream-soft',
-    reverse: false,
-    traits: [
-      {
-        icon: Sun,
-        title: 'Energia para brincar',
-        detail: 'Gosta de passeios e atividades todos os dias.',
-      },
-      {
-        icon: Heart,
-        title: 'Companheiro e sociável',
-        detail: 'Adora gente e a companhia de outros cães.',
-      },
-      {
-        icon: ShieldCheck,
-        title: 'Cuidados em dia',
-        detail: 'Castrado, vacinado e vermifugado.',
-      },
-    ],
-  },
-  {
-    name: 'Amora',
-    species: 'Gata',
-    meta: 'Fêmea · 3 anos · Porte pequeno',
-    tagline: ['Seu sofá acaba', 'de ganhar companhia.'],
-    bio: 'Tenho meu tempo para confiar. Mas, quando me sinto em casa, retribuo com ronrons e longas sonecas ao seu lado.',
-    caption: 'Ronrons são minha linguagem do amor',
-    cta: 'Quero conhecer a Amora',
-    photo: '/images/aumigo/pet-amora.avif',
-    cardClass: 'bg-[#e8e2f2] lg:rotate-2',
-    badgeClass: 'bg-[#e8e2f2]',
-    reverse: true,
-    traits: [
-      {
-        icon: Moon,
-        title: 'Tranquila e observadora',
-        detail: 'Prefere uma rotina calma, com cantinhos ao sol.',
-      },
-      {
-        icon: House,
-        title: 'Uma casa segura',
-        detail: 'Precisa de janelas teladas e vida dentro de casa.',
-      },
-      {
-        icon: ShieldCheck,
-        title: 'Cuidados em dia',
-        detail: 'Castrada, vacinada e vermifugada.',
-      },
-    ],
-  },
-  {
-    name: 'Chico',
-    species: 'Cão',
-    meta: 'Macho · 8 anos · Porte pequeno',
-    tagline: ['Amor não tem', 'idade para começar.'],
-    bio: 'Troco a pressa por um bom cafuné. Procuro um lar tranquilo para aproveitar a vida com calma e muito carinho.',
-    caption: 'Cafuné nunca é demais',
-    cta: 'Quero conhecer o Chico',
-    photo: '/images/aumigo/pet-chico.avif',
-    cardClass: 'bg-[#f6d8c9] lg:-rotate-2',
-    badgeClass: 'bg-[#f6d8c9]',
-    reverse: false,
-    traits: [
-      {
-        icon: Coffee,
-        title: 'Ritmo mais tranquilo',
-        detail: 'Caminhadas leves e boas pausas para descansar.',
-      },
-      {
-        icon: Heart,
-        title: 'Carinhoso e apegado',
-        detail: 'Ama estar perto e receber um bom cafuné.',
-      },
-      {
-        icon: Stethoscope,
-        title: 'Atenção na melhor idade',
-        detail: 'Precisa de acompanhamento veterinário regular.',
-      },
-    ],
-  },
 ]
 
 const steps = [
@@ -207,28 +121,22 @@ const footerColumns = [
   },
 ]
 
-const openIndex = ref(0)
-function toggleFaq(i: number) {
-  openIndex.value = openIndex.value === i ? -1 : i
-}
+const faqValue = ref('faq-0')
 
 useLenisScroll()
-const { revealHeading, revealGroup } = useScrollReveal()
+const { revealHeading } = useScrollReveal()
 
 const ready = ref(false)
 const heroTitle = ref<HTMLElement | null>(null)
-const trailTitle = ref<HTMLElement | null>(null)
 const adoptTitle = ref<HTMLElement | null>(null)
 const respTitle = ref<HTMLElement | null>(null)
 const faqTitle = ref<HTMLElement | null>(null)
 const ctaTitle = ref<HTMLElement | null>(null)
-const petCards = ref<HTMLElement[]>([])
 
 onMounted(() => {
   ready.value = true
   for (const heading of [
     heroTitle,
-    trailTitle,
     adoptTitle,
     respTitle,
     faqTitle,
@@ -236,21 +144,14 @@ onMounted(() => {
   ]) {
     revealHeading(heading.value)
   }
-  for (const card of petCards.value) {
-    const parts = card.querySelectorAll<HTMLElement>('[data-reveal]')
-    revealGroup(Array.from(parts), { y: 40, stagger: 0.14 })
-  }
 })
 </script>
 
 <template>
-  <div
-    class="landing-cursor-none bg-white text-forest"
-    :class="{ 'landing-anim-ready': ready }"
-  >
-    <ClientOnly>
+  <div class="bg-white text-forest" :class="{ 'landing-anim-ready': ready }">
+    <!-- <ClientOnly>
       <LandingPawCursor />
-    </ClientOnly>
+    </ClientOnly> -->
 
     <!-- Navegação -->
     <header class="px-6 md:px-10 lg:px-20">
@@ -259,13 +160,13 @@ onMounted(() => {
       >
         <NuxtLink to="/" class="flex items-center gap-2.5">
           <PawPrint class="size-7 text-forest" />
-          <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
+          <span class="text-[30px] tracking-[-1.4px] text-forest">Aumigo</span>
         </NuxtLink>
 
         <nav class="hidden items-center gap-8 text-[14px] text-forest lg:flex">
-          <NuxtLink to="/pets" class="transition-opacity hover:opacity-70"
-            >Encontre um pet</NuxtLink
-          >
+          <NuxtLink to="/pets" class="transition-opacity hover:opacity-70">
+            Encontre um pet
+          </NuxtLink>
           <a href="#como-adotar" class="transition-opacity hover:opacity-70"
             >Como adotar</a
           >
@@ -280,18 +181,25 @@ onMounted(() => {
         <div class="flex items-center gap-4 lg:gap-6">
           <template v-if="auth.isAuthenticated">
             <NuxtLink
+              to="/applications"
+              class="hidden text-[14px] font-medium text-forest sm:block"
+            >
+              Minhas candidaturas
+            </NuxtLink>
+            <NuxtLink
               v-if="auth.isStaff"
               to="/admin"
               class="hidden text-[14px] font-medium text-forest sm:block"
             >
               Admin
             </NuxtLink>
-            <NuxtLink
-              :to="auth.isStaff ? '/admin' : '/applications'"
-              class="inline-flex h-12 items-center rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+            <button
+              type="button"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              @click="logout"
             >
-              Minha conta
-            </NuxtLink>
+              Sair
+            </button>
           </template>
           <template v-else>
             <NuxtLink
@@ -302,7 +210,7 @@ onMounted(() => {
             </NuxtLink>
             <NuxtLink
               to="/register"
-              class="inline-flex h-12 items-center rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
             >
               Criar conta
             </NuxtLink>
@@ -327,6 +235,7 @@ onMounted(() => {
           </div>
           <h1
             ref="heroTitle"
+            data-reveal-heading
             class="text-[44px] font-medium leading-[1.08] tracking-[-2px] text-forest sm:text-[56px] lg:text-[68px] lg:tracking-[-3px]"
           >
             Seu próximo amor tem quatro patas.
@@ -369,7 +278,7 @@ onMounted(() => {
               src="/images/aumigo/dog-cat-home.avif"
               alt="Um cão e um gato juntos em casa"
               class="h-full w-full object-cover"
-            >
+            />
           </div>
           <div
             class="absolute right-2 top-6 flex size-30 rotate-12 items-center justify-center rounded-full bg-[#f6d8c9] p-4 text-center lg:right-6"
@@ -406,161 +315,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Trilha de encontros -->
-    <section class="px-6 pb-20 pt-22 md:px-10 lg:px-20">
-      <div class="mx-auto flex max-w-6xl flex-col items-center gap-12">
-        <div class="flex flex-col items-center gap-4 text-center">
-          <span class="text-[11px] font-semibold tracking-[1.6px] text-forest">
-            UM ENCONTRO PODE MUDAR TUDO
-          </span>
-          <h2
-            ref="trailTitle"
-            class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
-          >
-            Pequenas patas.<br >Grandes histórias de amor.
-          </h2>
-          <p class="max-w-157.5 text-[17px] leading-[1.6] text-text-soft">
-            Cada jeitinho é único. Conheça personalidades que podem combinar com
-            a sua e imagine uma vida juntos.
-          </p>
-          <div class="flex flex-wrap justify-center gap-2 pt-2">
-            <span
-              class="rounded-full border border-forest bg-forest px-5 py-2.5 text-[13px] font-medium text-white"
-            >
-              Todos os pets
-            </span>
-            <span
-              class="rounded-full border border-brand bg-white px-5 py-2.5 text-[13px] font-medium text-forest"
-            >
-              Cães
-            </span>
-            <span
-              class="rounded-full border border-brand bg-white px-5 py-2.5 text-[13px] font-medium text-forest"
-            >
-              Gatos
-            </span>
-          </div>
-        </div>
-
-        <div class="relative w-full py-4">
-          <LandingPawTrail />
-          <div
-            class="relative z-10 flex flex-col gap-16 pr-12 sm:pr-16 lg:gap-22 lg:pr-0"
-          >
-            <article
-              v-for="pet in pets"
-              :key="pet.name"
-              ref="petCards"
-              class="flex flex-col items-center gap-10 lg:gap-44"
-              :class="pet.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'"
-            >
-              <div data-reveal class="flex w-full justify-center lg:w-113.75">
-                <div
-                  class="w-full max-w-110 rounded-[24px] p-3"
-                  :class="pet.cardClass"
-                >
-                  <div class="relative overflow-hidden rounded-[16px]">
-                    <img
-                      :src="pet.photo"
-                      :alt="pet.name"
-                      class="aspect-416/370 w-full object-cover"
-                    >
-                    <div
-                      class="absolute right-4 top-4 flex size-10 items-center justify-center rounded-[20px] bg-white"
-                    >
-                      <Heart class="size-5 text-forest" />
-                    </div>
-                  </div>
-                  <div
-                    class="flex items-center justify-between px-2 pb-1.5 pt-3"
-                  >
-                    <span class="text-[13px] text-forest">{{
-                      pet.caption
-                    }}</span>
-                    <PawPrint class="size-4.5 text-forest" />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                data-reveal
-                class="flex w-full max-w-110 flex-col gap-4.5 lg:w-110"
-              >
-                <div class="flex items-center gap-3">
-                  <h3
-                    class="text-[34px] font-medium tracking-[-1.5px] text-forest md:text-[38px]"
-                  >
-                    {{ pet.name }}
-                  </h3>
-                  <span
-                    class="rounded-full px-3 py-1.5 text-[12px] text-forest"
-                    :class="pet.badgeClass"
-                  >
-                    {{ pet.species }}
-                  </span>
-                </div>
-                <p class="text-[13px] text-text-soft">{{ pet.meta }}</p>
-                <div
-                  class="text-[26px] font-medium leading-[1.2] tracking-[-0.8px] text-forest md:text-[28px]"
-                >
-                  <span v-for="line in pet.tagline" :key="line" class="block">{{
-                    line
-                  }}</span>
-                </div>
-                <p class="text-[15px] leading-[1.6] text-text-soft">
-                  {{ pet.bio }}
-                </p>
-                <div class="flex flex-col gap-3.5 py-1">
-                  <div
-                    v-for="trait in pet.traits"
-                    :key="trait.title"
-                    class="flex gap-3"
-                  >
-                    <div
-                      class="flex size-8.5 shrink-0 items-center justify-center rounded-[10px] bg-sage"
-                    >
-                      <component
-                        :is="trait.icon"
-                        class="size-4.5 text-forest"
-                      />
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[14px] font-medium text-forest">{{
-                        trait.title
-                      }}</span>
-                      <span class="text-[13px] leading-[1.4] text-text-soft">{{
-                        trait.detail
-                      }}</span>
-                    </div>
-                  </div>
-                </div>
-                <NuxtLink
-                  to="/pets"
-                  class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
-                >
-                  {{ pet.cta }}
-                  <ArrowUpRight class="size-4.5" />
-                </NuxtLink>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="flex flex-col items-center gap-3.5">
-          <NuxtLink
-            to="/pets"
-            class="inline-flex h-12 items-center gap-3 rounded-xl border border-brand bg-white px-5.5 text-[14px] font-semibold text-forest transition-colors hover:bg-cream-soft"
-          >
-            Ver todos os pets
-            <ArrowRight class="size-4.5" />
-          </NuxtLink>
-          <p class="max-w-prose text-center text-[12px] text-text-soft">
-            Perfis ilustrativos. A disponibilidade e os cuidados são confirmados
-            com o responsável.
-          </p>
-        </div>
-      </div>
-    </section>
+    <LandingPetTrail />
 
     <!-- Como adotar -->
     <section
@@ -574,6 +329,7 @@ onMounted(() => {
           </span>
           <h2
             ref="adoptTitle"
+            data-reveal-heading
             class="max-w-180 text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
             O caminho é mais simples juntos.
@@ -628,9 +384,10 @@ onMounted(() => {
           </span>
           <h2
             ref="respTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.7px] text-forest md:text-[44px]"
           >
-            Mais que abrir a porta.<br >É abrir espaço na vida.
+            Mais que abrir a porta.<br />É abrir espaço na vida.
           </h2>
           <p class="text-[16px] leading-[1.65] text-text-soft">
             Adotar é acolher uma vida com tudo o que ela precisa. Antes do
@@ -672,54 +429,49 @@ onMounted(() => {
 
     <!-- Dúvidas frequentes -->
     <section id="duvidas" class="px-6 pb-20 pt-10 md:px-10 lg:px-24">
-      <div
-        class="mx-auto flex max-w-312 flex-col gap-12 lg:flex-row lg:gap-24"
-      >
+      <div class="mx-auto flex max-w-312 flex-col gap-12 lg:flex-row lg:gap-24">
         <div class="flex flex-col gap-5 lg:w-99">
           <span class="text-[11px] font-semibold tracking-[1.6px] text-forest">
             PODE PERGUNTAR
           </span>
           <h2
             ref="faqTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
-            Todo começo<br >vem com dúvidas.
+            Todo começo<br />vem com dúvidas.
           </h2>
           <p class="text-[16px] leading-[1.6] text-text-soft">
             E tudo bem. O importante é dar esse passo com informação e
             tranquilidade.
           </p>
         </div>
-        <div class="flex-1">
-          <div
+        <Accordion v-model="faqValue" type="single" collapsible class="flex-1">
+          <AccordionItem
             v-for="(faq, i) in faqs"
             :key="faq.q"
-            class="border-b border-sage-line"
+            :value="`faq-${i}`"
+            class="border-sage-line last:border-b"
             :class="{ 'border-t': i === 0 }"
           >
-            <button
-              type="button"
-              class="flex w-full items-center gap-5 py-5.5 text-left"
-              @click="toggleFaq(i)"
+            <AccordionTrigger
+              class="items-center gap-5 py-5.5 text-[15px] font-medium text-forest hover:no-underline md:text-[16px]"
             >
-              <span
-                class="flex-1 text-[15px] font-medium text-forest md:text-[16px]"
-              >
-                {{ faq.q }}
-              </span>
-              <component
-                :is="openIndex === i ? Minus : Plus"
-                class="size-4.5 shrink-0 text-forest"
-              />
-            </button>
-            <p
-              v-if="openIndex === i"
+              {{ faq.q }}
+              <template #icon>
+                <component
+                  :is="faqValue === `faq-${i}` ? Minus : Plus"
+                  class="size-4.5 shrink-0 text-forest transition-transform duration-200"
+                />
+              </template>
+            </AccordionTrigger>
+            <AccordionContent
               class="pb-5.5 text-[15px] leading-[1.7] text-text-soft"
             >
               {{ faq.a }}
-            </p>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </section>
 
@@ -735,7 +487,7 @@ onMounted(() => {
             src="/images/aumigo/carinho.avif"
             alt="Pessoa fazendo carinho em um cão"
             class="aspect-square w-full object-cover"
-          >
+          />
         </div>
         <div
           class="flex flex-1 flex-col items-center gap-5 text-center lg:items-start lg:text-left"
@@ -745,6 +497,7 @@ onMounted(() => {
           </span>
           <h2
             ref="ctaTitle"
+            data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-white md:text-[46px]"
           >
             Tem um novo melhor amigo esperando pelo seu oi.

@@ -179,6 +179,14 @@ html.lenis body {
   pointer-events: none;
 }
 
+/* Pre-hide reveal targets until GSAP sets their start state, so SSR content
+   doesn't flash in before animating. Gated on `.js` (added before first paint)
+   so no-JS clients and crawlers still see the content. */
+html.js [data-reveal],
+html.js [data-reveal-heading] {
+  visibility: hidden;
+}
+
 /* Landing word-reveal (padding/margin leave room for accents + descenders) */
 .reveal-word-mask {
   display: inline-block;

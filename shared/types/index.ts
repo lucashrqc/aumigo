@@ -29,6 +29,12 @@ export interface PetImageDto {
   position: number
 }
 
+/** A vaccine the pet has received, summarized for display (catalog id + name). */
+export interface PetVaccineDto {
+  id: string
+  name: string
+}
+
 export interface PetDto {
   id: string
   name: string
@@ -55,6 +61,7 @@ export interface PetDto {
   creator?: AuditUserDto | null
   updater?: AuditUserDto | null
   images: PetImageDto[]
+  vaccines?: PetVaccineDto[]
 }
 
 /** Aggregate counts for the admin pets dashboard cards. */
