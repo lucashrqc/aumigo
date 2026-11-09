@@ -16,6 +16,12 @@ import {
   Stethoscope,
   Sun,
 } from '@lucide/vue'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { useAuthStore } from '@/stores/auth'
 
 definePageMeta({ layout: false })
@@ -207,10 +213,7 @@ const footerColumns = [
   },
 ]
 
-const openIndex = ref(0)
-function toggleFaq(i: number) {
-  openIndex.value = openIndex.value === i ? -1 : i
-}
+const faqValue = ref('faq-0')
 
 useLenisScroll()
 const { revealHeading, revealGroup } = useScrollReveal()
@@ -690,36 +693,32 @@ onMounted(() => {
             tranquilidade.
           </p>
         </div>
-        <div class="flex-1">
-          <div
+        <Accordion v-model="faqValue" type="single" collapsible class="flex-1">
+          <AccordionItem
             v-for="(faq, i) in faqs"
             :key="faq.q"
-            class="border-b border-sage-line"
+            :value="`faq-${i}`"
+            class="border-sage-line last:border-b"
             :class="{ 'border-t': i === 0 }"
           >
-            <button
-              type="button"
-              class="flex w-full items-center gap-5 py-5.5 text-left"
-              @click="toggleFaq(i)"
+            <AccordionTrigger
+              class="items-center gap-5 py-5.5 text-[15px] font-medium text-forest hover:no-underline md:text-[16px]"
             >
-              <span
-                class="flex-1 text-[15px] font-medium text-forest md:text-[16px]"
-              >
-                {{ faq.q }}
-              </span>
-              <component
-                :is="openIndex === i ? Minus : Plus"
-                class="size-4.5 shrink-0 text-forest"
-              />
-            </button>
-            <p
-              v-if="openIndex === i"
+              {{ faq.q }}
+              <template #icon>
+                <component
+                  :is="faqValue === `faq-${i}` ? Minus : Plus"
+                  class="size-4.5 shrink-0 text-forest transition-transform duration-200"
+                />
+              </template>
+            </AccordionTrigger>
+            <AccordionContent
               class="pb-5.5 text-[15px] leading-[1.7] text-text-soft"
             >
               {{ faq.a }}
-            </p>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </section>
 
