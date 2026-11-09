@@ -148,10 +148,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="bg-white text-forest"
-    :class="{ 'landing-anim-ready': ready }"
-  >
+  <div class="bg-white text-forest" :class="{ 'landing-anim-ready': ready }">
     <!-- <ClientOnly>
       <LandingPawCursor />
     </ClientOnly> -->
