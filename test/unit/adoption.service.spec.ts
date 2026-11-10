@@ -36,27 +36,30 @@ describe('AdoptionService.apply', () => {
   it('creates an application for an available pet', async () => {
     const service = new AdoptionService(apps, makePets('available'))
     const result = await service.apply(
-      { petId: 'pet-1', contactPhone: '+5511999999999' },
+      { petId: 'pet-1', document: '52998224725', contactPhone: '+5511999999999' },
       'user-1',
     )
     expect(apps.create).toHaveBeenCalledOnce()
+    expect(apps.create).toHaveBeenCalledWith(
+      expect.objectContaining({ document: '52998224725', adopterUserId: 'user-1' }),
+    )
     expect(result.id).toBe('app-1')
   })
 
   it('rejects applying for an already-adopted pet', async () => {
     const service = new AdoptionService(apps, makePets('adopted'))
-    await expect(service.apply({ petId: 'pet-1', contactPhone: '123456' }, 'user-1')).rejects.toThrow(
-      /already been adopted/,
-    )
+    await expect(
+      service.apply({ petId: 'pet-1', contactPhone: '123456' }, 'user-1'),
+    ).rejects.toMatchObject({ statusCode: 409 })
     expect(apps.create).not.toHaveBeenCalled()
   })
 
   it('rejects a duplicate open application', async () => {
     apps.findOpenByPetAndAdopter = vi.fn().mockResolvedValue({ id: 'existing' })
     const service = new AdoptionService(apps, makePets('available'))
-    await expect(service.apply({ petId: 'pet-1', contactPhone: '123456' }, 'user-1')).rejects.toThrow(
-      /open application/,
-    )
+    await expect(
+      service.apply({ petId: 'pet-1', contactPhone: '123456' }, 'user-1'),
+    ).rejects.toMatchObject({ statusCode: 409 })
   })
 })
 
@@ -81,6 +84,6 @@ describe('AdoptionService.review', () => {
 
     await expect(
       service.review('app-1', { decision: 'rejected' }, 'staff-1'),
-    ).rejects.toThrow(/already reviewed/)
+    ).rejects.toMatchObject({ statusCode: 409 })
   })
 })

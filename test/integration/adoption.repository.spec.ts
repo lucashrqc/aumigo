@@ -4,10 +4,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createDatabase } from '../../server/database/client'
 import {
   adoptionApplication,
+  city as cityTable,
   pet as petTable,
   species as speciesTable,
+  state as stateTable,
   user as userTable,
 } from '../../server/database/schema'
+import type { CreateApplicationData } from '../../server/repositories/adoption.repository'
 import { DrizzleAdoptionApplicationRepository } from '../../server/repositories/adoption.repository'
 import { DrizzlePetRepository } from '../../server/repositories/pet.repository'
 import { TEST_DATABASE_URL } from '../setup/database'
@@ -18,6 +21,7 @@ const applications = new DrizzleAdoptionApplicationRepository(db)
 
 let staffId: string
 let speciesId: string
+let cityId: string
 
 async function makeUser(role: 'admin' | 'staff' | 'adopter') {
   const id = randomUUID()
@@ -33,10 +37,44 @@ async function makeUser(role: 'admin' | 'staff' | 'adopter') {
   return id
 }
 
+function appData(
+  petId: string,
+  adopterUserId: string,
+  overrides: Partial<CreateApplicationData> = {},
+): CreateApplicationData {
+  return {
+    petId,
+    adopterUserId,
+    document: '52998224725',
+    contactPhone: '111',
+    age: 30,
+    home: 'house',
+    cityId,
+    street: 'Rua das Flores',
+    number: '100',
+    neighborhood: 'Centro',
+    zipCode: '01001-000',
+    isRental: false,
+    firstPet: true,
+    hasFinancialConditions: true,
+    acceptedTerms: true,
+    ...overrides,
+  }
+}
+
 beforeAll(async () => {
   staffId = await makeUser('staff')
   const [sp] = await db.insert(speciesTable).values({ name: 'Dog' }).returning()
   speciesId = sp!.id
+  const [st] = await db
+    .insert(stateTable)
+    .values({ ibgeId: 35, name: 'São Paulo', uf: 'SP' })
+    .returning()
+  const [ct] = await db
+    .insert(cityTable)
+    .values({ stateId: st!.id, name: 'São Paulo', ibgeId: 3550308 })
+    .returning()
+  cityId = ct!.id
 })
 
 afterAll(async () => {
@@ -77,12 +115,8 @@ describe('DrizzleAdoptionApplicationRepository.approve', () => {
     const adopterA = await makeUser('adopter')
     const adopterB = await makeUser('adopter')
 
-    const appA = await applications.create({
-      petId: pet.id,
-      adopterUserId: adopterA,
-      contactPhone: '111',
-    })
-    await applications.create({ petId: pet.id, adopterUserId: adopterB, contactPhone: '222' })
+    const appA = await applications.create(appData(pet.id, adopterA))
+    await applications.create(appData(pet.id, adopterB, { contactPhone: '222' }))
 
     await applications.approve(appA.id, pet.id, staffId)
 
@@ -103,9 +137,9 @@ describe('DrizzleAdoptionApplicationRepository.approve', () => {
     )
     const adopter = await makeUser('adopter')
 
-    await applications.create({ petId: pet.id, adopterUserId: adopter, contactPhone: '111' })
+    await applications.create(appData(pet.id, adopter))
     await expect(
-      applications.create({ petId: pet.id, adopterUserId: adopter, contactPhone: '222' }),
+      applications.create(appData(pet.id, adopter, { contactPhone: '222' })),
     ).rejects.toThrow()
   })
 })

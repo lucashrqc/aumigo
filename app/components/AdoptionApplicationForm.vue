@@ -10,6 +10,7 @@ import { vMaska } from 'maska/vue'
 import { watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
+import { isValidDocument } from '#shared/utils/document'
 import AdoptionTermsDialog from '@/components/AdoptionTermsDialog.vue'
 import useDialog from '@/composables/useDialog'
 
@@ -69,6 +70,7 @@ const enclosureOptions = enclosureTypeValues.map((value) => ({
 
 const form = useForm({
   defaultValues: {
+    document: '',
     contactPhone: '',
     message: '',
     age: undefined as number | undefined,
@@ -103,6 +105,7 @@ const form = useForm({
 
     const parsed = adoptionApplicationCreateSchema.safeParse({
       petId: props.petId,
+      document: value.document,
       contactPhone: value.contactPhone,
       message: value.message || undefined,
       age: value.age,
@@ -255,6 +258,37 @@ const boolFieldValue = (v: boolean | undefined) =>
         Confirme os dados e as vacinas com a equipe responsável.
       </p>
     </div>
+
+    <form.Field
+      name="document"
+      :validators="{
+        onChange: z
+          .string()
+          .trim()
+          .min(1, 'Informe o CPF ou CNPJ')
+          .refine(isValidDocument, 'Informe um CPF ou CNPJ válido'),
+      }"
+    >
+      <template #default="{ field }">
+        <FormField
+          label="CPF ou CNPJ"
+          required
+          :name="field.name"
+          :errors="field.state.meta.errors"
+          :touched="showErrors(field.state.meta.isTouched)"
+        >
+          <template #default="{ id }">
+            <DocumentInput
+              :id="id"
+              :model-value="field.state.value"
+              placeholder="000.000.000-00"
+              @update:model-value="field.handleChange($event ?? '')"
+              @blur="field.handleBlur"
+            />
+          </template>
+        </FormField>
+      </template>
+    </form.Field>
 
     <div class="grid gap-5 sm:grid-cols-2">
       <form.Field

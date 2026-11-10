@@ -1,0 +1,1 @@
+ALTER TABLE "adoption_application" ADD COLUMN "document" text NOT NULL;
