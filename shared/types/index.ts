@@ -115,12 +115,31 @@ export interface AdoptionApplicationDto {
   adopterUserId: string
   contactPhone: string | null
   message: string | null
+  age: number
+  home: 'house' | 'apartment'
+  cityId: string
+  street: string | null
+  number: string | null
+  neighborhood: string | null
+  complement: string | null
+  zipCode: string | null
+  isRental: boolean
+  allowPets: boolean | null
+  firstPet: boolean
+  hasFinancialConditions: boolean
+  enclosureType: ('walled' | 'fenced' | 'fully_enclosed' | 'is_netted')[] | null
+  acceptedTerms: boolean
   status: 'pending' | 'approved' | 'rejected' | 'canceled'
   reviewedAt: string | null
   rejectReason: string | null
   rejectedAt: string | null
   canceledAt: string | null
   createdAt: string
+  city: {
+    id: string
+    name: string
+    state: { id: string; name: string; uf: string } | null
+  } | null
   pet:
     | {
         id: string

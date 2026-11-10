@@ -15,6 +15,8 @@ import { user } from './auth'
 import { auditColumns, primaryId, timestamps } from './columns'
 import {
   applicationStatusEnum,
+  enclosureTypeEnum,
+  homeEnum,
   invitationRoleEnum,
   petSexEnum,
   petSizeEnum,
@@ -211,6 +213,22 @@ export const adoptionApplication = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     contactPhone: text('contact_phone'),
     message: text('message'),
+    age: integer('age').notNull(),
+    home: homeEnum('home').notNull(),
+    cityId: uuid('city_id')
+      .notNull()
+      .references(() => city.id, { onDelete: 'restrict' }),
+    street: text('street').notNull(),
+    number: text('number').notNull(),
+    neighborhood: text('neighborhood').notNull(),
+    complement: text('complement'),
+    zipCode: text('zip_code').notNull(),
+    isRental: boolean('is_rental').notNull(),
+    allowPets: boolean('allow_pets'),
+    firstPet: boolean('first_pet').notNull(),
+    hasFinancialConditions: boolean('has_financial_conditions').notNull(),
+    enclosureType: enclosureTypeEnum('enclosure_type').array(),
+    acceptedTerms: boolean('accepted_terms').notNull().default(false),
     status: applicationStatusEnum('status').notNull().default('pending'),
     reviewedBy: text('reviewed_by').references(() => user.id, { onDelete: 'set null' }),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
@@ -225,6 +243,7 @@ export const adoptionApplication = pgTable(
   (t) => [
     index('adoption_application_pet_id_idx').on(t.petId),
     index('adoption_application_adopter_idx').on(t.adopterUserId),
+    index('adoption_application_city_id_idx').on(t.cityId),
     index('adoption_application_status_idx').on(t.status),
     // An adopter may have at most one open (pending) application per pet.
     uniqueIndex('adoption_application_open_uq')

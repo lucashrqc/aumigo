@@ -1,6 +1,6 @@
-import AdoptionApplicationForm from '@/components/AdoptionApplicationForm.vue'
 import AuthGateDialog from '@/components/AuthGateDialog.vue'
 import useDialog from '@/composables/useDialog'
+import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 
 export interface AdoptionFlowPet {
@@ -9,8 +9,8 @@ export interface AdoptionFlowPet {
   demo?: boolean
 }
 
-// Keep the landing palette on both dialogs regardless of the viewer's theme:
-// these surfaces belong to the brand/landing experience, not the app chrome.
+// Keep the landing palette on the auth gate regardless of the viewer's theme:
+// this surface belongs to the brand/landing experience, not the app chrome.
 const dialogProps = { class: 'max-w-md bg-white text-forest border-brand' }
 
 export function useAdoptionFlow() {
@@ -18,6 +18,12 @@ export function useAdoptionFlow() {
   const dialog = useDialog()
 
   async function startApplication(pet: AdoptionFlowPet) {
+    // Landing cards can be illustrative and carry no real pet id yet.
+    if (pet.demo || !pet.id) {
+      toast.info('Em breve você poderá se candidatar à adoção por aqui.')
+      return
+    }
+
     if (!auth.isAuthenticated) {
       const authed = await dialog.open<boolean>(AuthGateDialog, {
         dialogProps,
@@ -26,10 +32,7 @@ export function useAdoptionFlow() {
       if (!authed || !auth.isAuthenticated) return
     }
 
-    await dialog.open(AdoptionApplicationForm, {
-      dialogProps,
-      props: { petId: pet.id, petName: pet.name, demo: pet.demo },
-    })
+    await navigateTo(`/pets/${pet.id}/apply`)
   }
 
   return { startApplication }
