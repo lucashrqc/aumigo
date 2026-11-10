@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { paginationSchema, uuidSchema } from './common'
+import { documentDigits, isValidDocument } from '../utils/document'
 
 export const applicationStatusValues = [
   'pending',
@@ -20,6 +21,12 @@ export const enclosureTypeValues = [
 export const adoptionApplicationCreateSchema = z
   .object({
     petId: uuidSchema,
+    document: z
+      .string()
+      .trim()
+      .min(1, 'Informe o CPF ou CNPJ')
+      .refine(isValidDocument, 'Informe um CPF ou CNPJ válido')
+      .transform(documentDigits),
     contactPhone: z.string().trim().min(5).max(30),
     message: z.string().trim().max(1000).optional(),
     age: z.coerce

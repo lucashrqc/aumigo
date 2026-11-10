@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ClipboardList, X } from '@lucide/vue'
 import useDialog from '@/composables/useDialog'
+import { formatDocument } from '#shared/utils/document'
 import type { AdoptionApplicationDto } from '#shared/types'
 
 const props = defineProps<{ application: AdoptionApplicationDto }>()
@@ -64,6 +65,10 @@ const enclosureLabels = computed(() =>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">E-mail</dt>
           <dd class="text-[14px] font-medium">{{ app.adopter?.email ?? '—' }}</dd>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <dt class="text-[12px] text-text-soft">CPF/CNPJ</dt>
+          <dd class="text-[14px] font-medium">{{ formatDocument(app.document) }}</dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Telefone</dt>

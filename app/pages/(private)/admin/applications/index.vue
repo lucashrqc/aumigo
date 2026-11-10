@@ -16,6 +16,7 @@ import {
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h, type Component } from 'vue'
 import { toast } from 'vue-sonner'
+import { formatDocument } from '#shared/utils/document'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
 useHead({ title: 'Candidaturas — Admin' })
@@ -198,6 +199,12 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     cell: ({ row }) => row.original.contactPhone ?? '—',
   },
   {
+    id: 'document',
+    header: 'CPF/CNPJ',
+    meta: { class: 'whitespace-nowrap' },
+    cell: ({ row }) => formatDocument(row.original.document),
+  },
+  {
     id: 'age',
     header: 'Idade',
     cell: ({ row }) => `${row.original.age} anos`,
@@ -317,7 +324,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     header: 'Ações',
     meta: {
       class:
-        'w-32 bg-background text-center whitespace-nowrap md:sticky md:right-0 md:z-10',
+        'w-32 min-w-32 max-w-32 bg-background text-center whitespace-nowrap md:sticky md:right-0 md:z-10',
     },
     cell: ({ row }) =>
       h(DataTableRowActions as Component, { row: row.original, actions }),
@@ -373,6 +380,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
       :columns="columns"
       :data="data?.items ?? []"
       selection="none"
+      scroll-x="always"
       :get-row-id="(row) => row.id"
       :is-loading="isLoading"
     >
