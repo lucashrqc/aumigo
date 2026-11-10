@@ -1,14 +1,21 @@
 <script lang="ts" setup>
-import type { ToasterProps } from "vue-sonner"
-import { CircleCheckIcon, InfoIcon, Loader2Icon, OctagonXIcon, TriangleAlertIcon, XIcon } from "@lucide/vue"
-import { cn } from "cn"
-import { Toaster as Sonner } from "vue-sonner"
-import { computed } from "vue"
+import type { ToasterProps } from 'vue-sonner'
+import {
+  CircleCheckIcon,
+  InfoIcon,
+  Loader2Icon,
+  OctagonXIcon,
+  TriangleAlertIcon,
+  XIcon,
+} from '@lucide/vue'
+import { cn } from 'cn'
+import { Toaster as Sonner } from 'vue-sonner'
+import { computed } from 'vue'
 
 const props = defineProps<ToasterProps>()
 
 const colorMode = useColorMode()
-const theme = computed(() => (colorMode.value === "dark" ? "dark" : "light"))
+const theme = computed(() => (colorMode.value === 'dark' ? 'dark' : 'light'))
 </script>
 
 <template>
@@ -26,16 +33,16 @@ const theme = computed(() => (colorMode.value === "dark" ? "dark" : "light"))
     }"
   >
     <template #success-icon>
-      <CircleCheckIcon class="size-4" />
+      <CircleCheckIcon class="size-4 text-green-400" />
     </template>
     <template #info-icon>
-      <InfoIcon class="size-4" />
+      <InfoIcon class="size-4 text-blue-400" />
     </template>
     <template #warning-icon>
-      <TriangleAlertIcon class="size-4" />
+      <TriangleAlertIcon class="size-4 text-amber-400" />
     </template>
     <template #error-icon>
-      <OctagonXIcon class="size-4" />
+      <OctagonXIcon class="size-4 text-red-400" />
     </template>
     <template #loading-icon>
       <div>
