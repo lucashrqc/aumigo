@@ -118,4 +118,8 @@ export const adoptionApplicationRelations = relations(adoptionApplication, ({ on
     fields: [adoptionApplication.adopterUserId],
     references: [user.id],
   }),
+  city: one(city, {
+    fields: [adoptionApplication.cityId],
+    references: [city.id],
+  }),
 }))

@@ -149,7 +149,9 @@ async function handleMarkAdopted(pet: PetDto) {
     await markAdopted(pet.id)
     toast.success('Pet marcado como adotado')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Não foi possível marcar como adotado'))
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível marcar como adotado'),
+    )
   }
 }
 
@@ -157,18 +159,21 @@ const actions: RowAction<PetDto>[] = [
   {
     label: 'Publicar',
     icon: Megaphone,
+    iconClass: 'text-blue-400',
     hidden: (row) => row.status !== 'pending',
     onClick: handlePublish,
   },
   {
     label: 'Adotado!',
     icon: CircleCheck,
+    iconClass: 'text-green-400',
     hidden: (row) => row.status !== 'available',
     onClick: handleMarkAdopted,
   },
   {
     label: 'Despublicar pet',
     icon: EyeOff,
+    iconClass: 'text-amber-400',
     hidden: (row) => row.status !== 'available',
     onClick: handleUnpublish,
   },
@@ -186,6 +191,7 @@ const actions: RowAction<PetDto>[] = [
   {
     label: 'Excluir',
     icon: Trash2,
+    iconClass: 'text-red-400',
     class: 'text-destructive',
     onClick: (row) => handleDelete(row.id, row.name),
   },

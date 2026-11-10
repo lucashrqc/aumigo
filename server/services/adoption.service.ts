@@ -50,6 +50,20 @@ export class AdoptionService {
       adopterUserId,
       contactPhone: input.contactPhone,
       message: input.message,
+      age: input.age,
+      home: input.home,
+      cityId: input.cityId,
+      street: input.street,
+      number: input.number,
+      neighborhood: input.neighborhood,
+      complement: input.complement ?? null,
+      zipCode: input.zipCode,
+      isRental: input.isRental,
+      allowPets: input.isRental ? (input.allowPets ?? null) : null,
+      firstPet: input.firstPet,
+      hasFinancialConditions: input.hasFinancialConditions,
+      enclosureType: input.enclosureType?.length ? input.enclosureType : null,
+      acceptedTerms: input.acceptedTerms,
     })
   }
 

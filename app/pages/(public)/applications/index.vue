@@ -52,9 +52,7 @@ function openGallery(app: AdoptionApplicationDto) {
 
 <template>
   <div class="flex flex-col gap-8">
-    <section
-      class="relative -mt-8 ml-[calc(50%-50vw)] w-screen bg-cream-soft"
-    >
+    <section class="relative -mt-8 ml-[calc(50%-50vw)] w-screen bg-cream-soft">
       <div class="container mx-auto px-4">
         <div class="mx-auto max-w-5xl py-12 md:py-14">
           <span

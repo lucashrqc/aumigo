@@ -15,3 +15,10 @@ export const applicationStatusEnum = pgEnum('application_status', [
   'canceled',
 ])
 export const invitationRoleEnum = pgEnum('invitation_role', ['admin', 'staff'])
+export const homeEnum = pgEnum('home', ['house', 'apartment'])
+export const enclosureTypeEnum = pgEnum('enclosure_type', [
+  'walled',
+  'fenced',
+  'fully_enclosed',
+  'is_netted',
+])
