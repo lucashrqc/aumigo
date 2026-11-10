@@ -211,6 +211,7 @@ export const adoptionApplication = pgTable(
     adopterUserId: text('adopter_user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    document: text('document').notNull(),
     contactPhone: text('contact_phone'),
     message: text('message'),
     age: integer('age').notNull(),

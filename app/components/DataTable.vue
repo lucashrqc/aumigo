@@ -26,12 +26,21 @@ const props = withDefaults(
     selection?: RowSelectionMode
     getRowId?: (row: TData) => string
     isLoading?: boolean
+    scrollX?: 'auto' | 'always'
   }>(),
-  { selection: 'none', getRowId: undefined, isLoading: false },
+  {
+    selection: 'none',
+    getRowId: undefined,
+    isLoading: false,
+    scrollX: 'auto',
+  },
 )
 
 // Number of placeholder rows rendered while loading.
 const SKELETON_ROWS = 5
+
+const minWidthClass = (columnId: string) =>
+  columnId === 'select' || columnId === 'actions' ? undefined : 'min-w-32'
 
 const selected = defineModel<TData[]>('selected', { default: () => [] })
 
@@ -107,8 +116,11 @@ const table = useTable({
 </script>
 
 <template>
-  <div class="rounded-md border">
-    <Table>
+  <div
+    class="rounded-md border"
+    :class="{ 'data-table--always-scroll': scrollX === 'always' }"
+  >
+    <Table class="border-separate border-spacing-0">
       <TableHeader>
         <TableRow
           v-for="headerGroup in table.getHeaderGroups()"
@@ -118,7 +130,11 @@ const table = useTable({
             v-for="header in headerGroup.headers"
             :key="header.id"
             :colspan="header.colSpan"
-            :class="['first:pl-4 last:pr-4', header.column.columnDef.meta?.class]"
+            :class="[
+              'first:pl-4 last:pr-4',
+              minWidthClass(header.column.id),
+              header.column.columnDef.meta?.class,
+            ]"
           >
             <FlexRender v-if="!header.isPlaceholder" :header="header" />
           </TableHead>
@@ -140,7 +156,11 @@ const table = useTable({
             <TableCell
               v-for="column in table.getVisibleFlatColumns()"
               :key="column.id"
-              :class="['text-xs first:pl-4 last:pr-4', column.columnDef.meta?.class]"
+              :class="[
+                'text-xs first:pl-4 last:pr-4',
+                minWidthClass(column.id),
+                column.columnDef.meta?.class,
+              ]"
             >
               <Skeleton class="h-6 w-full" />
             </TableCell>
@@ -151,7 +171,11 @@ const table = useTable({
             <TableCell
               v-for="cell in row.getVisibleCells()"
               :key="cell.id"
-              :class="['text-xs first:pl-4 last:pr-4', cell.column.columnDef.meta?.class]"
+              :class="[
+                'text-xs first:pl-4 last:pr-4',
+                minWidthClass(cell.column.id),
+                cell.column.columnDef.meta?.class,
+              ]"
             >
               <FlexRender :cell="cell" />
             </TableCell>
@@ -164,3 +188,9 @@ const table = useTable({
     </Table>
   </div>
 </template>
+
+<style scoped>
+.data-table--always-scroll :deep([data-slot='table-container']) {
+  overflow-x: scroll;
+}
+</style>

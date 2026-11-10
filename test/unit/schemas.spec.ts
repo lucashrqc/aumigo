@@ -27,9 +27,60 @@ describe('petCreateSchema', () => {
 })
 
 describe('adoptionApplicationCreateSchema', () => {
+  const uuid = '11111111-1111-4111-8111-111111111111'
+  const validPayload = {
+    petId: uuid,
+    document: '529.982.247-25',
+    contactPhone: '+55 11 99999-9999',
+    age: 30,
+    home: 'house',
+    cityId: uuid,
+    street: 'Rua das Flores',
+    number: '100',
+    neighborhood: 'Centro',
+    zipCode: '01001-000',
+    isRental: false,
+    firstPet: true,
+    hasFinancialConditions: true,
+    acceptedTerms: true,
+  }
+
   it('requires a contact phone', () => {
+    const result = adoptionApplicationCreateSchema.safeParse({ petId: uuid })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts a full payload with a valid CPF, normalising it to digits', () => {
+    const parsed = adoptionApplicationCreateSchema.parse(validPayload)
+    expect(parsed.document).toBe('52998224725')
+  })
+
+  it('accepts a valid CNPJ, normalising it to digits', () => {
+    const parsed = adoptionApplicationCreateSchema.parse({
+      ...validPayload,
+      document: '11.222.333/0001-81',
+    })
+    expect(parsed.document).toBe('11222333000181')
+  })
+
+  it('rejects a missing document', () => {
+    const { document, ...withoutDocument } = validPayload
+    void document
+    expect(adoptionApplicationCreateSchema.safeParse(withoutDocument).success).toBe(false)
+  })
+
+  it('rejects a document with an invalid checksum', () => {
     const result = adoptionApplicationCreateSchema.safeParse({
-      petId: '11111111-1111-4111-8111-111111111111',
+      ...validPayload,
+      document: '529.982.247-24',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a document of the wrong length', () => {
+    const result = adoptionApplicationCreateSchema.safeParse({
+      ...validPayload,
+      document: '5299822472',
     })
     expect(result.success).toBe(false)
   })

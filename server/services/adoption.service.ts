@@ -48,6 +48,7 @@ export class AdoptionService {
     return this.applications.create({
       petId: input.petId,
       adopterUserId,
+      document: input.document,
       contactPhone: input.contactPhone,
       message: input.message,
       age: input.age,

@@ -113,6 +113,7 @@ export interface AdoptionApplicationDto {
   id: string
   petId: string
   adopterUserId: string
+  document: string | null
   contactPhone: string | null
   message: string | null
   age: number
