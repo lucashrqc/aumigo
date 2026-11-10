@@ -15,6 +15,9 @@ const params = computed(() => ({
 }))
 const { data, isLoading } = usePublicPetsQuery(params)
 
+const petStatusVariant = (s: string) =>
+  s === 'available' ? 'success' : s === 'pending' ? 'warning' : 'secondary'
+
 watch([search, speciesFilter], () => {
   page.value = 1
 })
@@ -46,8 +49,14 @@ watch([search, speciesFilter], () => {
       Nenhum pet corresponde à sua busca no momento.
     </p>
 
-    <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <PetCard v-for="pet in data.items" :key="pet.id" :pet="pet" />
+    <div v-else class="flex flex-col gap-5">
+      <PetCard v-for="pet in data.items" :key="pet.id" :pet="pet">
+        <template #status>
+          <Badge :variant="petStatusVariant(pet.status)" class="shrink-0">
+            {{ petStatusLabel(pet.status) }}
+          </Badge>
+        </template>
+      </PetCard>
     </div>
 
     <Pagination

@@ -49,6 +49,11 @@ export interface AdoptionApplicationWithRelations extends AdoptionApplicationRow
       }
     | null
   adopter: { id: string; name: string; email: string } | null
+  city?: {
+    id: string
+    name: string
+    state: { id: string; name: string; uf: string } | null
+  } | null
 }
 
 export interface CreateApplicationData {
@@ -56,6 +61,20 @@ export interface CreateApplicationData {
   adopterUserId: string
   contactPhone: string
   message?: string
+  age: number
+  home: 'house' | 'apartment'
+  cityId: string
+  street: string
+  number: string
+  neighborhood: string
+  complement?: string | null
+  zipCode: string
+  isRental: boolean
+  allowPets?: boolean | null
+  firstPet: boolean
+  hasFinancialConditions: boolean
+  enclosureType?: ('walled' | 'fenced' | 'fully_enclosed' | 'is_netted')[] | null
+  acceptedTerms: boolean
 }
 
 export interface AdoptionApplicationRepository {
@@ -83,6 +102,10 @@ export interface AdoptionApplicationRepository {
 const withRelations = {
   pet: { columns: { id: true, name: true, status: true } },
   adopter: { columns: { id: true, name: true, email: true } },
+  city: {
+    columns: { id: true, name: true },
+    with: { state: { columns: { id: true, name: true, uf: true } } },
+  },
 } as const
 
 /** Richer pet embed for the adopter's own list: photos + vaccines + card meta. */

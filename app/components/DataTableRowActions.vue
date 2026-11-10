@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="TData">
-import { computed } from 'vue'
-import { MenuIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,13 +6,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Ellipsis } from '@lucide/vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   row: TData
   actions: RowAction<TData>[]
 }>()
 
-const visibleActions = computed(() => props.actions.filter((a) => !a.hidden?.(props.row)))
+const visibleActions = computed(() =>
+  props.actions.filter((a) => !a.hidden?.(props.row)),
+)
 </script>
 
 <template>
@@ -30,7 +32,11 @@ const visibleActions = computed(() => props.actions.filter((a) => !a.hidden?.(pr
         :title="action.label"
         @click="action.onClick(row)"
       >
-        <component :is="action.icon" v-if="action.icon" :class="action.iconClass ?? 'h-4 w-4'" />
+        <component
+          :is="action.icon"
+          v-if="action.icon"
+          :class="action.iconClass ?? 'h-4 w-4'"
+        />
         <span v-else>{{ action.label }}</span>
       </Button>
     </div>
@@ -39,7 +45,7 @@ const visibleActions = computed(() => props.actions.filter((a) => !a.hidden?.(pr
       <DropdownMenuTrigger as-child>
         <Button variant="ghost" class="h-8 w-8 p-0">
           <span class="sr-only">Abrir menu</span>
-          <MenuIcon class="h-4 w-4" />
+          <Ellipsis class="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -49,7 +55,11 @@ const visibleActions = computed(() => props.actions.filter((a) => !a.hidden?.(pr
           :class="action.class"
           @click="action.onClick(row)"
         >
-          <component :is="action.icon" v-if="action.icon" :class="action.iconClass ?? 'h-4 w-4'" />
+          <component
+            :is="action.icon"
+            v-if="action.icon"
+            :class="action.iconClass ?? 'h-4 w-4'"
+          />
           {{ action.label }}
         </DropdownMenuItem>
       </DropdownMenuContent>

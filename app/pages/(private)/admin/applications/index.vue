@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AdoptionApplicationDetailsDialog from '@/components/AdoptionApplicationDetailsDialog.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
@@ -9,6 +10,7 @@ import {
   CircleSlash,
   ClipboardList,
   Clock,
+  Eye,
   X,
 } from '@lucide/vue'
 import type { ColumnDef } from '@tanstack/vue-table'
@@ -108,7 +110,9 @@ async function handleCancel(row: AdoptionApplicationDto) {
     await cancelApplication(row.id)
     toast.success('Candidatura cancelada')
   } catch (err) {
-    toast.error(resolveErrorMessage(err, 'Não foi possível cancelar a candidatura'))
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível cancelar a candidatura'),
+    )
   }
 }
 
@@ -121,7 +125,20 @@ const statusClass: Record<string, string> = {
   canceled: 'bg-muted text-muted-foreground',
 }
 
+function openDetails(row: AdoptionApplicationDto) {
+  dialog.open(AdoptionApplicationDetailsDialog, {
+    dialogProps: { class: 'max-w-2xl' },
+    props: { application: row },
+  })
+}
+
 const actions: RowAction<AdoptionApplicationDto>[] = [
+  {
+    label: 'Ver detalhes',
+    icon: Eye,
+    iconClass: 'h-4 w-4',
+    onClick: (row) => openDetails(row),
+  },
   {
     label: 'Aprovar',
     icon: Check,
@@ -181,6 +198,63 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     cell: ({ row }) => row.original.contactPhone ?? '—',
   },
   {
+    id: 'age',
+    header: 'Idade',
+    cell: ({ row }) => `${row.original.age} anos`,
+  },
+  {
+    id: 'home',
+    header: 'Moradia',
+    cell: ({ row }) => homeLabel(row.original.home),
+  },
+  {
+    id: 'address',
+    header: 'Endereço',
+    meta: { class: 'max-w-xs' },
+    cell: ({ row }) => {
+      const a = row.original
+      const text =
+        [a.street, a.number].filter(Boolean).join(', ') +
+        (a.city ? ` · ${a.city.name}${a.city.state ? `/${a.city.state.uf}` : ''}` : '')
+      return h(
+        'span',
+        { class: 'block max-w-xs truncate', title: text },
+        text || '—',
+      )
+    },
+  },
+  {
+    id: 'isRental',
+    header: 'Aluguel?',
+    cell: ({ row }) => yesNoLabel(row.original.isRental),
+  },
+  {
+    id: 'firstPet',
+    header: '1º pet?',
+    cell: ({ row }) => yesNoLabel(row.original.firstPet),
+  },
+  {
+    id: 'hasFinancialConditions',
+    header: 'Condições?',
+    cell: ({ row }) => yesNoLabel(row.original.hasFinancialConditions),
+  },
+  {
+    id: 'enclosureType',
+    header: 'Vedação',
+    meta: { class: 'max-w-xs' },
+    cell: ({ row }) => {
+      const list = row.original.enclosureType ?? []
+      if (!list.length) return h('span', { class: 'text-muted-foreground' }, '—')
+      const text = list.map((v) => enclosureTypeLabel(v)).join(', ')
+      return h('span', { class: 'block max-w-xs truncate', title: text }, text)
+    },
+  },
+  {
+    id: 'acceptedTerms',
+    header: 'Termos',
+    cell: ({ row }) => yesNoLabel(row.original.acceptedTerms),
+  },
+  {
     id: 'message',
     header: 'Mensagem',
     meta: { class: 'max-w-xs' },
@@ -197,20 +271,6 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
         : h('span', { class: 'text-muted-foreground' }, '—'),
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) =>
-      h(
-        'span',
-        {
-          class: `rounded-full px-2 py-0.5 text-xs font-medium ${
-            statusClass[row.original.status] ?? 'bg-muted'
-          }`,
-        },
-        applicationStatusLabel(row.original.status),
-      ),
-  },
-  {
     accessorKey: 'createdAt',
     header: 'Enviada em',
     meta: { class: 'whitespace-nowrap' },
@@ -223,13 +283,44 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     cell: ({ row }) => formatDateTime(row.original.reviewedAt),
   },
   {
+    accessorKey: 'rejectedAt',
+    header: 'Rejeitada em',
+    meta: { class: 'whitespace-nowrap' },
+    cell: ({ row }) => formatDateTime(row.original.rejectedAt),
+  },
+  {
+    accessorKey: 'canceledAt',
+    header: 'Cancelada em',
+    meta: { class: 'whitespace-nowrap' },
+    cell: ({ row }) => formatDateTime(row.original.canceledAt),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    meta: {
+      class:
+        'bg-background md:sticky md:right-32 md:z-10 md:border-l md:shadow-[-8px_0_12px_-8px_rgba(0,0,0,0.12)]',
+    },
+    cell: ({ row }) =>
+      h(
+        'span',
+        {
+          class: `rounded-full px-2 py-0.5 text-xs font-medium ${
+            statusClass[row.original.status] ?? 'bg-muted'
+          }`,
+        },
+        applicationStatusLabel(row.original.status),
+      ),
+  },
+  {
     id: 'actions',
     header: 'Ações',
-    meta: { class: 'w-32 text-center whitespace-nowrap' },
+    meta: {
+      class:
+        'w-32 bg-background text-center whitespace-nowrap md:sticky md:right-0 md:z-10',
+    },
     cell: ({ row }) =>
-      row.original.status === 'pending' || row.original.status === 'approved'
-        ? h(DataTableRowActions as Component, { row: row.original, actions })
-        : h('span', { class: 'text-muted-foreground text-xs' }, 'Analisada'),
+      h(DataTableRowActions as Component, { row: row.original, actions }),
   },
 ]
 </script>
