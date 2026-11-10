@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Menu, PawPrint } from '@lucide/vue'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
+import { Menu, PawPrint } from '@lucide/vue'
+import { ref } from 'vue'
 
 const auth = useAuthStore()
 const menuOpen = ref(false)
@@ -17,28 +17,42 @@ async function logout() {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <header class="border-b">
+    <header class="px-6 md:px-10 lg:px-20">
       <div
-        class="container mx-auto flex h-16 items-center justify-between gap-4 px-4"
+        class="mx-auto flex h-22 max-w-7xl items-center justify-between lg:h-26"
       >
-        <NuxtLink to="/" class="flex items-center gap-2 font-bold">
-          <PawPrint class="h-5 w-5" />
-          <span>Aumigo</span>
+        <NuxtLink to="/" class="flex items-center gap-2.5">
+          <PawPrint class="size-7 text-forest" />
+          <span class="text-[30px] tracking-[-1.4px] text-forest">Aumigo</span>
         </NuxtLink>
 
-        <nav class="hidden items-center gap-2 sm:flex">
-          <Button as-child variant="ghost" size="sm">
-            <NuxtLink to="/pets">Adotar</NuxtLink>
-          </Button>
-
+        <nav class="hidden items-center gap-4 lg:gap-6 sm:flex">
+          <NuxtLink
+            to="/pets"
+            class="text-[14px] font-medium text-forest sm:block"
+            >Adotar</NuxtLink
+          >
           <template v-if="auth.isAuthenticated">
-            <Button v-if="auth.isStaff" as-child variant="ghost" size="sm">
-              <NuxtLink to="/admin">Admin</NuxtLink>
-            </Button>
-            <Button as-child variant="ghost" size="sm">
-              <NuxtLink to="/applications">Minhas candidaturas</NuxtLink>
-            </Button>
-            <Button variant="outline" size="sm" @click="logout">Sair</Button>
+            <NuxtLink
+              to="/applications"
+              class="text-[14px] font-medium text-forest sm:block"
+            >
+              Minhas candidaturas
+            </NuxtLink>
+            <NuxtLink
+              v-if="auth.isStaff"
+              to="/admin"
+              class="text-[14px] font-medium text-forest sm:block"
+            >
+              Admin
+            </NuxtLink>
+            <button
+              type="button"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              @click="logout"
+            >
+              Sair
+            </button>
           </template>
           <template v-else>
             <Button as-child variant="ghost" size="sm">

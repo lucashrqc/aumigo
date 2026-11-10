@@ -233,9 +233,13 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             as-child
             class="data-[slot=sidebar-menu-button]:p-1.5!"
           >
-            <NuxtLink href="/admin">
-              <PawPrint class="size-6! text-primary dark:text-brand" />
-              <span class="text-base text-primary dark:text-brand font-semibold"
+            <NuxtLink
+              to="/admin"
+              class="flex items-center gap-2.5 h-fit hover:bg-inherit!"
+            >
+              <PawPrint class="size-7! text-forest" />
+              <span
+                class="text-[30px] tracking-[-1.4px] text-forest dark:text-brand"
                 >Aumigo</span
               >
             </NuxtLink>
