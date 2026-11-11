@@ -3,6 +3,7 @@ import { Eye, EyeOff } from '@lucide/vue'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
+import { resolveAuthErrorMessage } from '#shared/utils/auth-error-messages'
 
 const emit = defineEmits<{ (e: 'success'): void }>()
 
@@ -19,7 +20,8 @@ async function submit() {
       email: email.value,
       password: password.value,
     })
-    if (error) throw new Error(error.message || 'Credenciais inválidas')
+    if (error)
+      throw new Error(resolveAuthErrorMessage(error, 'Credenciais inválidas'))
     await auth.fetchSession()
     emit('success')
   } catch (err) {

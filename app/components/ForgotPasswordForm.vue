@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'vue-sonner'
+import { resolveAuthErrorMessage } from '#shared/utils/auth-error-messages'
 
 const email = ref('')
 const loading = ref(false)
@@ -13,7 +14,10 @@ async function submit() {
       email: email.value,
       redirectTo: '/reset-password',
     })
-    if (error) throw new Error(error.message || 'Não foi possível enviar o e-mail')
+    if (error)
+      throw new Error(
+        resolveAuthErrorMessage(error, 'Não foi possível enviar o e-mail'),
+      )
     sent.value = true
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Falha ao enviar o e-mail')

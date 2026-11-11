@@ -3,6 +3,7 @@ import { Eye, EyeOff } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
+import { resolveAuthErrorMessage } from '#shared/utils/auth-error-messages'
 
 const props = defineProps<{ invite?: string }>()
 const emit = defineEmits<{ (e: 'success'): void }>()
@@ -38,7 +39,9 @@ async function submit() {
         password: password.value,
       })
       if (error)
-        throw new Error(error.message || 'Não foi possível criar a conta')
+        throw new Error(
+          resolveAuthErrorMessage(error, 'Não foi possível criar a conta'),
+        )
     }
 
     await auth.fetchSession()
