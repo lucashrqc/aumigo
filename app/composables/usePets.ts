@@ -79,7 +79,10 @@ export function useCreatePet() {
   return useMutation({
     mutationFn: (body: PetCreateInput) =>
       api<PetDto>('/api/admin/pets', { method: 'POST', body }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-pets'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-pets'] })
+      qc.invalidateQueries({ queryKey: ['public-pets'] })
+    },
   })
 }
 
@@ -92,6 +95,8 @@ export function useUpdatePet() {
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: ['admin-pets'] })
       qc.invalidateQueries({ queryKey: ['admin-pet', id] })
+      qc.invalidateQueries({ queryKey: ['public-pets'] })
+      qc.invalidateQueries({ queryKey: ['public-pet', id] })
     },
   })
 }
@@ -101,7 +106,10 @@ export function useDeletePet() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api(`/api/admin/pets/${id}`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-pets'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-pets'] })
+      qc.invalidateQueries({ queryKey: ['public-pets'] })
+    },
   })
 }
 
@@ -109,6 +117,8 @@ function invalidatePetLists(qc: ReturnType<typeof useQueryClient>, id: string) {
   qc.invalidateQueries({ queryKey: ['admin-pets'] })
   qc.invalidateQueries({ queryKey: ['admin-pet', id] })
   qc.invalidateQueries({ queryKey: ['admin-pet-stats'] })
+  qc.invalidateQueries({ queryKey: ['public-pets'] })
+  qc.invalidateQueries({ queryKey: ['public-pet', id] })
 }
 
 function invalidateApplicationLists(qc: ReturnType<typeof useQueryClient>) {

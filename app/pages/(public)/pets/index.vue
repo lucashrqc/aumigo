@@ -1,17 +1,24 @@
 <script setup lang="ts">
 import { Loader2Icon, PawPrint, SearchX } from '@lucide/vue'
-import { useInfiniteScroll } from '@vueuse/core'
+import { useDebounceFn, useInfiniteScroll } from '@vueuse/core'
 
 definePageMeta({ layout: 'public', footer: true })
 useHead({ title: 'Adote um pet — Aumigo' })
 
 const search = ref('')
+const debouncedSearch = ref('')
 const speciesFilter = ref('all')
+
+const updateDebouncedSearch = useDebounceFn((value: string) => {
+  debouncedSearch.value = value
+}, 400)
+
+watch(search, (value) => updateDebouncedSearch(value))
 
 const { data: species } = useSpeciesQuery()
 const params = computed(() => ({
   pageSize: 12,
-  search: search.value || undefined,
+  search: debouncedSearch.value || undefined,
   speciesId: speciesFilter.value === 'all' ? undefined : speciesFilter.value,
 }))
 
@@ -36,6 +43,7 @@ const hasActiveFilters = computed(
 
 function clearFilters() {
   search.value = ''
+  debouncedSearch.value = ''
   speciesFilter.value = 'all'
 }
 
