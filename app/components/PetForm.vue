@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { petCreateSchema, type PetCreateInput } from '#shared/schemas'
+import {
+  MAX_PET_IMAGES,
+  petCreateSchema,
+  type PetCreateInput,
+} from '#shared/schemas'
 import { useForm } from '@tanstack/vue-form'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
 
 const props = defineProps<{ initial?: PetDto | null; submitting?: boolean }>()
 const emit = defineEmits<{ (e: 'submit', payload: PetCreateInput): void }>()
+
+// An image is either already persisted (an existing URL) or a freshly cropped
+// file kept locally until the form is saved — uploads are deferred to submit.
+type PetFormImage =
+  | { kind: 'existing'; url: string }
+  | { kind: 'pending'; file: File; previewUrl: string }
+
+const imageSrc = (image: PetFormImage) =>
+  image.kind === 'existing' ? image.url : image.previewUrl
 
 const species = useSpeciesOptions()
 
@@ -32,9 +45,41 @@ const form = useForm({
     neutered: props.initial?.neutered ?? false,
     description: props.initial?.description ?? '',
     specialNeeds: props.initial?.specialNeeds ?? '',
-    images: (props.initial?.images ?? []).map((i) => ({ url: i.url })),
+    images: (props.initial?.images ?? []).map((i): PetFormImage => ({
+      kind: 'existing',
+      url: i.url,
+    })),
   },
-  onSubmit: ({ value }) => {
+  onSubmit: async ({ value }) => {
+    // Deferred uploads: cropped files are only sent to blob storage now, on
+    // save, then the resolved URLs flow into the shared schema as before.
+    let urls: string[]
+    try {
+      urls = await Promise.all(
+        value.images.map((image) =>
+          image.kind === 'existing'
+            ? Promise.resolve(image.url)
+            : uploadImage(image.file, {
+                pathPrefix: 'pets/',
+                handleUploadUrl: '/api/admin/uploads/pet-image',
+              }),
+        ),
+      )
+    } catch (err) {
+      toast.error(resolveErrorMessage(err, 'Falha ao enviar as imagens'))
+      return
+    }
+
+    // Replace uploaded files with their URLs so a save retry (e.g. after a
+    // failed pet request) reuses the stored blobs instead of re-uploading.
+    value.images.forEach((image) => {
+      if (image.kind === 'pending') URL.revokeObjectURL(image.previewUrl)
+    })
+    form.setFieldValue(
+      'images',
+      urls.map((url) => ({ kind: 'existing' as const, url })),
+    )
+
     // Shared schema stays the source of truth: build the API payload and let
     // petCreateSchema validate/normalize it before emitting.
     const parsed = petCreateSchema.safeParse({
@@ -49,9 +94,9 @@ const form = useForm({
       neutered: value.neutered,
       birthDate: value.birthDate || null,
       specialNeeds: value.specialNeeds || null,
-      images: value.images
-        .filter((i) => i.url.trim())
-        .map((i, position) => ({ url: i.url.trim(), position })),
+      images: urls
+        .filter((url) => url.trim())
+        .map((url, position) => ({ url: url.trim(), position })),
     })
 
     if (!parsed.success) {
@@ -61,6 +106,25 @@ const form = useForm({
     emit('submit', parsed.data)
   },
 })
+
+// Release object URLs for any still-pending previews when the form is destroyed.
+onBeforeUnmount(() => {
+  for (const image of form.state.values.images) {
+    if (image.kind === 'pending') URL.revokeObjectURL(image.previewUrl)
+  }
+})
+
+const removeImage = (
+  field: {
+    state: { value: PetFormImage[] }
+    removeValue: (index: number) => unknown
+  },
+  index: number,
+) => {
+  const image = field.state.value[index]
+  if (image?.kind === 'pending') URL.revokeObjectURL(image.previewUrl)
+  field.removeValue(index)
+}
 
 // Reactive view of the selected species so the breeds query refetches.
 const speciesId = form.useStore((state) => state.values.speciesId)
@@ -335,20 +399,21 @@ const sizeOptions = [
       <template #default="{ field: images }">
         <div class="space-y-2">
           <Label>Fotos</Label>
-          <div
-            v-if="images.state.value.length"
-            class="flex flex-wrap gap-3"
-          >
+          <div v-if="images.state.value.length" class="flex flex-wrap gap-3">
             <div
               v-for="(image, index) in images.state.value"
               :key="index"
               class="relative h-24 w-24 overflow-hidden rounded-md border"
             >
-              <img :src="image.url" alt="" class="h-full w-full object-cover">
+              <img
+                :src="imageSrc(image)"
+                alt=""
+                class="h-full w-full object-cover"
+              >
               <button
                 type="button"
                 class="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs leading-5 text-white"
-                @click="images.removeValue(index)"
+                @click="removeImage(images, index)"
               >
                 ✕
               </button>
@@ -362,11 +427,14 @@ const sizeOptions = [
             :aspect-ratio="16 / 9"
             :crop-width="1600"
             :crop-height="900"
-            :disabled="images.state.value.length >= 12"
-            @uploaded="(url) => images.pushValue({ url })"
+            :disabled="images.state.value.length >= MAX_PET_IMAGES"
+            defer-upload
+            @cropped="
+              (payload) => images.pushValue({ kind: 'pending', ...payload })
+            "
           />
           <p class="text-muted-foreground text-xs">
-            JPG, PNG ou WebP até 5 MB. Máximo de 12 fotos.
+            JPG, PNG ou WebP até 5 MB. Máximo de {{ MAX_PET_IMAGES }} fotos.
           </p>
         </div>
       </template>

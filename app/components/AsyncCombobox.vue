@@ -117,7 +117,6 @@ const triggerLabel = computed(() => {
   return registry.get(model.value) ?? props.initialOption?.label ?? model.value
 })
 
-// Debounced search; below the min length (or cleared) emit '' to show the default page.
 const emitSearch = useDebounceFn((value: string) => {
   emit('search', value.length >= props.minSearchLength ? value : '')
 }, props.debounceMs)
@@ -188,7 +187,7 @@ const showEmpty = computed(() => !props.isFetching && props.items.length === 0)
             v-model="rawSearch"
             :placeholder="searchPlaceholder"
             class="placeholder:text-muted-foreground flex h-10 w-full bg-transparent py-3 text-sm outline-hidden"
-          >
+          />
         </div>
         <CommandList ref="listRef">
           <div

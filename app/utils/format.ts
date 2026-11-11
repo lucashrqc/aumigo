@@ -47,22 +47,48 @@ export const formatDate = (value: string | Date | null | undefined): string => {
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
 }
 
+const monthsBetween = (from: Date, to: Date): number => {
+  let months =
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth())
+  if (to.getDate() < from.getDate()) months--
+  return months
+}
+
+const durationLabel = (months: number): string => {
+  if (months < 1) return 'Menos de 1 mês'
+  if (months < 12) return `${months} ${months === 1 ? 'mês' : 'meses'}`
+  const years = Math.floor(months / 12)
+  return `${years} ${years === 1 ? 'ano' : 'anos'}`
+}
+
 /** pt-BR age label derived from a birth date, or `null` when empty/invalid. */
 export const petAgeLabel = (
   value: string | Date | null | undefined,
 ): string | null => {
   const birth = toDate(value)
-  if (!birth) return null
+  return birth ? durationLabel(monthsBetween(birth, new Date())) : null
+}
+
+/**
+ * pt-BR "time in adoption" label from a start date (e.g. `publishedAt`): `Novo pet`
+ * under a day, then days / months / years, each suffixed `em adoção`. `null` when empty.
+ */
+export const petTimeInAdoptionLabel = (
+  value: string | Date | null | undefined,
+): string | null => {
+  const since = toDate(value)
+  if (!since) return null
 
   const now = new Date()
-  let months =
-    (now.getFullYear() - birth.getFullYear()) * 12 +
-    (now.getMonth() - birth.getMonth())
-  if (now.getDate() < birth.getDate()) months--
+  const months = monthsBetween(since, now)
+  if (months >= 12) {
+    const years = Math.floor(months / 12)
+    return `${years} ${years === 1 ? 'ano' : 'anos'} em adoção`
+  }
+  if (months >= 1) return `${months} ${months === 1 ? 'mês' : 'meses'} em adoção`
 
-  if (months < 1) return 'Menos de 1 mês'
-  if (months < 12) return `${months} ${months === 1 ? 'mês' : 'meses'}`
-
-  const years = Math.floor(months / 12)
-  return `${years} ${years === 1 ? 'ano' : 'anos'}`
+  const days = Math.floor((now.getTime() - since.getTime()) / 86_400_000)
+  if (days < 1) return 'Novo pet'
+  return `${days} ${days === 1 ? 'dia' : 'dias'} em adoção`
 }

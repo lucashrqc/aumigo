@@ -85,7 +85,7 @@ async function handleCancel(app: AdoptionApplicationDto) {
           @click="openGallery(application)"
         >
           <ImageIcon class="size-4" />
-          Ver galeria
+          Ver fotos
         </Button>
       </div>
 
