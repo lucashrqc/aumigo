@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { paginationSchema, uuidSchema } from './common'
+import { appliedVaccineFieldsSchema } from './vaccine'
 
 export const petSexValues = ['male', 'female', 'unknown'] as const
 export const petSizeValues = ['small', 'medium', 'large'] as const
@@ -24,12 +25,17 @@ export const petCreateSchema = z.object({
   birthDate: z.string().date().nullish(),
   status: z.enum(petStatusValues).default('pending'),
   images: z.array(petImageInputSchema).max(12).default([]),
+  // Optional vaccines registered together with a new pet (persisted atomically).
+  appliedVaccines: z.array(appliedVaccineFieldsSchema).max(30).default([]),
 })
 export type PetCreateInput = z.infer<typeof petCreateSchema>
 
 // Status is never set through the generic create/update form — new pets are
 // always 'pending' and transitions go through the dedicated action endpoints.
-export const petUpdateSchema = petCreateSchema.omit({ status: true }).partial()
+// Vaccines are managed individually, not through the pet update payload.
+export const petUpdateSchema = petCreateSchema
+  .omit({ status: true, appliedVaccines: true })
+  .partial()
 export type PetUpdateInput = z.infer<typeof petUpdateSchema>
 
 export const petListQuerySchema = paginationSchema.extend({

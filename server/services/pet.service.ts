@@ -5,6 +5,7 @@ import type {
   PetWithRelations,
 } from '../repositories/pet.repository'
 import type { AdoptionApplicationRepository } from '../repositories/adoption.repository'
+import type { VaccineRepository } from '../repositories/vaccine.repository'
 import type { PetCreateInput, PetListQuery, PetUpdateInput, Paginated } from '#shared/schemas'
 import type { PetStatsDto } from '#shared/types'
 
@@ -13,6 +14,7 @@ export class PetService {
     private readonly pets: PetRepository,
     private readonly images: ImageStorage,
     private readonly applications: AdoptionApplicationRepository,
+    private readonly vaccines: VaccineRepository,
   ) {}
 
   list(query: PetListQuery, options?: PetListOptions): Promise<Paginated<PetWithRelations>> {
@@ -30,6 +32,7 @@ export class PetService {
   }
 
   async create(input: PetCreateInput, actorId: string): Promise<PetWithRelations> {
+    await this.ensureVaccinesExist(input.appliedVaccines)
     const data = {
       ...input,
       status: 'pending' as const,
@@ -86,6 +89,15 @@ export class PetService {
     }
     await this.applications.markPetAdopted(id, actorId)
     return this.getById(id)
+  }
+
+  private async ensureVaccinesExist(
+    applied: PetCreateInput['appliedVaccines'],
+  ) {
+    for (const { vaccineId } of applied) {
+      const vaccine = await this.vaccines.findById(vaccineId)
+      if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Vacina desconhecida' })
+    }
   }
 
   private async normalizeImages(images: PetCreateInput['images']) {

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { parseDate, type DateValue } from '@internationalized/date'
+import {
+  getLocalTimeZone,
+  parseDate,
+  today,
+  type DateValue,
+} from '@internationalized/date'
 import { CalendarDays } from '@lucide/vue'
 import { vMaska } from 'maska/vue'
 
@@ -101,6 +106,10 @@ function onSelect(value: DateValue | undefined) {
   emit('update:modelValue', iso)
   open.value = false
 }
+
+function selectToday() {
+  onSelect(today(getLocalTimeZone()))
+}
 </script>
 
 <template>
@@ -139,6 +148,17 @@ function onSelect(value: DateValue | undefined) {
         :max-value="maxValue"
         @update:model-value="onSelect"
       />
+      <div class="border-t p-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="w-full"
+          @click="selectToday"
+        >
+          Hoje
+        </Button>
+      </div>
     </PopoverContent>
   </Popover>
 </template>

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import AppliedVaccineEditDialog from '@/components/AppliedVaccineEditDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { Pencil, Trash2 } from '@lucide/vue'
+import type { AppliedVaccineFieldsInput } from '#shared/schemas'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'private', middleware: 'staff' })
@@ -25,35 +29,63 @@ async function handleUpdate(payload: Parameters<typeof updatePet>[0]['body']) {
 // --- Vaccination records ---
 const { data: applied } = usePetVaccinesQuery(id)
 const { data: vaccines } = useVaccinesQuery()
-const vaccineOptions = useVaccineOptions()
-const { mutateAsync: applyVaccine, isPending: applying } = useApplyVaccine()
+const { mutateAsync: applyVaccine } = useApplyVaccine()
+const { mutateAsync: updateApplied } = useUpdateAppliedVaccine()
+const { mutateAsync: deleteApplied } = useDeleteAppliedVaccine()
 
-const vax = reactive({
-  vaccineId: '',
-  applicationDate: '',
-  nextDoseDate: '',
-  vetLicense: '',
-  batchNumber: '',
-})
+const dialog = useDialog()
+// Remount the add form after a successful registration to clear its fields.
+const formKey = ref(0)
 
-async function recordVaccine() {
+async function handleApply(payload: AppliedVaccineFieldsInput) {
   try {
-    await applyVaccine({
-      petId: id.value,
-      vaccineId: vax.vaccineId,
-      applicationDate: vax.applicationDate,
-      nextDoseDate: vax.nextDoseDate || null,
-      vetLicense: vax.vetLicense || null,
-      batchNumber: vax.batchNumber || null,
-    })
+    await applyVaccine({ petId: id.value, ...payload })
     toast.success('Vacina registrada')
-    vax.vaccineId = ''
-    vax.applicationDate = ''
-    vax.nextDoseDate = ''
-    vax.vetLicense = ''
-    vax.batchNumber = ''
+    formKey.value++
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Não foi possível registrar a vacina'))
+  }
+}
+
+async function handleEdit(row: AppliedVaccineDto) {
+  const payload = await dialog.open<AppliedVaccineFieldsInput | undefined>(
+    AppliedVaccineEditDialog,
+    {
+      dialogProps: {
+        title: 'Editar registro de vacina',
+        description: 'Atualize os dados da vacina aplicada.',
+        class: 'max-w-2xl',
+      },
+      props: { initial: row },
+    },
+  )
+  if (!payload) return
+  try {
+    await updateApplied({ id: row.id, petId: id.value, body: payload })
+    toast.success('Registro atualizado')
+  } catch (err) {
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível atualizar o registro'),
+    )
+  }
+}
+
+async function handleRemove(row: AppliedVaccineDto) {
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Remover registro de vacina',
+      description: `Remover o registro de ${vaccineName(row.vaccineId)}?`,
+      confirmText: 'Remover',
+      destructive: true,
+    },
+  })
+  if (!ok) return
+  try {
+    await deleteApplied({ id: row.id, petId: id.value })
+    toast.success('Registro removido')
+  } catch (err) {
+    toast.error(resolveErrorMessage(err))
   }
 }
 
@@ -95,64 +127,44 @@ const vaccineName = (vaccineId: string) =>
               <TableHead>Aplicada</TableHead>
               <TableHead>Próxima dose</TableHead>
               <TableHead>Lote</TableHead>
+              <TableHead class="w-24 text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-for="a in applied ?? []" :key="a.id">
               <TableCell>{{ vaccineName(a.vaccineId) }}</TableCell>
-              <TableCell>{{ a.applicationDate }}</TableCell>
-              <TableCell>{{ a.nextDoseDate ?? '—' }}</TableCell>
+              <TableCell>{{ formatDate(a.applicationDate) }}</TableCell>
+              <TableCell>{{ formatDate(a.nextDoseDate) }}</TableCell>
               <TableCell>{{ a.batchNumber ?? '—' }}</TableCell>
+              <TableCell class="text-right">
+                <div class="flex justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Editar"
+                    @click="handleEdit(a)"
+                  >
+                    <Pencil class="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="text-destructive"
+                    aria-label="Remover"
+                    @click="handleRemove(a)"
+                  >
+                    <Trash2 class="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
             </TableRow>
-            <TableEmpty v-if="!applied?.length" :colspan="4"
+            <TableEmpty v-if="!applied?.length" :colspan="5"
               >Nenhuma vacina registrada ainda.</TableEmpty
             >
           </TableBody>
         </Table>
 
-        <form
-          class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-          @submit.prevent="recordVaccine"
-        >
-          <div>
-            <Label>Vacina</Label>
-            <AsyncCombobox
-              v-model="vax.vaccineId"
-              :items="vaccineOptions.items"
-              :is-fetching="vaccineOptions.isFetching"
-              :is-fetching-next-page="vaccineOptions.isFetchingNextPage"
-              :has-next-page="vaccineOptions.hasNextPage"
-              :resolve-by-id="vaccineOptions.resolveById"
-              option-value="id"
-              option-label="name"
-              placeholder="Selecione a vacina"
-              search-placeholder="Buscar vacina…"
-              @search="vaccineOptions.setSearch"
-              @can-load-more="vaccineOptions.loadMore"
-            />
-          </div>
-          <div>
-            <Label>Data de aplicação</Label>
-            <Input v-model="vax.applicationDate" type="date" required />
-          </div>
-          <div>
-            <Label>Próxima dose</Label>
-            <Input v-model="vax.nextDoseDate" type="date" />
-          </div>
-          <div>
-            <Label>CRMV do veterinário</Label>
-            <Input v-model="vax.vetLicense" />
-          </div>
-          <div>
-            <Label>Número do lote</Label>
-            <Input v-model="vax.batchNumber" />
-          </div>
-          <div class="flex items-end">
-            <Button type="submit" :disabled="applying || !vax.vaccineId"
-              >Registrar vacina</Button
-            >
-          </div>
-        </form>
+        <AppliedVaccineForm :key="formKey" @submit="handleApply" />
       </CardContent>
     </Card>
   </div>

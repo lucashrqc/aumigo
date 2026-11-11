@@ -1,7 +1,9 @@
+import { getLocalTimeZone, today } from '@internationalized/date'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import type {
   AppliedVaccineCreateInput,
+  AppliedVaccineUpdateInput,
   Paginated,
   VaccineCreateInput,
   VaccineListQuery,
@@ -22,11 +24,13 @@ export function useAdminVaccinesQuery(params: VaccineListParams = () => ({})) {
   })
 }
 
-/** Infinite, searchable vaccine options for `AsyncCombobox`. */
+/** Infinite, searchable vaccine options for `AsyncCombobox` — valid (non-expired) only. */
 export function useVaccineOptions() {
+  const validOn = today(getLocalTimeZone()).toString()
   return useInfiniteOptions<VaccineDto>({
-    queryKey: ['vaccines'],
+    queryKey: ['vaccines', 'options', validOn],
     endpoint: '/api/admin/vaccines',
+    query: { validOn },
   })
 }
 
@@ -106,5 +110,37 @@ export function useApplyVaccine() {
       }),
     onSuccess: (_data, body) =>
       qc.invalidateQueries({ queryKey: ['pet-vaccines', body.petId] }),
+  })
+}
+
+export function useUpdateAppliedVaccine() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string
+      petId: string
+      body: AppliedVaccineUpdateInput
+    }) =>
+      api<AppliedVaccineDto>(`/api/admin/applied-vaccines/${id}`, {
+        method: 'PATCH',
+        body,
+      }),
+    onSuccess: (_data, { petId }) =>
+      qc.invalidateQueries({ queryKey: ['pet-vaccines', petId] }),
+  })
+}
+
+export function useDeleteAppliedVaccine() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id }: { id: string; petId: string }) =>
+      api(`/api/admin/applied-vaccines/${id}`, { method: 'DELETE' }),
+    onSuccess: (_data, { petId }) =>
+      qc.invalidateQueries({ queryKey: ['pet-vaccines', petId] }),
   })
 }

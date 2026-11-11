@@ -1,8 +1,9 @@
-import { and, asc, count, desc, eq, ilike } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ilike, isNull, or } from 'drizzle-orm'
 import type { Database } from '../database/client'
 import { appliedVaccine, vaccine } from '../database/schema'
 import type {
   AppliedVaccineCreateInput,
+  AppliedVaccineUpdateInput,
   Paginated,
   VaccineCreateInput,
   VaccineListQuery,
@@ -33,6 +34,12 @@ export class DrizzleVaccineRepository implements VaccineRepository {
     const conditions = [
       eq(vaccine.active, true),
       query.search ? ilike(vaccine.name, `%${query.search}%`) : undefined,
+      query.validOn
+        ? or(
+            isNull(vaccine.expirationDate),
+            gte(vaccine.expirationDate, query.validOn),
+          )
+        : undefined,
     ].filter(Boolean)
 
     const where = conditions.length ? and(...conditions) : undefined
@@ -92,7 +99,13 @@ export class DrizzleVaccineRepository implements VaccineRepository {
 
 export interface AppliedVaccineRepository {
   listByPet(petId: string): Promise<AppliedVaccineRow[]>
+  findById(id: string): Promise<AppliedVaccineRow | null>
   create(data: AppliedVaccineCreateInput, actorId: string): Promise<AppliedVaccineRow>
+  update(
+    id: string,
+    data: AppliedVaccineUpdateInput,
+    actorId: string,
+  ): Promise<AppliedVaccineRow | null>
   delete(id: string): Promise<void>
 }
 
@@ -106,12 +119,28 @@ export class DrizzleAppliedVaccineRepository implements AppliedVaccineRepository
     })
   }
 
+  async findById(id: string) {
+    const row = await this.db.query.appliedVaccine.findFirst({
+      where: eq(appliedVaccine.id, id),
+    })
+    return row ?? null
+  }
+
   async create(data: AppliedVaccineCreateInput, actorId: string) {
     const [row] = await this.db
       .insert(appliedVaccine)
       .values({ ...data, createdBy: actorId, updatedBy: actorId })
       .returning()
     return row!
+  }
+
+  async update(id: string, data: AppliedVaccineUpdateInput, actorId: string) {
+    const [row] = await this.db
+      .update(appliedVaccine)
+      .set({ ...data, updatedBy: actorId, updatedAt: new Date() })
+      .where(eq(appliedVaccine.id, id))
+      .returning()
+    return row ?? null
   }
 
   async delete(id: string) {

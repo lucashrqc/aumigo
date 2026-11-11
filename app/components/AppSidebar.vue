@@ -90,7 +90,7 @@ const data = {
       items: [
         {
           title: 'Vacinas',
-          url: '/admin/cadastro/vacinas',
+          url: '/admin/vaccines',
         },
         {
           title: 'Espécies',
