@@ -70,6 +70,11 @@ async function submit() {
           <component :is="showPassword ? EyeOff : Eye" class="size-4.5" />
         </button>
       </div>
+      <NuxtLink
+        to="/forgot-password"
+        class="self-end text-[13px] text-forest/70 underline hover:text-forest"
+        >Esqueceu a senha?</NuxtLink
+      >
     </div>
 
     <Button

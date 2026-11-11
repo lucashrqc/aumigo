@@ -93,6 +93,7 @@ describe('DrizzlePetRepository', () => {
         neutered: true,
         status: 'available',
         images: [{ url: 'https://example.com/rex.jpg', position: 0 }],
+        appliedVaccines: [],
       },
       staffId,
     )
@@ -109,7 +110,7 @@ describe('DrizzlePetRepository', () => {
 describe('DrizzleAdoptionApplicationRepository.approve', () => {
   it('approves one application, adopts the pet, and rejects competitors', async () => {
     const pet = await pets.create(
-      { name: 'Bella', speciesId, sex: 'female', neutered: false, status: 'available', images: [] },
+      { name: 'Bella', speciesId, sex: 'female', neutered: false, status: 'available', images: [], appliedVaccines: [] },
       staffId,
     )
     const adopterA = await makeUser('adopter')
@@ -132,7 +133,7 @@ describe('DrizzleAdoptionApplicationRepository.approve', () => {
 
   it('blocks a duplicate open application via the partial unique index', async () => {
     const pet = await pets.create(
-      { name: 'Max', speciesId, sex: 'male', neutered: false, status: 'available', images: [] },
+      { name: 'Max', speciesId, sex: 'male', neutered: false, status: 'available', images: [], appliedVaccines: [] },
       staffId,
     )
     const adopter = await makeUser('adopter')

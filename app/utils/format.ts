@@ -32,6 +32,16 @@ export const formatDateTime = (value: string | Date | null | undefined): string 
 
 /** Format a date as `dd/mm/YYYY` in local time, or `—` when empty/invalid. */
 export const formatDate = (value: string | Date | null | undefined): string => {
+  // A date-only ISO string ('YYYY-MM-DD') is a calendar date, not an instant:
+  // parsing it via `new Date` treats it as UTC midnight and can shift the day
+  // in negative-offset timezones, so format it from its parts directly.
+  if (typeof value === 'string') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (match) {
+      const [, y, m, d] = match
+      return `${d}/${m}/${y}`
+    }
+  }
   const date = toDate(value)
   if (!date) return '—'
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
