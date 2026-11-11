@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   Camera,
-  CircleQuestionMark,
   ClipboardList,
   Database,
   Dog,
@@ -9,6 +8,7 @@ import {
   FileText,
   FolderPlus,
   LayoutDashboard,
+  LogOut,
   PawPrint,
   Search,
   Settings,
@@ -35,6 +35,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
@@ -47,6 +48,12 @@ const user = computed(() => ({
   email: auth.user?.email ?? '',
   avatar: auth.user?.image ?? '',
 }))
+
+async function logout() {
+  await authClient.signOut()
+  auth.setUser(null)
+  await navigateTo('/')
+}
 
 const data = {
   navMain: [
@@ -146,19 +153,16 @@ const data = {
   ],
   navSecondary: [
     {
-      title: 'Settings',
-      url: '#',
+      title: 'Configurações',
+      url: '/admin/settings',
       icon: Settings,
     },
     {
-      title: 'Get Help',
-      url: '#',
-      icon: CircleQuestionMark,
-    },
-    {
-      title: 'Search',
-      url: '#',
-      icon: Search,
+      title: 'Sair',
+      class: 'hover:bg-red-100 cursor-pointer',
+      icon: LogOut,
+      iconClass: 'text-red-400',
+      onClick: logout,
     },
   ],
   documents: [
@@ -271,12 +275,15 @@ useEventListener('keydown', (event: KeyboardEvent) => {
     <SidebarContent>
       <NavMain :items="filteredNavMain" :searching="isSearching" />
       <!-- <NavDocuments :items="data.documents" /> -->
-      <!-- <NavSecondary :items="data.navSecondary" class="mt-auto" /> -->
+      <NavSecondary :items="data.navSecondary" class="mt-auto">
+        <template #before>
+          <div class="flex justify-center px-1 pb-1">
+            <ThemeSwitcher />
+          </div>
+        </template>
+      </NavSecondary>
     </SidebarContent>
     <SidebarFooter>
-      <div class="flex justify-center px-1 pb-1">
-        <ThemeSwitcher />
-      </div>
       <NavUser :user="user" />
     </SidebarFooter>
   </Sidebar>

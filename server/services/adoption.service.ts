@@ -88,7 +88,11 @@ export class AdoptionService {
       }
       await this.applications.approve(applicationId, application.petId, reviewerId)
     } else {
-      await this.applications.reject(applicationId, reviewerId)
+      await this.applications.reject(
+        applicationId,
+        reviewerId,
+        input.rejectReason ?? null,
+      )
     }
 
     return (await this.applications.findById(applicationId))!

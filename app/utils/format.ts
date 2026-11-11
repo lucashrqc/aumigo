@@ -2,6 +2,18 @@
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
+const onlyDigits = (value: string) => value.replace(/\D/g, '')
+
+/** Format a BR phone for display: 10 digits as (XX) XXXX-XXXX, 11 as (XX) XXXXX-XXXX. */
+export const formatPhone = (value: string | null | undefined): string => {
+  const digits = onlyDigits(value ?? '')
+  if (digits.length === 10)
+    return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
+  if (digits.length === 11)
+    return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+  return value?.trim() || '—'
+}
+
 const toDate = (value: string | Date | null | undefined): Date | null => {
   if (!value) return null
   const date = value instanceof Date ? value : new Date(value)

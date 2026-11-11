@@ -64,6 +64,7 @@ export type AdoptionApplicationCreateInput = z.infer<typeof adoptionApplicationC
 /** Staff decision on an application. */
 export const adoptionApplicationReviewSchema = z.object({
   decision: z.enum(['approved', 'rejected']),
+  rejectReason: z.string().trim().max(1000).optional(),
 })
 export type AdoptionApplicationReviewInput = z.infer<typeof adoptionApplicationReviewSchema>
 

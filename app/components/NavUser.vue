@@ -1,24 +1,6 @@
 <script setup lang="ts">
-import { EllipsisVertical, LogOut, Settings } from '@lucide/vue'
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from '@/components/ui/sidebar'
-import { authClient } from '@/lib/auth-client'
-import { useAuthStore } from '@/stores/auth'
+import { SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar'
 
 interface User {
   name: string
@@ -30,20 +12,38 @@ defineProps<{
   user: User
 }>()
 
-const { isMobile } = useSidebar()
-const auth = useAuthStore()
+// const { isMobile } = useSidebar()
+// const auth = useAuthStore()
 
-async function logout() {
-  await authClient.signOut()
-  auth.setUser(null)
-  await navigateTo('/')
-}
+// async function logout() {
+//   await authClient.signOut()
+//   auth.setUser(null)
+//   await navigateTo('/')
+// }
 </script>
 
 <template>
   <SidebarMenu>
     <SidebarMenuItem>
-      <DropdownMenu>
+      <SidebarMenuButton
+        size="lg"
+        class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-inherit"
+      >
+        <Avatar class="h-8 w-8 rounded-lg">
+          <AvatarImage :src="user.avatar" :alt="user.name" />
+          <AvatarFallback class="rounded-lg">
+            {{ getInitials(user.name) }}
+          </AvatarFallback>
+        </Avatar>
+        <div class="grid flex-1 text-left text-sm leading-tight">
+          <span class="truncate font-medium">{{ user.name }}</span>
+          <span class="text-muted-foreground truncate text-xs">
+            {{ user.email }}
+          </span>
+        </div>
+      </SidebarMenuButton>
+
+      <!-- <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <SidebarMenuButton
             size="lg"
@@ -98,7 +98,7 @@ async function logout() {
             Sair
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> -->
     </SidebarMenuItem>
   </SidebarMenu>
 </template>
