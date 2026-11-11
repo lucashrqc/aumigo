@@ -6,6 +6,8 @@ export const petSexValues = ['male', 'female', 'unknown'] as const
 export const petSizeValues = ['small', 'medium', 'large'] as const
 export const petStatusValues = ['available', 'pending', 'adopted'] as const
 
+export const MAX_PET_IMAGES = 5
+
 export const petImageInputSchema = z.object({
   url: z.string().url(),
   position: z.number().int().min(0).default(0),
@@ -24,7 +26,7 @@ export const petCreateSchema = z.object({
   neutered: z.boolean().default(false),
   birthDate: z.string().date().nullish(),
   status: z.enum(petStatusValues).default('pending'),
-  images: z.array(petImageInputSchema).max(12).default([]),
+  images: z.array(petImageInputSchema).max(MAX_PET_IMAGES).default([]),
   // Optional vaccines registered together with a new pet (persisted atomically).
   appliedVaccines: z.array(appliedVaccineFieldsSchema).max(30).default([]),
 })

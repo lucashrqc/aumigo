@@ -6,8 +6,9 @@ import {
 } from '#shared/schemas'
 import { isValidDocument } from '#shared/utils/document'
 import AdoptionTermsDialog from '@/components/AdoptionTermsDialog.vue'
+import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
 import useDialog from '@/composables/useDialog'
-import { PawPrint } from '@lucide/vue'
+import { ImageIcon, PawPrint } from '@lucide/vue'
 import { useForm } from '@tanstack/vue-form'
 import { watch } from 'vue'
 import { toast } from 'vue-sonner'
@@ -27,7 +28,7 @@ const dialog = useDialog()
 // the pet (or the listing) instead.
 function dismiss() {
   if (isPage.value) {
-    return navigateTo(props.petId ? `/pets/${props.petId}` : '/pets')
+    return navigateTo('/pets')
   }
   dialog.close()
 }
@@ -55,6 +56,18 @@ const petMeta = computed(() => {
   if (p.size) parts.push(`Porte ${petSizeLabel(p.size).toLowerCase()}`)
   return parts.join(' · ')
 })
+
+function openGallery() {
+  if (!pet.value) return
+  dialog.open(PetGalleryDialog, {
+    dialogProps: {
+      class:
+        'max-w-[calc(100%-2rem)] p-0 bg-white text-forest border-brand sm:max-w-2xl',
+      showCloseButton: false,
+    },
+    props: { pet: pet.value },
+  })
+}
 
 const homeOptions = [
   { label: 'Casa', value: 'house' },
@@ -203,25 +216,38 @@ const boolFieldValue = (v: boolean | undefined) =>
     />
     <div
       v-else-if="pet"
-      class="flex flex-col gap-3 rounded-xl border border-brand bg-[#fffcf7] p-4"
+      class="relative flex flex-col gap-3 rounded-xl border border-brand bg-[#fffcf7] p-4"
     >
+      <button
+        type="button"
+        :aria-label="`Ver galeria de fotos de ${pet.name}`"
+        class="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-brand bg-white px-3 py-1.5 text-[12px] font-medium text-forest transition-colors hover:bg-cream-soft"
+        @click="openGallery()"
+      >
+        <ImageIcon class="size-3.5" />
+        Ver fotos
+      </button>
+
       <div class="flex items-center gap-4">
-        <div
-          class="h-33 w-33 shrink-0 overflow-hidden rounded-lg bg-cream-soft"
+        <button
+          type="button"
+          :aria-label="`Ver galeria de fotos de ${pet.name}`"
+          class="h-33 w-33 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-cream-soft transition-opacity hover:opacity-90"
+          @click="openGallery()"
         >
           <img
             v-if="petPhoto"
             :src="petPhoto"
             :alt="pet.name"
             class="h-full w-full object-cover backface-hidden"
-          >
+          />
           <div
             v-else
             class="flex h-full w-full items-center justify-center text-forest/40"
           >
             <PawPrint class="size-10" />
           </div>
-        </div>
+        </button>
         <div class="flex min-w-0 flex-1 flex-col gap-2">
           <p
             class="text-[24px] font-medium tracking-[-0.7px] text-forest leading-none"

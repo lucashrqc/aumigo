@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { ImageIcon, X } from '@lucide/vue'
 import useDialog from '@/composables/useDialog'
-import type { CarouselApi } from '@/components/ui/carousel'
 import type { PetImageDto } from '#shared/types'
 
 const props = defineProps<{
@@ -19,17 +18,7 @@ const { close } = useDialog()
 const placeholder = '/images/aumigo/pet-placeholder.jpeg'
 
 const images = computed(() => props.pet.images ?? [])
-const hasImages = computed(() => images.value.length > 0)
 const total = computed(() => images.value.length)
-
-const current = ref(1)
-function onInitApi(api: CarouselApi) {
-  if (!api) return
-  current.value = api.selectedScrollSnap() + 1
-  api.on('select', () => {
-    current.value = api.selectedScrollSnap() + 1
-  })
-}
 
 const meta = computed(() =>
   [
@@ -68,48 +57,11 @@ const photoCountLabel = computed(() =>
       </button>
     </div>
 
-    <Carousel
-      v-if="hasImages"
-      class="w-full"
-      :opts="{ loop: total > 1 }"
-      @init-api="onInitApi"
-    >
-      <CarouselContent>
-        <CarouselItem v-for="img in images" :key="img.id">
-          <img
-            :src="img.url"
-            :alt="pet.name"
-            class="aspect-square w-full rounded-[16px] object-cover sm:aspect-4/3"
-          >
-        </CarouselItem>
-      </CarouselContent>
-
-      <span
-        class="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[12px] font-medium text-forest shadow-sm"
-      >
-        {{ current }} de {{ total }}
-      </span>
-
-      <template v-if="total > 1">
-        <CarouselPrevious
-          class="left-4 size-10 border-none bg-white/90 text-forest shadow-sm hover:bg-white"
-        />
-        <CarouselNext
-          class="right-4 size-10 border-none bg-white/90 text-forest shadow-sm hover:bg-white"
-        />
-      </template>
-    </Carousel>
-
-    <div
-      v-else
-      class="flex aspect-square w-full items-center justify-center rounded-[16px] bg-cream-soft text-text-soft sm:aspect-4/3"
-    >
-      <img
-        :src="placeholder"
-        :alt="pet.name"
-        class="aspect-square w-full rounded-[16px] object-cover sm:aspect-4/3"
-      >
-    </div>
+    <PetImageCarousel
+      :images="images"
+      :alt="pet.name"
+      aspect-class="aspect-square sm:aspect-4/3"
+    />
 
     <div class="flex items-center gap-3">
       <img

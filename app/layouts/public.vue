@@ -4,6 +4,7 @@ import { Menu, PawPrint } from '@lucide/vue'
 import { ref } from 'vue'
 
 const auth = useAuthStore()
+const route = useRoute()
 const menuOpen = ref(false)
 const signOut = useLogout()
 
@@ -14,7 +15,7 @@ async function logout() {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex min-h-screen flex-col bg-white">
     <header class="px-6 md:px-10 lg:px-20">
       <div
         class="mx-auto flex h-22 max-w-7xl items-center justify-between lg:h-26"
@@ -137,8 +138,6 @@ async function logout() {
       <slot />
     </main>
 
-    <footer class="border-t py-6 text-center text-sm text-muted-foreground">
-      Aumigo — encontre seu novo melhor amigo.
-    </footer>
+    <LandingFooter v-if="route.meta.footer" />
   </div>
 </template>

@@ -1,29 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ImageIcon } from '@lucide/vue'
+import { ArrowUpRight, PawPrint } from '@lucide/vue'
 import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
 import useDialog from '@/composables/useDialog'
-import type { PetImageDto, PetVaccineDto } from '#shared/types'
+import type { PetDto } from '#shared/types'
 
-type PetCardPet = {
-  id: string
-  name: string
-  description?: string | null
-  size?: 'small' | 'medium' | 'large' | null
-  birthDate?: string | null
-  images?: PetImageDto[]
-  vaccines?: PetVaccineDto[]
+const props = defineProps<{ pet: PetDto }>()
+
+const sexArticle: Record<PetDto['sex'], string> = {
+  male: 'o ',
+  female: 'a ',
+  unknown: '',
 }
 
-const props = defineProps<{ pet: PetCardPet }>()
-
-const dialog = useDialog()
-
-const placeholder = '/images/aumigo/pet-placeholder.jpeg'
-
-const coverUrl = computed(() => props.pet.images?.[0]?.url ?? placeholder)
-
-const metaLine = computed(() =>
+const ageSizeLine = computed(() =>
   [
     petAgeLabel(props.pet.birthDate),
     props.pet.size ? `Porte ${petSizeLabel(props.pet.size)}` : null,
@@ -32,7 +22,15 @@ const metaLine = computed(() =>
     .join(' · '),
 )
 
-function openGallery() {
+const timeInAdoption = computed(() =>
+  petTimeInAdoptionLabel(props.pet.publishedAt),
+)
+
+const { startApplication } = useAdoptionFlow()
+const dialog = useDialog()
+
+function openGallery(event: MouseEvent) {
+  if ((event.target as HTMLElement).closest('button')) return
   dialog.open(PetGalleryDialog, {
     dialogProps: {
       class:
@@ -45,64 +43,65 @@ function openGallery() {
 </script>
 
 <template>
-  <article class="rounded-[20px] border border-brand/40 bg-white p-6">
-    <div class="flex flex-col gap-6 sm:flex-row">
-      <div class="flex w-full shrink-0 flex-col gap-3 sm:w-48">
-        <img
-          :src="coverUrl"
+  <article class="flex h-full flex-col overflow-hidden rounded-[28px] bg-white">
+    <div class="bg-cream-soft p-3 rounded-[16px]">
+      <div class="cursor-pointer" @click="openGallery">
+        <PetImageCarousel
+          :images="pet.images"
           :alt="pet.name"
-          class="aspect-square w-full rounded-[16px] object-cover"
-        >
-        <Button
-          variant="outline"
-          class="w-full border-brand text-forest hover:bg-cream-soft"
-          :disabled="!pet.images?.length"
-          @click="openGallery"
-        >
-          <ImageIcon class="size-4" />
-          Ver galeria
-        </Button>
+          aspect-class="aspect-4/3"
+        />
       </div>
 
-      <div class="flex min-w-0 flex-1 flex-col gap-3">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <NuxtLink
-              :to="`/pets/${pet.id}`"
-              class="text-[24px] font-semibold tracking-[-0.5px] text-forest hover:underline"
-            >
-              {{ pet.name }}
-            </NuxtLink>
-            <p v-if="metaLine" class="text-[14px] text-text-soft">
-              {{ metaLine }}
-            </p>
-          </div>
-          <slot name="status" />
-        </div>
-
-        <p v-if="pet.description" class="text-[15px] text-text-soft">
-          {{ pet.description }}
-        </p>
-
-        <div v-if="pet.vaccines?.length" class="flex flex-col gap-2">
-          <span
-            class="text-[11px] font-semibold uppercase tracking-[1px] text-forest/60"
-          >
-            Vacinas recebidas
+      <div class="flex items-baseline justify-between gap-2 px-2 pb-1 pt-3">
+        <div class="flex min-w-0 items-baseline gap-2">
+          <span class="shrink-0 text-[16px] font-semibold text-forest">
+            {{ pet.name }}
           </span>
-          <div class="flex flex-wrap gap-2">
-            <Badge
-              v-for="vaccine in pet.vaccines"
-              :key="vaccine.id"
-              class="border-none bg-cream-soft text-forest"
-            >
-              {{ vaccine.name }}
-            </Badge>
-          </div>
+          <span v-if="ageSizeLine" class="truncate text-[13px] text-text-soft">
+            {{ ageSizeLine }}
+          </span>
         </div>
-
-        <slot />
+        <PawPrint class="size-4.5 shrink-0 self-center text-forest" />
       </div>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-3 p-4 pt-3">
+      <div
+        v-if="pet.species || pet.vaccines?.length"
+        class="flex flex-wrap gap-2"
+      >
+        <Badge v-if="pet.species" class="border-none bg-forest text-white">
+          {{ pet.species.name }}
+        </Badge>
+        <Badge
+          v-for="vaccine in pet.vaccines"
+          :key="vaccine.id"
+          class="border-none bg-cream-soft text-forest"
+        >
+          {{ vaccine.name }}
+        </Badge>
+      </div>
+
+      <p
+        v-if="pet.description"
+        class="line-clamp-2 text-[14px] leading-normal text-text-soft"
+      >
+        {{ pet.description }}
+      </p>
+
+      <p v-if="timeInAdoption" class="text-[13px] font-medium text-forest">
+        {{ timeInAdoption }}
+      </p>
+
+      <button
+        type="button"
+        class="mt-auto inline-flex h-11 items-center justify-center gap-2.5 rounded-xl bg-forest px-5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+        @click="startApplication({ id: pet.id, name: pet.name })"
+      >
+        Quero conhecer {{ sexArticle[pet.sex] }}{{ pet.name }}
+        <ArrowUpRight class="size-4.5 shrink-0" />
+      </button>
     </div>
   </article>
 </template>
