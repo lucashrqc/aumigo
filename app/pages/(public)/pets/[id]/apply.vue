@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import AdoptionApplicationForm from '@/components/AdoptionApplicationForm.vue'
+import { computed } from 'vue'
 
 definePageMeta({ layout: 'public', middleware: 'auth' })
 useSeoMeta({ robots: 'noindex, nofollow' })
