@@ -35,7 +35,11 @@ defineProps<{
               {{ item.title }}
             </NuxtLink>
           </SidebarMenuButton>
-          <SidebarMenuButton v-else-if="item.onClick" :class="item.class">
+          <SidebarMenuButton
+            v-else-if="item.onClick"
+            :class="item.class"
+            @click="item.onClick"
+          >
             <component
               :is="item.icon"
               v-if="item.icon"
