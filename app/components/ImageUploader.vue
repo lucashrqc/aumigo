@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { upload } from '@vercel/blob/client'
 import { toast } from 'vue-sonner'
 
 const props = withDefaults(
@@ -16,6 +15,7 @@ const props = withDefaults(
     cropHeight?: number
     outputFormat?: string
     quality?: number
+    deferUpload?: boolean
   }>(),
   {
     accept: 'image/jpeg,image/png,image/webp',
@@ -28,10 +28,14 @@ const props = withDefaults(
     cropHeight: 1024,
     outputFormat: 'image/webp',
     quality: 0.9,
+    deferUpload: false,
   },
 )
 
-const emit = defineEmits<{ (e: 'uploaded', url: string): void }>()
+const emit = defineEmits<{
+  (e: 'uploaded', url: string): void
+  (e: 'cropped', payload: { file: File; previewUrl: string }): void
+}>()
 
 const input = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
@@ -90,14 +94,18 @@ async function onCropped(blob: Blob) {
     type: props.outputFormat,
   })
 
+  if (props.deferUpload) {
+    emit('cropped', { file, previewUrl: URL.createObjectURL(file) })
+    return
+  }
+
   uploading.value = true
   try {
-    const result = await upload(
-      `${props.pathPrefix}${Date.now()}-${file.name}`,
-      file,
-      { access: 'public', handleUploadUrl: props.handleUploadUrl },
-    )
-    emit('uploaded', result.url)
+    const url = await uploadImage(file, {
+      pathPrefix: props.pathPrefix,
+      handleUploadUrl: props.handleUploadUrl,
+    })
+    emit('uploaded', url)
   } catch (err) {
     toast.error(resolveErrorMessage(err, 'Falha ao enviar a imagem'))
   } finally {
@@ -120,7 +128,7 @@ onBeforeUnmount(releaseSrc)
       :accept="accept"
       class="hidden"
       @change="onChange"
-    >
+    />
     <Button
       type="button"
       variant="outline"
