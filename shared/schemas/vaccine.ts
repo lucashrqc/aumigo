@@ -13,17 +13,25 @@ export type VaccineUpdateInput = z.infer<typeof vaccineUpdateSchema>
 
 export const vaccineListQuerySchema = paginationSchema.extend({
   search: z.string().trim().max(120).optional(),
+  // When set, exclude vaccines expired before this date (keeps non-expiring ones).
+  validOn: z.string().date().optional(),
 })
 export type VaccineListQuery = z.infer<typeof vaccineListQuerySchema>
 
 // --- Applied vaccine ---
-export const appliedVaccineCreateSchema = z.object({
-  petId: uuidSchema,
+// Fields shared by standalone application and the nested "create pet with
+// vaccines" case — everything except the owning `petId`.
+export const appliedVaccineFieldsSchema = z.object({
   vaccineId: uuidSchema,
   vetLicense: z.string().trim().max(60).nullish(),
   batchNumber: z.string().trim().max(60).nullish(),
   applicationDate: z.string().date(),
   nextDoseDate: z.string().date().nullish(),
 })
-export const appliedVaccineUpdateSchema = appliedVaccineCreateSchema.partial().omit({ petId: true })
+export const appliedVaccineCreateSchema = appliedVaccineFieldsSchema.extend({
+  petId: uuidSchema,
+})
+export const appliedVaccineUpdateSchema = appliedVaccineFieldsSchema.partial()
+export type AppliedVaccineFieldsInput = z.infer<typeof appliedVaccineFieldsSchema>
 export type AppliedVaccineCreateInput = z.infer<typeof appliedVaccineCreateSchema>
+export type AppliedVaccineUpdateInput = z.infer<typeof appliedVaccineUpdateSchema>

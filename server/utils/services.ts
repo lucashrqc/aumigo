@@ -1,8 +1,4 @@
-import {
-  ConsoleEmailSender,
-  ResendEmailSender,
-  type EmailSender,
-} from '../email/email-sender'
+import { createEmailSender, type EmailSender } from '../email/email-sender'
 import { UrlImageStorage, type ImageStorage } from '../storage/image-storage'
 import {
   DisabledBlobStorage,
@@ -59,9 +55,17 @@ function buildContainer(): Container {
   const config = useRuntimeConfig()
 
   const imageStorage: ImageStorage = new UrlImageStorage()
-  const emailSender: EmailSender = config.resendApiKey
-    ? new ResendEmailSender(config.resendApiKey, config.resendFromEmail)
-    : new ConsoleEmailSender()
+  const emailSender: EmailSender = createEmailSender({
+    provider: config.emailProvider,
+    smtp: {
+      host: config.smtpHost,
+      port: config.smtpPort,
+      user: config.smtpUser,
+      pass: config.smtpPass,
+      from: config.smtpFrom,
+    },
+    resend: { apiKey: config.resendApiKey, from: config.resendFromEmail },
+  })
   const blobStorage: BlobStorage = config.blobReadWriteToken
     ? new VercelBlobStorage(config.blobReadWriteToken)
     : new DisabledBlobStorage()
@@ -79,7 +83,7 @@ function buildContainer(): Container {
   const identityProvider = new BetterAuthIdentityProvider()
 
   return {
-    petService: new PetService(petRepo, imageStorage, adoptionRepo),
+    petService: new PetService(petRepo, imageStorage, adoptionRepo, vaccineRepo),
     vaccineService: new VaccineService(vaccineRepo, appliedVaccineRepo),
     adoptionService: new AdoptionService(adoptionRepo, petRepo),
     analyticsService: new AnalyticsService(analyticsRepo),

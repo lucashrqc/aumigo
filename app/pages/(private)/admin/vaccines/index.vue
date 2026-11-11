@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
+import { Pencil, Trash2 } from '@lucide/vue'
 import type { ColumnDef } from '@tanstack/vue-table'
-import { h } from 'vue'
+import { h, type Component } from 'vue'
 import { toast } from 'vue-sonner'
 import { auditColumns } from '~/utils/audit-columns'
 
@@ -63,6 +65,24 @@ async function handleDelete(id: string, name: string) {
   }
 }
 
+const actions: RowAction<VaccineDto>[] = [
+  {
+    label: 'Editar',
+    icon: Pencil,
+    onClick: (row) => {
+      editing.value = row
+      editOpen.value = true
+    },
+  },
+  {
+    label: 'Excluir',
+    icon: Trash2,
+    iconClass: 'text-red-400',
+    class: 'text-destructive',
+    onClick: (row) => handleDelete(row.id, row.name),
+  },
+]
+
 const columns: ColumnDef<Features, VaccineDto>[] = [
   { accessorKey: 'name', header: 'Nome' },
   {
@@ -73,34 +93,15 @@ const columns: ColumnDef<Features, VaccineDto>[] = [
   {
     id: 'expirationDate',
     header: 'Validade',
-    cell: ({ row }) => row.original.expirationDate ?? '—',
+    cell: ({ row }) => formatDate(row.original.expirationDate),
   },
   ...auditColumns<VaccineDto>(),
   {
     id: 'actions',
-    header: '',
+    header: 'Ações',
+    meta: { class: 'w-32 text-center whitespace-nowrap' },
     cell: ({ row }) =>
-      h('div', { class: 'flex justify-end gap-2' }, [
-        h(
-          'button',
-          {
-            class: 'text-sm underline',
-            onClick: () => {
-              editing.value = row.original
-              editOpen.value = true
-            },
-          },
-          'Editar',
-        ),
-        h(
-          'button',
-          {
-            class: 'text-sm text-destructive underline',
-            onClick: () => handleDelete(row.original.id, row.original.name),
-          },
-          'Excluir',
-        ),
-      ]),
+      h(DataTableRowActions as Component, { row: row.original, actions }),
   },
 ]
 </script>

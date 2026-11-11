@@ -30,14 +30,16 @@ async function onSuccess() {
     >
       <NuxtLink to="/" class="flex items-center gap-2.5">
         <PawPrint class="size-[30px] text-forest" />
-        <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
+        <span class="text-[30px] tracking-[-1.4px] text-forest">Aumigo</span>
       </NuxtLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
         <div class="mx-auto w-full max-w-[400px]">
           <div class="flex flex-col gap-3">
             <h1 class="text-[32px] font-semibold tracking-[-1px] text-forest">
-              {{ isStaffInvite ? 'Junte-se à equipe Aumigo' : 'Crie sua conta' }}
+              {{
+                isStaffInvite ? 'Junte-se à equipe Aumigo' : 'Crie sua conta'
+              }}
             </h1>
             <p class="text-[15px] leading-[1.5] text-forest/70">
               {{

@@ -5,6 +5,7 @@ import type {
 } from '../repositories/vaccine.repository'
 import type {
   AppliedVaccineCreateInput,
+  AppliedVaccineUpdateInput,
   VaccineCreateInput,
   VaccineListQuery,
   VaccineUpdateInput,
@@ -46,12 +47,29 @@ export class VaccineService {
   }
 
   async applyToPet(input: AppliedVaccineCreateInput, actorId: string) {
-    const vaccine = await this.vaccines.findById(input.vaccineId)
-    if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Vacina desconhecida' })
+    await this.ensureVaccineExists(input.vaccineId)
     return this.appliedVaccines.create(input, actorId)
   }
 
-  removeApplied(id: string) {
-    return this.appliedVaccines.delete(id)
+  async updateApplied(
+    id: string,
+    input: AppliedVaccineUpdateInput,
+    actorId: string,
+  ) {
+    if (input.vaccineId) await this.ensureVaccineExists(input.vaccineId)
+    const updated = await this.appliedVaccines.update(id, input, actorId)
+    if (!updated) throw createError({ statusCode: 404, statusMessage: 'Registro de vacina não encontrado' })
+    return updated
+  }
+
+  async removeApplied(id: string): Promise<void> {
+    const applied = await this.appliedVaccines.findById(id)
+    if (!applied) throw createError({ statusCode: 404, statusMessage: 'Registro de vacina não encontrado' })
+    await this.appliedVaccines.delete(id)
+  }
+
+  private async ensureVaccineExists(vaccineId: string) {
+    const vaccine = await this.vaccines.findById(vaccineId)
+    if (!vaccine) throw createError({ statusCode: 422, statusMessage: 'Vacina desconhecida' })
   }
 }

@@ -67,7 +67,8 @@ export function distinctVaccines(
 
 /** Serialize domain input into Drizzle column values. */
 function toColumns(data: Partial<PetCreateInput>) {
-  const { images: _images, weight, ...rest } = data
+  const { images: _images, appliedVaccines: _appliedVaccines, weight, ...rest } =
+    data
   return {
     ...rest,
     ...(weight !== undefined
@@ -185,6 +186,16 @@ export class DrizzlePetRepository implements PetRepository {
             petId: newId,
             url: img.url,
             position: img.position,
+          })),
+        )
+      }
+      if (data.appliedVaccines.length) {
+        await tx.insert(appliedVaccine).values(
+          data.appliedVaccines.map((v) => ({
+            ...v,
+            petId: newId,
+            createdBy: actorId,
+            updatedBy: actorId,
           })),
         )
       }

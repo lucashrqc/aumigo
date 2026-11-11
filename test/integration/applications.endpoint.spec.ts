@@ -38,7 +38,7 @@ async function makeUser(role: 'admin' | 'staff' | 'adopter') {
 
 async function makeAvailablePet() {
   const pet = await pets.create(
-    { name: 'Rex', speciesId, sex: 'male', neutered: false, status: 'available', images: [] },
+    { name: 'Rex', speciesId, sex: 'male', neutered: false, status: 'available', images: [], appliedVaccines: [] },
     adopterId,
   )
   return pet.id
@@ -203,7 +203,7 @@ describe('POST /api/applications — auth and business rules', () => {
 
   it('returns 409 for an already-adopted pet', async () => {
     const pet = await pets.create(
-      { name: 'Bella', speciesId, sex: 'female', neutered: false, status: 'adopted', images: [] },
+      { name: 'Bella', speciesId, sex: 'female', neutered: false, status: 'adopted', images: [], appliedVaccines: [] },
       adopterId,
     )
     const res = await endpoint.post(validBody(pet.id), adopterId)

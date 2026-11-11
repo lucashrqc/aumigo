@@ -94,6 +94,13 @@ Staff invitation (admin-issued)
        → setRole(invited role)  +  create staff_profile  +  mark invitation accepted
   3. Invitee signs in at /login  →  redirected to /admin
 
+Password reset (BetterAuth built-in)
+  1. /forgot-password  →  authClient.requestPasswordReset({ email, redirectTo: '/reset-password' })
+       → always generic response (no account enumeration)
+       → sendResetPassword() in auth.ts  →  EmailSender.send(url = {authBaseUrl}/reset-password?token=…)
+       → token hashed in the `verification` table, single-use, 1-hour expiry
+  2. /reset-password?token=…  →  authClient.resetPassword({ newPassword, token })  →  /login
+
 Session use (every request)
   Plugin app/plugins/auth.ts → useAuthStore.fetchSession() → GET /api/auth/get-session
   API routes re-check role server-side via requireUser / requireStaff / requireAdmin
@@ -164,14 +171,21 @@ Workflow for schema changes: edit `server/database/schema/**` → `pnpm db:gener
 
 Server-only (read in `nuxt.config.ts` runtimeConfig): `DATABASE_URL`,
 `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
-`RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `BLOB_READ_WRITE_TOKEN`. Public:
+`EMAIL_PROVIDER`, `SMTP_HOST/PORT/USER/PASS/FROM`, `RESEND_API_KEY`,
+`RESEND_FROM_EMAIL`, `BLOB_READ_WRITE_TOKEN`. Public:
 `NUXT_PUBLIC_AUTH_BASE_URL`, `NUXT_PUBLIC_SITE_URL`,
 `NUXT_PUBLIC_CF_ANALYTICS_TOKEN`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See
 `.env.example`.
 
-Email: when `RESEND_API_KEY` is set, `services.ts` wires `ResendEmailSender`
-(from-address `RESEND_FROM_EMAIL`, default `onboarding@resend.dev`); otherwise
-it falls back to `ConsoleEmailSender`, which logs messages to stdout.
+Email: `EMAIL_PROVIDER` selects the adapter — `smtp` (`SmtpEmailSender`, Nodemailer
+over SMTP; Gmail for the MVP, `SMTP_PASS` is an App Password), `resend`
+(`ResendEmailSender`, kept for future use), or `console` (`ConsoleEmailSender`,
+logs to stdout — the default). The chosen adapter is wrapped in
+`DeferredEmailSender`, which returns before delivery completes so the request is
+not blocked: on Vercel serverless `waitUntil` keeps the function alive until the
+send finishes; elsewhere it falls back to fire-and-forget. A send failure is
+logged, not surfaced to the caller. Selection is in `createEmailSender()`
+(`server/email/email-sender.ts`), wired in both `services.ts` and `auth.ts`.
 
 Image uploads: when `BLOB_READ_WRITE_TOKEN` is set, `services.ts` wires
 `VercelBlobStorage`; otherwise `DisabledBlobStorage` (upload endpoints return

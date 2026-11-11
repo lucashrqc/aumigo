@@ -23,7 +23,7 @@ async function onSuccess() {
     >
       <NuxtLink to="/" class="flex items-center gap-2.5">
         <PawPrint class="size-7.5 text-forest" />
-        <span class="text-[30px] tracking-[-1.4px] text-forest">aumigo</span>
+        <span class="text-[30px] tracking-[-1.4px] text-forest">Aumigo</span>
       </NuxtLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
