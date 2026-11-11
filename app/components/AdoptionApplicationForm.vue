@@ -6,7 +6,6 @@ import {
 } from '#shared/schemas'
 import { PawPrint } from '@lucide/vue'
 import { useForm } from '@tanstack/vue-form'
-import { vMaska } from 'maska/vue'
 import { watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
@@ -306,10 +305,11 @@ const boolFieldValue = (v: boolean | undefined) =>
             :touched="showErrors(field.state.meta.isTouched)"
           >
             <template #default="{ id }">
-              <Input
+              <PhoneInput
                 :id="id"
                 :model-value="field.state.value"
-                placeholder="+55 11 99999-9999"                @update:model-value="field.handleChange(String($event))"
+                placeholder="(11) 99999-9999"
+                @update:model-value="field.handleChange($event)"
                 @blur="field.handleBlur"
               />
             </template>
@@ -401,13 +401,10 @@ const boolFieldValue = (v: boolean | undefined) =>
               :touched="showErrors(field.state.meta.isTouched)"
             >
               <template #default="{ id }">
-                <Input
+                <CepInput
                   :id="id"
-                  v-maska
-                  data-maska="#####-###"
-                  inputmode="numeric"
-                  placeholder="00000-000"                  :model-value="field.state.value"
-                  @update:model-value="field.handleChange(String($event))"
+                  :model-value="field.state.value"
+                  @update:model-value="field.handleChange($event)"
                   @blur="field.handleBlur"
                 />
               </template>

@@ -1,0 +1,45 @@
+<script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
+import { vMaska } from 'maska/vue'
+
+withDefaults(
+  defineProps<{
+    modelValue?: string | null
+    id?: string
+    disabled?: boolean
+    placeholder?: string
+    class?: HTMLAttributes['class']
+  }>(),
+  {
+    modelValue: null,
+    id: undefined,
+    disabled: false,
+    placeholder: '00000-000',
+    class: undefined,
+  },
+)
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'blur'): void
+}>()
+
+const options = {
+  mask: '#####-###',
+  onMaska: (detail: { unmasked: string }) =>
+    emit('update:modelValue', detail.unmasked),
+}
+</script>
+
+<template>
+  <Input
+    :id="id"
+    v-maska="options"
+    :default-value="modelValue ?? ''"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    :class="$props.class"
+    inputmode="numeric"
+    @blur="emit('blur')"
+  />
+</template>

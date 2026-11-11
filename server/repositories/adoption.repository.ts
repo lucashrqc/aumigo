@@ -91,7 +91,11 @@ export interface AdoptionApplicationRepository {
   /** Approve an application: mark it approved, adopt the pet, reject siblings. */
   approve(applicationId: string, petId: string, reviewerId: string): Promise<void>
   /** Reject a single application. */
-  reject(applicationId: string, reviewerId: string): Promise<void>
+  reject(
+    applicationId: string,
+    reviewerId: string,
+    rejectReason?: string | null,
+  ): Promise<void>
   /** Mark the pet adopted and auto-reject its still-open applications. */
   markPetAdopted(petId: string, actorId: string): Promise<void>
   /** Undo an adoption at the pet level: pet back to pending, re-open applications. */
@@ -278,7 +282,11 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
     })
   }
 
-  async reject(applicationId: string, reviewerId: string) {
+  async reject(
+    applicationId: string,
+    reviewerId: string,
+    rejectReason?: string | null,
+  ) {
     const reviewedAt = new Date()
     await this.db
       .update(adoptionApplication)
@@ -288,6 +296,7 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
         reviewedAt,
         rejectedBy: reviewerId,
         rejectedAt: reviewedAt,
+        rejectReason: rejectReason ?? null,
         updatedAt: reviewedAt,
       })
       .where(eq(adoptionApplication.id, applicationId))

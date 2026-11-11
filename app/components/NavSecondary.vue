@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Component } from "vue"
+import type { Component } from 'vue'
 
 import {
   SidebarGroup,
@@ -11,8 +11,11 @@ import {
 
 interface NavItem {
   title: string
-  url: string
+  url?: string
+  class?: string
   icon?: Component
+  iconClass?: string
+  onClick?: () => void
 }
 
 defineProps<{
@@ -24,15 +27,21 @@ defineProps<{
   <SidebarGroup>
     <SidebarGroupContent>
       <SidebarMenu>
-        <SidebarMenuItem
-          v-for="item in items"
-          :key="item.title"
-        >
-          <SidebarMenuButton as-child>
-            <a :href="item.url">
+        <slot name="before" />
+        <SidebarMenuItem v-for="item in items" :key="item.title">
+          <SidebarMenuButton v-if="item.url" as-child>
+            <NuxtLink :href="item.url">
               <component :is="item.icon" v-if="item.icon" />
               {{ item.title }}
-            </a>
+            </NuxtLink>
+          </SidebarMenuButton>
+          <SidebarMenuButton v-else-if="item.onClick" :class="item.class">
+            <component
+              :is="item.icon"
+              v-if="item.icon"
+              :class="item.iconClass"
+            />
+            {{ item.title }}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
