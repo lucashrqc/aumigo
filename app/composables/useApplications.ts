@@ -19,6 +19,17 @@ export function useApplyForPet() {
   })
 }
 
+/** Adopter: cancel their own pending application. */
+export function useCancelMyApplication() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<AdoptionApplicationDto>(`/api/applications/${id}/cancel`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-applications'] }),
+  })
+}
+
 /** Adopter: own applications. */
 export function useMyApplicationsQuery() {
   const api = useRequestFetch()

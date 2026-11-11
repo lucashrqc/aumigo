@@ -114,4 +114,24 @@ export class AdoptionService {
     await this.applications.cancelApplication(applicationId, actorId)
     return (await this.applications.findById(applicationId))!
   }
+
+  /** Adopter cancels their own pending application. */
+  async cancelOwnApplication(
+    applicationId: string,
+    adopterUserId: string,
+  ): Promise<AdoptionApplicationWithRelations> {
+    const application = await this.applications.findById(applicationId)
+    if (!application || application.adopterUserId !== adopterUserId) {
+      throw createError({ statusCode: 404, statusMessage: 'Candidatura não encontrada' })
+    }
+    if (application.status !== 'pending') {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'Só é possível cancelar candidaturas pendentes',
+      })
+    }
+
+    await this.applications.cancelApplication(applicationId, adopterUserId)
+    return (await this.applications.findById(applicationId))!
+  }
 }
