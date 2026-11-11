@@ -214,7 +214,7 @@ const boolFieldValue = (v: boolean | undefined) =>
             :src="petPhoto"
             :alt="pet.name"
             class="h-full w-full object-cover backface-hidden"
-          />
+          >
           <div
             v-else
             class="flex h-full w-full items-center justify-center text-forest/40"

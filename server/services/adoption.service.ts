@@ -37,11 +37,11 @@ export class AdoptionService {
       throw createError({ statusCode: 409, statusMessage: 'Este pet já foi adotado' })
     }
 
-    const existing = await this.applications.findOpenByPetAndAdopter(input.petId, adopterUserId)
+    const existing = await this.applications.findActiveByPetAndAdopter(input.petId, adopterUserId)
     if (existing) {
       throw createError({
         statusCode: 409,
-        statusMessage: 'Você já tem uma candidatura aberta para este pet',
+        statusMessage: 'Você já tem uma candidatura em andamento para este pet',
       })
     }
 

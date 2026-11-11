@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import type {
   AdoptionApplicationCreateInput,
   AdoptionApplicationListQuery,
@@ -21,10 +22,36 @@ export function useApplyForPet() {
 /** Adopter: own applications. */
 export function useMyApplicationsQuery() {
   const api = useRequestFetch()
+  const auth = useAuthStore()
   return useQuery({
     queryKey: ['my-applications'],
     queryFn: () => api<AdoptionApplicationDto[]>('/api/applications/me'),
+    enabled: () => auth.isAuthenticated,
   })
+}
+
+export function isActiveApplication(app: AdoptionApplicationDto) {
+  return app.status === 'pending' || app.status === 'approved'
+}
+
+export function useAppliedPetIds() {
+  const { data } = useMyApplicationsQuery()
+  return computed(
+    () =>
+      new Set(
+        (data.value ?? []).filter(isActiveApplication).map((a) => a.petId),
+      ),
+  )
+}
+
+export function useEnsureMyApplications() {
+  const api = useRequestFetch()
+  const qc = useQueryClient()
+  return () =>
+    qc.ensureQueryData({
+      queryKey: ['my-applications'],
+      queryFn: () => api<AdoptionApplicationDto[]>('/api/applications/me'),
+    })
 }
 
 /** Admin: list applications. */

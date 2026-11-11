@@ -2,6 +2,10 @@ import AuthGateDialog from '@/components/AuthGateDialog.vue'
 import useDialog from '@/composables/useDialog'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
+import {
+  useEnsureMyApplications,
+  isActiveApplication,
+} from '@/composables/useApplications'
 
 export interface AdoptionFlowPet {
   id?: string
@@ -15,6 +19,7 @@ const dialogProps = { class: 'max-w-md bg-white text-forest border-brand' }
 export function useAdoptionFlow() {
   const auth = useAuthStore()
   const dialog = useDialog()
+  const ensureApplications = useEnsureMyApplications()
 
   async function startApplication(pet: AdoptionFlowPet) {
     // Landing cards can be illustrative and carry no real pet id yet.
@@ -29,6 +34,12 @@ export function useAdoptionFlow() {
         props: { petName: pet.name },
       })
       if (!authed || !auth.isAuthenticated) return
+    }
+
+    const apps = await ensureApplications()
+    if (apps.some((a) => a.petId === pet.id && isActiveApplication(a))) {
+      toast.warning('Você já tem uma candidatura em andamento para este pet.')
+      return
     }
 
     await navigateTo(`/pets/${pet.id}/apply`)
