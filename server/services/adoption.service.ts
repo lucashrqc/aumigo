@@ -37,11 +37,11 @@ export class AdoptionService {
       throw createError({ statusCode: 409, statusMessage: 'Este pet já foi adotado' })
     }
 
-    const existing = await this.applications.findOpenByPetAndAdopter(input.petId, adopterUserId)
+    const existing = await this.applications.findActiveByPetAndAdopter(input.petId, adopterUserId)
     if (existing) {
       throw createError({
         statusCode: 409,
-        statusMessage: 'Você já tem uma candidatura aberta para este pet',
+        statusMessage: 'Você já tem uma candidatura em andamento para este pet',
       })
     }
 
@@ -112,6 +112,26 @@ export class AdoptionService {
     }
 
     await this.applications.cancelApplication(applicationId, actorId)
+    return (await this.applications.findById(applicationId))!
+  }
+
+  /** Adopter cancels their own pending application. */
+  async cancelOwnApplication(
+    applicationId: string,
+    adopterUserId: string,
+  ): Promise<AdoptionApplicationWithRelations> {
+    const application = await this.applications.findById(applicationId)
+    if (!application || application.adopterUserId !== adopterUserId) {
+      throw createError({ statusCode: 404, statusMessage: 'Candidatura não encontrada' })
+    }
+    if (application.status !== 'pending') {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'Só é possível cancelar candidaturas pendentes',
+      })
+    }
+
+    await this.applications.cancelApplication(applicationId, adopterUserId)
     return (await this.applications.findById(applicationId))!
   }
 }

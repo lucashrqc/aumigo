@@ -6,6 +6,7 @@ import {
   eq,
   exists,
   ilike,
+  inArray,
   ne,
   notExists,
   notInArray,
@@ -84,6 +85,10 @@ export interface AdoptionApplicationRepository {
   listByAdopter(adopterUserId: string): Promise<AdoptionApplicationWithRelations[]>
   findById(id: string): Promise<AdoptionApplicationWithRelations | null>
   findOpenByPetAndAdopter(
+    petId: string,
+    adopterUserId: string,
+  ): Promise<AdoptionApplicationRow | null>
+  findActiveByPetAndAdopter(
     petId: string,
     adopterUserId: string,
   ): Promise<AdoptionApplicationRow | null>
@@ -238,6 +243,17 @@ export class DrizzleAdoptionApplicationRepository implements AdoptionApplication
         eq(adoptionApplication.petId, petId),
         eq(adoptionApplication.adopterUserId, adopterUserId),
         eq(adoptionApplication.status, 'pending'),
+      ),
+    })
+    return row ?? null
+  }
+
+  async findActiveByPetAndAdopter(petId: string, adopterUserId: string) {
+    const row = await this.db.query.adoptionApplication.findFirst({
+      where: and(
+        eq(adoptionApplication.petId, petId),
+        eq(adoptionApplication.adopterUserId, adopterUserId),
+        inArray(adoptionApplication.status, ['pending', 'approved']),
       ),
     })
     return row ?? null

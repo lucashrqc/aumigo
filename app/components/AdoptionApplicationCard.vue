@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { Check, ImageIcon } from '@lucide/vue'
-import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
-import useDialog from '@/composables/useDialog'
-import { applicationStatusLabel, petSizeLabel } from '@/utils/labels'
-import { formatDate, petAgeLabel } from '@/utils/format'
 import type { AdoptionApplicationDto } from '#shared/types'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
+import { useCancelMyApplication } from '@/composables/useApplications'
+import useDialog from '@/composables/useDialog'
+import { resolveErrorMessage } from '@/utils/errors'
+import { formatDate, petAgeLabel } from '@/utils/format'
+import { applicationStatusLabel, petSizeLabel } from '@/utils/labels'
+import { Ban, Check, ImageIcon } from '@lucide/vue'
+import { toast } from 'vue-sonner'
 
 defineProps<{ application: AdoptionApplicationDto }>()
 
 const dialog = useDialog()
+
+const { mutateAsync: cancelApplication, isPending: isCanceling } =
+  useCancelMyApplication()
 
 const placeholder = '/images/aumigo/pet-placeholder.jpeg'
 
@@ -37,6 +44,29 @@ function openGallery(app: AdoptionApplicationDto) {
     props: { pet: app.pet },
   })
 }
+
+async function handleCancel(app: AdoptionApplicationDto) {
+  const ok = await dialog.open<boolean>(ConfirmDialog, {
+    dialogProps: { class: 'max-w-md' },
+    props: {
+      title: 'Cancelar candidatura',
+      icon: Ban,
+      description: `Tem certeza que deseja cancelar sua candidatura para ${app.pet?.name ?? 'este pet'}? Esta ação não pode ser desfeita.`,
+      confirmText: 'Cancelar candidatura',
+      cancelText: 'Voltar',
+      destructive: true,
+    },
+  })
+  if (!ok) return
+  try {
+    await cancelApplication(app.id)
+    toast.success('Candidatura cancelada')
+  } catch (err) {
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível cancelar a candidatura'),
+    )
+  }
+}
 </script>
 
 <template>
@@ -47,7 +77,7 @@ function openGallery(app: AdoptionApplicationDto) {
           :src="coverUrl(application)"
           :alt="application.pet?.name ?? 'Pet'"
           class="aspect-square w-full rounded-[16px] object-cover"
-        >
+        />
         <Button
           variant="outline"
           class="w-full border-brand text-forest hover:bg-cream-soft"
@@ -55,7 +85,7 @@ function openGallery(app: AdoptionApplicationDto) {
           @click="openGallery(application)"
         >
           <ImageIcon class="size-4" />
-          Ver galeria
+          Ver fotos
         </Button>
       </div>
 
@@ -72,21 +102,37 @@ function openGallery(app: AdoptionApplicationDto) {
               {{ metaLine(application) }}
             </p>
           </div>
-          <Badge
-            :variant="statusVariant(application.status)"
-            :class="[
-              'shrink-0 gap-1.5 px-3.5 py-1.5 text-[13px] font-medium [&>svg]:size-4',
-              application.status === 'rejected'
-                ? 'border-transparent bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                : '',
-            ]"
-          >
-            <Check v-if="application.status === 'approved'" />
-            {{ applicationStatusLabel(application.status) }}
-          </Badge>
+          <div class="flex shrink-0 items-center gap-2">
+            <Button
+              v-if="application.status === 'pending'"
+              variant="destructive"
+              size="sm"
+              class="cursor-pointer"
+              :disabled="isCanceling"
+              @click="handleCancel(application)"
+            >
+              <Ban class="size-4" />
+              Cancelar
+            </Button>
+            <Badge
+              :variant="statusVariant(application.status)"
+              :class="[
+                'shrink-0 gap-1.5 px-3.5 py-1.5 text-[13px] font-medium [&>svg]:size-4',
+                application.status === 'rejected'
+                  ? 'border-transparent bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                  : '',
+              ]"
+            >
+              <Check v-if="application.status === 'approved'" />
+              {{ applicationStatusLabel(application.status) }}
+            </Badge>
+          </div>
         </div>
 
-        <p v-if="application.pet?.description" class="text-[15px] text-text-soft">
+        <p
+          v-if="application.pet?.description"
+          class="text-[15px] text-text-soft"
+        >
           {{ application.pet.description }}
         </p>
 

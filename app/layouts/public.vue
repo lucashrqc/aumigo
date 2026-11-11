@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 import { Menu, PawPrint } from '@lucide/vue'
 import { ref } from 'vue'
@@ -7,12 +6,11 @@ import { ref } from 'vue'
 const auth = useAuthStore()
 const route = useRoute()
 const menuOpen = ref(false)
+const signOut = useLogout()
 
 async function logout() {
   menuOpen.value = false
-  await authClient.signOut()
-  auth.setUser(null)
-  await navigateTo('/')
+  await signOut()
 }
 </script>
 

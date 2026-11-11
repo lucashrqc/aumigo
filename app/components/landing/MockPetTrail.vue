@@ -246,7 +246,7 @@ onMounted(() => {
               <button
                 type="button"
                 class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
-                @click="startApplication({ name: pet.name, demo: true })"
+                @click="startApplication({ name: pet.name })"
               >
                 {{ pet.cta }}
                 <ArrowUpRight class="size-4.5" />

@@ -1,3 +1,4 @@
+import { resolveAuthErrorMessage } from '#shared/utils/auth-error-messages'
 import { APIError } from 'better-auth/api'
 import { eq } from 'drizzle-orm'
 import { user } from '../database/schema'
@@ -15,7 +16,10 @@ export class BetterAuthIdentityProvider implements IdentityProvider {
       if (err instanceof APIError) {
         throw createError({
           statusCode: err.statusCode,
-          statusMessage: err.message,
+          statusMessage: resolveAuthErrorMessage(
+            { code: err.body?.code, message: err.message },
+            'Não foi possível criar o usuário',
+          ),
         })
       }
       throw err

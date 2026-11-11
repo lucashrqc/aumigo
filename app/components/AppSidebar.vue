@@ -35,10 +35,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const logout = useLogout()
 const { isMobile, setOpen, setOpenMobile } = useSidebar()
 
 // Session user for NavUser. Avatar isn't implemented on the backend yet, so it
@@ -48,12 +48,6 @@ const user = computed(() => ({
   email: auth.user?.email ?? '',
   avatar: auth.user?.image ?? '',
 }))
-
-async function logout() {
-  await authClient.signOut()
-  auth.setUser(null)
-  await navigateTo('/')
-}
 
 const data = {
   navMain: [
@@ -162,7 +156,7 @@ const data = {
       class: 'hover:bg-red-100 cursor-pointer',
       icon: LogOut,
       iconClass: 'text-red-400',
-      onClick: logout,
+      onClick: () => logout(),
     },
   ],
   documents: [

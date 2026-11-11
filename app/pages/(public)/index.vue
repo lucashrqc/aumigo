@@ -6,7 +6,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
-import { authClient } from '@/lib/auth-client'
 import useDialog from '@/composables/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -25,7 +24,9 @@ definePageMeta({ layout: false })
 useHead({ title: 'Aumigo — Adoção de pets' })
 
 const auth = useAuthStore()
+const appliedPetIds = useAppliedPetIds()
 const dialog = useDialog()
+const logout = useLogout()
 
 function openAdoptionGuide() {
   dialog.open(AdoptionGuideDialog, {
@@ -35,12 +36,6 @@ function openAdoptionGuide() {
       showCloseButton: false,
     },
   })
-}
-
-async function logout() {
-  await authClient.signOut()
-  auth.setUser(null)
-  await navigateTo('/')
 }
 
 const principles = [
@@ -183,7 +178,7 @@ onMounted(() => {
             <button
               type="button"
               class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
-              @click="logout"
+              @click="logout()"
             >
               Sair
             </button>
@@ -302,7 +297,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <LandingPetTrail />
+    <LandingPetTrail :applied-pet-ids="appliedPetIds" />
 
     <!-- Como adotar -->
     <section

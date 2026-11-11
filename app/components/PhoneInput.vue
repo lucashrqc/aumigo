@@ -24,16 +24,17 @@ const emit = defineEmits<{
   (e: 'blur'): void
 }>()
 
-function onMaska(detail: { unmasked: string }) {
-  emit('update:modelValue', detail.unmasked)
+const options = {
+  mask: ['(##) ####-####', '(##) #####-####'],
+  onMaska: (detail: { unmasked: string }) =>
+    emit('update:modelValue', detail.unmasked),
 }
 </script>
 
 <template>
   <Input
     :id="id"
-    v-maska
-    data-maska="['(##) #####-####', '(##) ####-####']"
+    v-maska="options"
     :default-value="modelValue ?? ''"
     :placeholder="placeholder"
     :disabled="disabled"
@@ -41,6 +42,5 @@ function onMaska(detail: { unmasked: string }) {
     inputmode="numeric"
     autocomplete="tel"
     @blur="emit('blur')"
-    @on-maska="onMaska"
   />
 </template>

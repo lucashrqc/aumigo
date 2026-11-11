@@ -17,7 +17,6 @@ import { z } from 'zod'
 const props = defineProps<{
   petId?: string
   petName?: string
-  demo?: boolean
   variant?: 'dialog' | 'page'
 }>()
 
@@ -43,7 +42,7 @@ const { mutateAsync: apply, isPending } = useApplyForPet()
 
 const { data: pet, isLoading: isPetLoading } = usePublicPetQuery(
   () => props.petId,
-  { enabled: computed(() => Boolean(props.petId) && !props.demo) },
+  { enabled: computed(() => Boolean(props.petId)) },
 )
 
 const petPhoto = computed(() => pet.value?.images?.[0]?.url ?? null)
@@ -101,15 +100,12 @@ const form = useForm({
     enclosureType: [] as (typeof enclosureTypeValues)[number][],
   },
   onSubmit: async ({ value }) => {
-    // Landing/demo cards carry no real pet id, so there is nothing to submit.
-    if (props.demo || !props.petId) {
+    if (!props.petId) {
       toast.info('Em breve você poderá se candidatar à adoção por aqui.')
       dismiss()
       return
     }
 
-    // Terms must be accepted in a dedicated dialog before the request goes out;
-    // dismissing it (X/overlay) resolves falsy and aborts the submission.
     const agreedToTerms = await dialog.open<boolean>(AdoptionTermsDialog, {
       dialogProps: termsDialogProps,
     })
@@ -195,7 +191,7 @@ const boolFieldValue = (v: boolean | undefined) =>
 
 <template>
   <form
-    class="flex flex-col gap-5 text-forest"
+    class="flex flex-col gap-8 text-forest"
     @submit.prevent="form.handleSubmit"
   >
     <div v-if="!isPage" class="flex flex-col gap-1.5">
@@ -244,7 +240,7 @@ const boolFieldValue = (v: boolean | undefined) =>
             :src="petPhoto"
             :alt="pet.name"
             class="h-full w-full object-cover backface-hidden"
-          >
+          />
           <div
             v-else
             class="flex h-full w-full items-center justify-center text-forest/40"
@@ -398,7 +394,7 @@ const boolFieldValue = (v: boolean | undefined) =>
         >
           <RadioGroup
             :model-value="field.state.value"
-            class="flex flex-row gap-4 mt-4"
+            class="flex flex-row gap-6 mt-4"
             @update:model-value="
               (ev) => field.handleChange(ev as typeof field.state.value)
             "
@@ -408,8 +404,14 @@ const boolFieldValue = (v: boolean | undefined) =>
               :key="opt.value"
               class="flex items-center space-x-2"
             >
-              <RadioGroupItem :id="`home-${opt.value}`" :value="opt.value" />
-              <Label :for="`home-${opt.value}`">{{ opt.label }}</Label>
+              <RadioGroupItem
+                :id="`home-${opt.value}`"
+                :value="opt.value"
+                class="cursor-pointer"
+              />
+              <Label :for="`home-${opt.value}`" class="cursor-pointer">{{
+                opt.label
+              }}</Label>
             </div>
           </RadioGroup>
         </FormField>
@@ -618,18 +620,26 @@ const boolFieldValue = (v: boolean | undefined) =>
         >
           <RadioGroup
             :model-value="boolFieldValue(field.state.value)"
-            class="flex flex-row gap-4 mt-4"
+            class="flex flex-row gap-6 mt-4"
             @update:model-value="
               (ev) => field.handleChange(Boolean(Number(ev)))
             "
           >
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="isRental-sim" value="1" />
-              <Label for="isRental-sim">Sim</Label>
+              <RadioGroupItem
+                id="isRental-sim"
+                value="1"
+                class="cursor-pointer"
+              />
+              <Label for="isRental-sim" class="cursor-pointer">Sim</Label>
             </div>
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="isRental-nao" value="0" />
-              <Label for="isRental-nao">Não</Label>
+              <RadioGroupItem
+                id="isRental-nao"
+                value="0"
+                class="cursor-pointer"
+              />
+              <Label for="isRental-nao" class="cursor-pointer">Não</Label>
             </div>
           </RadioGroup>
         </FormField>
@@ -653,18 +663,26 @@ const boolFieldValue = (v: boolean | undefined) =>
         >
           <RadioGroup
             :model-value="boolFieldValue(field.state.value)"
-            class="flex flex-row gap-4 mt-4"
+            class="flex flex-row gap-6 mt-4"
             @update:model-value="
               (ev) => field.handleChange(Boolean(Number(ev)))
             "
           >
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="allowPets-sim" value="1" />
-              <Label for="allowPets-sim">Sim</Label>
+              <RadioGroupItem
+                id="allowPets-sim"
+                value="1"
+                class="cursor-pointer"
+              />
+              <Label for="allowPets-sim" class="cursor-pointer">Sim</Label>
             </div>
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="allowPets-nao" value="0" />
-              <Label for="allowPets-nao">Não</Label>
+              <RadioGroupItem
+                id="allowPets-nao"
+                value="0"
+                class="cursor-pointer"
+              />
+              <Label for="allowPets-nao" class="cursor-pointer">Não</Label>
             </div>
           </RadioGroup>
         </FormField>
@@ -687,18 +705,26 @@ const boolFieldValue = (v: boolean | undefined) =>
         >
           <RadioGroup
             :model-value="boolFieldValue(field.state.value)"
-            class="flex flex-row gap-4 mt-4"
+            class="flex flex-row gap-6 mt-4"
             @update:model-value="
               (ev) => field.handleChange(Boolean(Number(ev)))
             "
           >
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="firstPet-sim" value="1" />
-              <Label for="firstPet-sim">Sim</Label>
+              <RadioGroupItem
+                id="firstPet-sim"
+                value="1"
+                class="cursor-pointer"
+              />
+              <Label for="firstPet-sim" class="cursor-pointer">Sim</Label>
             </div>
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="firstPet-nao" value="0" />
-              <Label for="firstPet-nao">Não</Label>
+              <RadioGroupItem
+                id="firstPet-nao"
+                value="0"
+                class="cursor-pointer"
+              />
+              <Label for="firstPet-nao" class="cursor-pointer">Não</Label>
             </div>
           </RadioGroup>
         </FormField>
@@ -721,18 +747,30 @@ const boolFieldValue = (v: boolean | undefined) =>
         >
           <RadioGroup
             :model-value="boolFieldValue(field.state.value)"
-            class="flex flex-row gap-4 mt-4"
+            class="flex flex-row gap-6 mt-4"
             @update:model-value="
               (ev) => field.handleChange(Boolean(Number(ev)))
             "
           >
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="hasFinancialConditions-sim" value="1" />
-              <Label for="hasFinancialConditions-sim">Sim</Label>
+              <RadioGroupItem
+                id="hasFinancialConditions-sim"
+                value="1"
+                class="cursor-pointer"
+              />
+              <Label for="hasFinancialConditions-sim" class="cursor-pointer"
+                >Sim</Label
+              >
             </div>
             <div class="flex items-center space-x-2">
-              <RadioGroupItem id="hasFinancialConditions-nao" value="0" />
-              <Label for="hasFinancialConditions-nao">Não</Label>
+              <RadioGroupItem
+                id="hasFinancialConditions-nao"
+                value="0"
+                class="cursor-pointer"
+              />
+              <Label for="hasFinancialConditions-nao" class="cursor-pointer"
+                >Não</Label
+              >
             </div>
           </RadioGroup>
         </FormField>
@@ -746,7 +784,7 @@ const boolFieldValue = (v: boolean | undefined) =>
           hint="Selecione todas as opções que se aplicam."
           :name="field.name"
         >
-          <div class="flex flex-col gap-2.5 mt-4">
+          <div class="flex flex-col gap-4.5 mt-4">
             <div
               v-for="opt in enclosureOptions"
               :key="opt.value"
@@ -754,6 +792,7 @@ const boolFieldValue = (v: boolean | undefined) =>
             >
               <Checkbox
                 :id="`enclosure-${opt.value}`"
+                class="cursor-pointer"
                 :model-value="(field.state.value ?? []).includes(opt.value)"
                 @update:model-value="
                   (checked) =>
@@ -766,7 +805,9 @@ const boolFieldValue = (v: boolean | undefined) =>
                     )
                 "
               />
-              <Label :for="`enclosure-${opt.value}`">{{ opt.label }}</Label>
+              <Label :for="`enclosure-${opt.value}`" class="cursor-pointer">{{
+                opt.label
+              }}</Label>
             </div>
           </div>
         </FormField>
