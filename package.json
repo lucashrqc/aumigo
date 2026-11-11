@@ -22,8 +22,9 @@
     "db:seed": "tsx server/database/seed.ts",
     "db:seed:locations": "tsx server/database/seed-locations.ts",
     "db:studio": "drizzle-kit studio",
-    "test": "pnpm test:unit && pnpm test:integration",
+    "test": "pnpm test:unit && pnpm test:components && pnpm test:integration",
     "test:unit": "vitest run --project unit",
+    "test:components": "vitest run --project components",
     "test:integration": "vitest run --project integration",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
@@ -72,6 +73,7 @@
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.11.0",
+    "@vitejs/plugin-vue": "6.0.10",
     "@vue/test-utils": "^2.5.1",
     "dotenv": "^16.4.0",
     "drizzle-kit": "^0.31.11",

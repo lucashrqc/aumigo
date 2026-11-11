@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AdoptionApplicationDetailsDialog from '@/components/AdoptionApplicationDetailsDialog.vue'
+import ApplicationRejectDialog from '@/components/ApplicationRejectDialog.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DataTableRowActions from '@/components/DataTableRowActions.vue'
 import type { Features } from '@/components/features'
@@ -95,6 +96,28 @@ async function decide(id: string, decision: 'approved' | 'rejected') {
   }
 }
 
+async function handleReject(row: AdoptionApplicationDto) {
+  const reason = await dialog.open<string | undefined>(
+    ApplicationRejectDialog,
+    {
+      dialogProps: { class: 'max-w-md' },
+      props: { application: row },
+    },
+  )
+  if (!reason) return
+  try {
+    await review({
+      id: row.id,
+      body: { decision: 'rejected', rejectReason: reason },
+    })
+    toast.success('Candidatura rejeitada')
+  } catch (err) {
+    toast.error(
+      resolveErrorMessage(err, 'Não foi possível atualizar a candidatura'),
+    )
+  }
+}
+
 async function handleCancel(row: AdoptionApplicationDto) {
   const ok = await dialog.open<boolean>(ConfirmDialog, {
     dialogProps: { class: 'max-w-md' },
@@ -153,7 +176,7 @@ const actions: RowAction<AdoptionApplicationDto>[] = [
     iconClass: 'h-4 w-4',
     class: 'text-destructive',
     hidden: (row) => row.status !== 'pending',
-    onClick: (row) => decide(row.id, 'rejected'),
+    onClick: (row) => handleReject(row),
   },
   {
     label: 'Cancelar',
@@ -196,7 +219,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
   {
     id: 'contact',
     header: 'Contato',
-    cell: ({ row }) => row.original.contactPhone ?? '—',
+    cell: ({ row }) => formatPhone(row.original.contactPhone),
   },
   {
     id: 'document',
@@ -222,7 +245,9 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
       const a = row.original
       const text =
         [a.street, a.number].filter(Boolean).join(', ') +
-        (a.city ? ` · ${a.city.name}${a.city.state ? `/${a.city.state.uf}` : ''}` : '')
+        (a.city
+          ? ` · ${a.city.name}${a.city.state ? `/${a.city.state.uf}` : ''}`
+          : '')
       return h(
         'span',
         { class: 'block max-w-xs truncate', title: text },
@@ -251,7 +276,8 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
     meta: { class: 'max-w-xs' },
     cell: ({ row }) => {
       const list = row.original.enclosureType ?? []
-      if (!list.length) return h('span', { class: 'text-muted-foreground' }, '—')
+      if (!list.length)
+        return h('span', { class: 'text-muted-foreground' }, '—')
       const text = list.map((v) => enclosureTypeLabel(v)).join(', ')
       return h('span', { class: 'block max-w-xs truncate', title: text }, text)
     },

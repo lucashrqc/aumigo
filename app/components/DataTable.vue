@@ -193,4 +193,29 @@ const table = useTable({
 .data-table--always-scroll :deep([data-slot='table-container']) {
   overflow-x: scroll;
 }
+
+.data-table--always-scroll
+  :deep([data-slot='table-container']::-webkit-scrollbar) {
+  height: 8px;
+}
+
+.data-table--always-scroll
+  :deep([data-slot='table-container']::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+.data-table--always-scroll
+  :deep([data-slot='table-container']::-webkit-scrollbar-thumb) {
+  border-radius: 9999px;
+  background-color: color-mix(
+    in oklch,
+    var(--muted-foreground) 35%,
+    transparent
+  );
+}
+
+.data-table--always-scroll
+  :deep([data-slot='table-container']::-webkit-scrollbar-thumb:hover) {
+  background-color: var(--muted-foreground);
+}
 </style>

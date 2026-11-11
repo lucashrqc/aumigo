@@ -114,12 +114,11 @@ const showErrors = (touched: boolean) => touched || attempts.value > 0
             :touched="showErrors(field.state.meta.isTouched)"
           >
             <template #default="{ id }">
-              <Input
+              <PhoneInput
                 :id="id"
-                type="tel"
                 placeholder="(11) 99999-9999"
                 :model-value="field.state.value"
-                @update:model-value="field.handleChange(String($event))"
+                @update:model-value="field.handleChange($event)"
                 @blur="field.handleBlur"
               />
             </template>

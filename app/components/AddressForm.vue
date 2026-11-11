@@ -3,7 +3,6 @@ import { addressUpsertSchema, type AddressUpsertInput } from '#shared/schemas'
 import type { AddressDto } from '#shared/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useForm } from '@tanstack/vue-form'
-import { vMaska } from 'maska/vue'
 import { watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
@@ -110,14 +109,10 @@ watch(
             :touched="showErrors(field.state.meta.isTouched)"
           >
             <template #default="{ id }">
-              <Input
+              <CepInput
                 :id="id"
-                v-maska
-                data-maska="#####-###"
-                inputmode="numeric"
-                placeholder="00000-000"
                 :model-value="field.state.value"
-                @update:model-value="field.handleChange(String($event))"
+                @update:model-value="field.handleChange($event)"
                 @blur="field.handleBlur"
               />
             </template>

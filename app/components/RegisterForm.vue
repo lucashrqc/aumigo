@@ -86,10 +86,9 @@ async function submit() {
       <Label for="register-phone" class="text-[14px] font-medium text-forest">
         Telefone (opcional)
       </Label>
-      <Input
+      <PhoneInput
         id="register-phone"
         v-model="phone"
-        autocomplete="tel"
         placeholder="(00) 00000-0000"
         class="h-12 rounded-xl border-brand bg-white text-[14px] text-forest placeholder:text-forest/50"
       />
