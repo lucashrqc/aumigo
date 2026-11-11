@@ -2,6 +2,7 @@
 import { Eye, EyeOff } from '@lucide/vue'
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'vue-sonner'
+import { resolveAuthErrorMessage } from '#shared/utils/auth-error-messages'
 
 const props = defineProps<{ token: string }>()
 const emit = defineEmits<{ (e: 'success'): void }>()
@@ -24,7 +25,10 @@ async function submit() {
     })
     if (error)
       throw new Error(
-        error.message || 'Link inválido ou expirado. Solicite um novo.',
+        resolveAuthErrorMessage(
+          error,
+          'Link inválido ou expirado. Solicite um novo.',
+        ),
       )
     emit('success')
   } catch (err) {

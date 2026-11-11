@@ -3,12 +3,16 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   ArrowRight,
   ArrowUpRight,
+  Check,
   Heart,
   ImageIcon,
   PawPrint,
 } from '@lucide/vue'
 import PetGalleryDialog from '@/components/PetGalleryDialog.vue'
 import useDialog from '@/composables/useDialog'
+
+const props = defineProps<{ appliedPetIds?: Set<string> }>()
+const isApplied = (pet: PetDto) => props.appliedPetIds?.has(pet.id) ?? false
 
 const placeholder = '/images/aumigo/pet-placeholder.jpeg'
 
@@ -128,7 +132,14 @@ onMounted(() => {
                   <div
                     class="absolute right-4 top-4 flex size-10 items-center justify-center rounded-[20px] bg-white"
                   >
-                    <Heart class="size-5 text-forest" />
+                    <Heart
+                      class="size-5"
+                      :class="
+                        isApplied(pet)
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-forest'
+                      "
+                    />
                   </div>
                 </div>
                 <div class="flex items-center justify-between px-2 pb-1.5 pt-3">
@@ -168,11 +179,23 @@ onMounted(() => {
               <div class="mt-1 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+                  :disabled="isApplied(pet)"
+                  class="inline-flex h-12 w-fit items-center gap-3 rounded-xl bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors"
+                  :class="
+                    isApplied(pet)
+                      ? 'pointer-events-none opacity-60'
+                      : 'hover:bg-forest/90'
+                  "
                   @click="startApplication({ id: pet.id, name: pet.name })"
                 >
-                  Quero conhecer {{ articleArticle[pet.sex] }}{{ pet.name }}
-                  <ArrowUpRight class="size-4.5" />
+                  <template v-if="isApplied(pet)">
+                    Candidatura já enviada
+                    <Check class="size-4.5" />
+                  </template>
+                  <template v-else>
+                    Quero conhecer {{ articleArticle[pet.sex] }}{{ pet.name }}
+                    <ArrowUpRight class="size-4.5" />
+                  </template>
                 </button>
                 <button
                   v-if="pet.images.length"

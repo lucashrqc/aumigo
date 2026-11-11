@@ -27,7 +27,10 @@ export const adoptionApplicationCreateSchema = z
       .min(1, 'Informe o CPF ou CNPJ')
       .refine(isValidDocument, 'Informe um CPF ou CNPJ válido')
       .transform(documentDigits),
-    contactPhone: z.string().trim().min(5).max(30),
+    contactPhone: z
+      .string()
+      .trim()
+      .regex(/^\d{10,11}$/, 'Informe um telefone válido com DDD'),
     message: z.string().trim().max(1000).optional(),
     age: z.coerce
       .number({ error: 'Informe a idade' })

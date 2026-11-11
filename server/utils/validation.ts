@@ -32,7 +32,10 @@ export function useValidatedQuery<T>(event: H3Event, schema: ZodType<T>): T {
 export function useUuidParam(event: H3Event, name: string): string {
   const value = getRouterParam(event, name)
   if (!value || !/^[0-9a-f-]{36}$/i.test(value)) {
-    throw createError({ statusCode: 400, statusMessage: `${name} inválido` })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Identificador inválido',
+    })
   }
   return value
 }

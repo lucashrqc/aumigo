@@ -57,12 +57,11 @@ export class SmtpEmailSender implements EmailSender {
         html: message.html,
         text: message.text,
       })
-    } catch (error) {
+    } catch (err) {
+      console.error('[email] SMTP send failed', err)
       throw createError({
         statusCode: 502,
-        statusMessage: `Email send failed: ${
-          error instanceof Error ? error.message : 'unknown error'
-        }`,
+        statusMessage: 'Não foi possível enviar o e-mail',
       })
     }
   }
@@ -89,7 +88,7 @@ export class ResendEmailSender implements EmailSender {
     if (error) {
       throw createError({
         statusCode: 502,
-        statusMessage: `Email send failed: ${error.message}`,
+        statusMessage: 'Não foi possível enviar o e-mail',
       })
     }
   }
