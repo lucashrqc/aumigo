@@ -62,19 +62,17 @@ const paragraphs = [
       </div>
     </div>
 
-    <footer
-      class="flex flex-col gap-4 border-t border-brand px-6 py-5 sm:px-8"
-    >
+    <footer class="flex flex-col gap-4 border-t border-brand px-6 py-5 sm:px-8">
       <div class="flex items-start gap-2.5">
         <Checkbox
           id="accept-adoption-terms"
-          class="mt-0.5"
+          class="mt-0.5 cursor-pointer"
           :model-value="agreed"
           @update:model-value="(checked) => (agreed = checked === true)"
         />
         <Label
           for="accept-adoption-terms"
-          class="text-[13px] leading-snug text-text-soft"
+          class="text-[13px] leading-snug text-text-soft cursor-pointer"
         >
           Li e aceito os termos de adoção responsável e autorizo o contato da
           equipe.

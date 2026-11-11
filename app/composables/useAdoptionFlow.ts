@@ -6,7 +6,6 @@ import { useAuthStore } from '@/stores/auth'
 export interface AdoptionFlowPet {
   id?: string
   name: string
-  demo?: boolean
 }
 
 // Keep the landing palette on the auth gate regardless of the viewer's theme:
@@ -19,7 +18,7 @@ export function useAdoptionFlow() {
 
   async function startApplication(pet: AdoptionFlowPet) {
     // Landing cards can be illustrative and carry no real pet id yet.
-    if (pet.demo || !pet.id) {
+    if (!pet.id) {
       toast.info('Em breve você poderá se candidatar à adoção por aqui.')
       return
     }
