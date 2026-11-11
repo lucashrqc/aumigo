@@ -409,7 +409,7 @@ const sizeOptions = [
                 :src="imageSrc(image)"
                 alt=""
                 class="h-full w-full object-cover"
-              />
+              >
               <button
                 type="button"
                 class="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs leading-5 text-white"

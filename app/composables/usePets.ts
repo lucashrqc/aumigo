@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import type { Paginated, PetCreateInput, PetListQuery, PetUpdateInput } from '#shared/schemas'
 
@@ -10,6 +15,21 @@ export function usePublicPetsQuery(params: PetListParams = () => ({})) {
   return useQuery({
     queryKey: ['public-pets', params],
     queryFn: () => api<Paginated<PetDto>>('/api/pets', { query: toValue(params) }),
+  })
+}
+
+/** Public: infinite-scroll list of available pets. */
+export function usePublicPetsInfiniteQuery(params: PetListParams = () => ({})) {
+  const api = useRequestFetch()
+  return useInfiniteQuery({
+    queryKey: computed(() => ['public-pets', 'infinite', toValue(params)]),
+    queryFn: ({ pageParam }) =>
+      api<Paginated<PetDto>>('/api/pets', {
+        query: { ...toValue(params), page: pageParam },
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.pageSize < last.total ? last.page + 1 : undefined,
   })
 }
 

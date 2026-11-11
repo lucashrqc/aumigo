@@ -128,7 +128,7 @@ onBeforeUnmount(releaseSrc)
       :accept="accept"
       class="hidden"
       @change="onChange"
-    />
+    >
     <Button
       type="button"
       variant="outline"

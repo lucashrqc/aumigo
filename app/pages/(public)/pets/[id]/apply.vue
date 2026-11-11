@@ -2,7 +2,7 @@
 import AdoptionApplicationForm from '@/components/AdoptionApplicationForm.vue'
 import { computed } from 'vue'
 
-definePageMeta({ layout: 'public', middleware: 'auth' })
+definePageMeta({ layout: 'public', middleware: 'auth', footer: true })
 useSeoMeta({ robots: 'noindex, nofollow' })
 
 const route = useRoute()
