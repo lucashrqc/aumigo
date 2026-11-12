@@ -1,7 +1,7 @@
 # Testing
 
-Three suites: **unit** and **integration** (Vitest), **E2E** (Playwright).
-CI runs lint → typecheck → unit → integration → build, then E2E
+Four suites: **unit**, **components**, and **integration** (Vitest), plus **E2E**
+(Playwright). CI runs lint → typecheck → unit → integration → build, then E2E
 (`.github/workflows/ci.yml`).
 
 ## Suites
@@ -9,19 +9,22 @@ CI runs lint → typecheck → unit → integration → build, then E2E
 | Suite | Tool | Location | Needs DB | What it covers |
 |---|---|---|---|---|
 | unit | Vitest (`node`) | `test/unit/**` | no | Services (mocked repos), Zod schemas, Pinia store |
-| integration | Vitest (`node`, serial) | `test/integration/**` | yes (Postgres) | Repositories against real Postgres |
-| e2e | Playwright | `test/e2e/**` | yes (migrated+seeded) | Smoke flows against built app |
+| components | Vitest (`happy-dom`) | `test/components/**` | no | Vue components in isolation |
+| integration | Vitest (`node`, serial) | `test/integration/**` | yes (Postgres) | Repositories + endpoints against real Postgres |
+| e2e | Playwright (chromium) | `test/e2e/**` | yes (migrated + seeded) | Smoke flows against the built app |
 
-Vitest uses two projects (`unit`, `integration`) defined in `vitest.config.ts`.
+Vitest defines three projects (`unit`, `components`, `integration`) in
+`vitest.config.ts`.
 
 ## Commands
 
 ```bash
-pnpm test                 # unit + integration
+pnpm test                 # unit + components + integration (no e2e)
 pnpm test:unit            # unit only
+pnpm test:components      # components only
 pnpm test:integration     # integration only (needs a test DB, see below)
 pnpm test:watch           # vitest watch
-pnpm test:e2e             # Playwright (needs built + seeded app)
+pnpm test:e2e             # Playwright (needs a built + seeded app)
 
 # Run a single file / test
 pnpm vitest run --project unit test/unit/schemas.spec.ts
@@ -35,15 +38,16 @@ Point `TEST_DATABASE_URL` at a Postgres the suite can wipe. A dedicated throwawa
 container is provided:
 
 ```bash
-docker compose -f docker-compose.test.yml up -d       # test Postgres on :5433 (tmpfs, ephemeral)
+docker compose -f docker-compose.test.yml up -d test-db   # test Postgres on :5433 (tmpfs, ephemeral)
 TEST_DATABASE_URL=postgresql://aumigo_test:aumigo_test@localhost:5433/aumigo_test \
   pnpm test:integration
 ```
 
 `test/setup/database.ts` (Vitest `globalSetup`) **drops and recreates** the
-`public` + `drizzle` schemas, then applies all migrations once before the suite.
-Integration files run serially (`fileParallelism: false`) since they share one
-schema. Defaults to `…/aumigo_test` on :5432 if `TEST_DATABASE_URL` is unset.
+`public` + `drizzle` schemas, then applies all migrations once before the suite —
+so only ever point it at a throwaway database. Integration files run serially
+(`fileParallelism: false`) since they share one schema. If `TEST_DATABASE_URL` is
+unset it defaults to an `aumigo_test` database on :5432 (which must already exist).
 
 ## E2E tests
 
@@ -54,14 +58,15 @@ output (`node .output/server/index.mjs`):
 pnpm db:migrate && pnpm db:seed && pnpm build && pnpm test:e2e
 ```
 
-`playwright.config.ts` manages the web server (port via `E2E_PORT`, default 3000)
-and reuses an existing server locally.
+`playwright.config.ts` runs chromium only, manages the web server (port via
+`E2E_PORT`, default 3000), and reuses an existing server locally.
 
 ## Patterns
 
 - **Unit:** services get hand-mocked repository objects (`vi.fn()`); no Nuxt
   runtime. `test/setup/globals.ts` polyfills the auto-imported `createError`
   global so server code runs outside Nitro.
+- **Components:** mount Vue components with `@vue/test-utils` under happy-dom.
 - **Integration:** construct repositories directly with
   `createDatabase(TEST_DATABASE_URL)`; seed rows via Drizzle inside
   `beforeAll`/`afterAll`.

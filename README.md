@@ -1,111 +1,142 @@
 # Aumigo — Pet Adoption Platform
 
-A Nuxt 4 fullstack app where the public browses adoptable pets and submits
-adoption applications, and company staff manage pets, vaccines, applications,
-and staff invitations from a gated admin panel.
+Aumigo is a pet-adoption platform. The public browses adoptable pets and submits
+adoption applications; company staff manage pets, vaccines, applications, and
+staff invitations from a gated admin panel.
 
-## Stack
+It's a single Nuxt 4 fullstack app: a Vue 3 frontend and a Nitro server backed by
+Postgres (Drizzle ORM), with email-and-password auth (BetterAuth).
+
+## Documentation
+
+Deeper docs live in [`docs/`](docs/):
+
+- [docs/architecture.md](docs/architecture.md) — big picture: layers, ports, domain model, request lifecycle.
+- [docs/backend.md](docs/backend.md) — server stack, structure, patterns, auth flow, database & Docker.
+- [docs/frontend.md](docs/frontend.md) — Nuxt/Vue stack, folder layout, data-fetching & route-guard patterns.
+- [docs/testing.md](docs/testing.md) — unit, component, integration, and E2E suites.
+
+## Tech stack
 
 | Layer | Tech |
 |---|---|
-| Framework | Nuxt 4 (Nitro server), TypeScript |
+| Framework | Nuxt 4 (Nitro server), Vue 3, TypeScript |
 | Database | Postgres (Neon in prod, Docker locally) + Drizzle ORM |
-| Auth | BetterAuth (email + password; Google scaffolded) + admin plugin |
-| Validation | Zod (shared `shared/schemas`) |
-| Client state | Pinia (`useAuthStore`) |
-| Server state | TanStack Query |
-| Tables | TanStack Table |
+| Auth | BetterAuth (email + password; Google optional) |
+| Validation | Zod (shared between client and server) |
+| State | Pinia (client) + TanStack Query (server state) |
 | UI | shadcn-vue + Tailwind CSS v4 |
-| Tests | Vitest + @nuxt/test-utils (unit/integration), Playwright (E2E) |
+| Tests | Vitest (unit/component/integration), Playwright (E2E) |
 
-## Architecture
+## Running locally
 
-The server follows a layered, SOLID design:
+### Prerequisites
 
-```
-API route (controller)  → validates input (Zod), maps to HTTP
-  → Service              → business rules (depends on repository interfaces)
-    → Repository         → Drizzle data access (the only layer touching the DB)
-Ports: ImageStorage, EmailSender, IdentityProvider — swappable adapters
-Composition root: server/utils/services.ts
-```
+- **Node.js** 20 or newer (24 recommended)
+- **pnpm** 10 or newer
+- **Docker** (with the Compose plugin) — for the local Postgres database
 
-- `(public)` and `(private)` route groups under `app/pages/`. Private routes use
-  the `staff` middleware (admin + staff) and `admin` middleware (admin-only);
-  every `/api/admin/**` route also enforces this server-side.
-- Roles: `admin`, `staff`, `adopter`. Adopters self-register and can never reach
-  the admin panel. Staff join via an **admin-issued email invitation**.
-- Images are URL-only in v1 behind the `ImageStorage` port (swap to Vercel Blob
-  later via one adapter).
+### Steps
 
-See [docs/plans/aumigo-plan.md](docs/plans/aumigo-plan.md) for the full design.
+1. **Clone the repo and enter it.**
 
-## Prerequisites
+   ```bash
+   git clone <repo-url> aumigo && cd aumigo
+   ```
 
-- Node 20+ (24 recommended), pnpm 11+, Docker (for local Postgres).
+2. **Set up your local configuration.** Copy the provided example configuration
+   and adjust it if needed — for a basic local run the defaults work (Postgres in
+   Docker, emails printed to the console, uploads disabled). See
+   [docs/backend.md](docs/backend.md#configuration) for what each setting does.
 
-## Local development
+3. **Start Postgres** (runs in Docker on port 5432):
 
-```bash
-cp .env.example .env            # adjust secrets as needed
-docker compose up -d db         # local Postgres on :5432
-pnpm install
-pnpm db:migrate                 # apply migrations
-pnpm db:seed                    # create the first admin + reference species
-pnpm dev                        # http://localhost:3000
-```
+   ```bash
+   docker compose up -d db
+   ```
 
-Default seeded admin (override via `.env`): `admin@aumigo.local` / `ChangeMe123!`.
+4. **Install dependencies:**
+
+   ```bash
+   pnpm install
+   ```
+
+5. **Set up the database** — apply migrations, seed the first admin + reference
+   species, and (optionally) load Brazilian states and cities:
+
+   ```bash
+   pnpm db:migrate
+   pnpm db:seed
+   pnpm db:seed:locations   # optional, fetched from the public IBGE API
+   ```
+
+6. **Start the dev server:**
+
+   ```bash
+   pnpm dev
+   ```
+
+The app is now at **http://localhost:3000**, and the admin panel at
+**http://localhost:3000/admin**.
+
+**Default admin login** (created by `pnpm db:seed`): `admin@aumigo.local` /
+`ChangeMe123!`.
 
 ### Run everything in Docker
 
-```bash
-docker compose up --build       # db + app (Nuxt dev server) on :3000
-```
-
-## Database
-
-- `pnpm db:generate` — generate a migration from `server/database/schema`.
-- `pnpm db:migrate` — apply pending migrations.
-- `pnpm db:seed` — seed the first admin and reference data (idempotent).
-- `pnpm db:studio` — open Drizzle Studio.
-
-## Testing
+To run the database **and** the app (dev server) together:
 
 ```bash
-pnpm test:unit                  # services (mocked repos), schemas, store
-docker compose -f docker-compose.test.yml up -d   # test Postgres on :5433
-TEST_DATABASE_URL=postgresql://aumigo_test:aumigo_test@localhost:5433/aumigo_test \
-  pnpm test:integration         # repositories against real Postgres
-pnpm test:e2e                   # Playwright (needs a built + seeded app)
+docker compose up --build        # db + app on http://localhost:3000
 ```
 
-`pnpm lint`, `pnpm typecheck`, and `pnpm test` run in CI (`.github/workflows/ci.yml`).
+Migrations and seeds still need to be run once — see
+[docs/backend.md](docs/backend.md#local-setup--docker).
+
+## Optional integrations
+
+Aumigo runs fully without any third-party accounts. These optional integrations
+unlock extra features once you provide their keys (configuration details are in
+[docs/backend.md](docs/backend.md#configuration)):
+
+- **Google sign-in** — add a Google OAuth client and sign-in with Google turns on
+  automatically. Create one in the [Google Cloud Console](https://console.cloud.google.com/)
+  under **APIs & Services → Credentials → Create OAuth client ID** (Web
+  application), and add `http://localhost:3000` as an authorized origin.
+- **Real email delivery** — by default, invitation and password-reset emails are
+  printed to the server console. To send real email, use either an SMTP account
+  (for Gmail, enable 2-Step Verification and create an
+  [App Password](https://myaccount.google.com/apppasswords)) or a
+  [Resend](https://resend.com/api-keys) API key.
+- **Image uploads** — pet and avatar image uploads require a
+  [Vercel Blob](https://vercel.com/docs/vercel-blob) store. Create a Blob store in
+  the Vercel dashboard (**Storage**) and copy its read/write token; use a separate
+  store for local development. Without it, uploads are disabled.
 
 ## Staff invitation flow
 
 1. An admin opens **Admin → Staff** and invites an employee by email.
-2. The invite link is emailed (logged to the server console in dev:
-   `…/register?invite=<token>`).
+2. The invite link is emailed (printed to the server console in dev).
 3. The employee opens the link, registers, and is granted the invited role; a
-   `staff_profile` is created. Plain registration always creates an `adopter`.
+   staff profile is created. Plain registration always creates an adopter, who can
+   never reach the admin panel.
 
-## Deployment (Vercel + Neon)
+## Testing
 
-1. Create a Neon Postgres database and copy the **pooled** connection string.
-2. Import the GitHub repo into Vercel (Nuxt is auto-detected).
-3. Set Vercel environment variables:
-   - `DATABASE_URL` — Neon pooled connection string (`sslmode=require`)
-   - `BETTER_AUTH_SECRET` — `openssl rand -base64 32`
-   - `BETTER_AUTH_URL`, `NUXT_PUBLIC_AUTH_BASE_URL` — your production URL
-   - (optional) `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` to enable Google login
-4. Run migrations against Neon once per release: `pnpm db:migrate` with
-   `DATABASE_URL` pointed at Neon (locally or in a CI step), then `pnpm db:seed`
-   to create the first admin.
-5. Vercel builds previews per PR and deploys production from `main`.
+```bash
+pnpm test                 # unit + component + integration
+pnpm test:e2e             # Playwright (needs a built + seeded app)
+```
 
-## Enabling Google login
+Integration tests need a throwaway Postgres; full details (including the test
+database container) are in [docs/testing.md](docs/testing.md).
 
-Google is scaffolded but disabled until credentials exist. Set
-`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` and the provider activates
-automatically (see `server/utils/auth.ts`).
+`pnpm lint`, `pnpm typecheck`, and `pnpm test` run in CI
+(`.github/workflows/ci.yml`).
+
+## Deployment
+
+Production runs on **Vercel + Neon Postgres**. Import the repo into Vercel (Nuxt
+is auto-detected), point it at a Neon database (use the pooled connection string),
+and provide the production configuration. Run `pnpm db:migrate` and `pnpm db:seed`
+against Neon once per release. See [docs/backend.md](docs/backend.md) for details.
