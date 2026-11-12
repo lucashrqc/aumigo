@@ -1,5 +1,7 @@
 /** Response DTOs shared between the Nuxt server and client. */
 
+export * from './maintenance'
+
 /** Minimal staff user reference, used for audit columns (created/updated by). */
 export interface AuditUserDto {
   id: string
@@ -141,18 +143,16 @@ export interface AdoptionApplicationDto {
     name: string
     state: { id: string; name: string; uf: string } | null
   } | null
-  pet:
-    | {
-        id: string
-        name: string
-        status: string
-        description?: string | null
-        size?: 'small' | 'medium' | 'large' | null
-        birthDate?: string | null
-        images?: PetImageDto[]
-        vaccines?: PetVaccineDto[]
-      }
-    | null
+  pet: {
+    id: string
+    name: string
+    status: string
+    description?: string | null
+    size?: 'small' | 'medium' | 'large' | null
+    birthDate?: string | null
+    images?: PetImageDto[]
+    vaccines?: PetVaccineDto[]
+  } | null
   adopter: { id: string; name: string; email: string } | null
 }
 

@@ -29,6 +29,7 @@ interface NavItem {
   icon?: Component
   iconClass?: string
   isActive?: boolean
+  adminOnly?: boolean
   items?: NavSubItem[]
 }
 

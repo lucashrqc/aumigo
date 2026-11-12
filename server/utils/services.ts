@@ -10,6 +10,7 @@ import { DrizzleAdoptionApplicationRepository } from '../repositories/adoption.r
 import { DrizzleAnalyticsRepository } from '../repositories/analytics.repository'
 import { DrizzleCatalogRepository } from '../repositories/catalog.repository'
 import { DrizzleLocationRepository } from '../repositories/location.repository'
+import { DrizzleMaintenanceRepository } from '../repositories/maintenance.repository'
 import { DrizzlePetRepository } from '../repositories/pet.repository'
 import {
   DrizzleStaffInvitationRepository,
@@ -24,6 +25,7 @@ import { AdoptionService } from '../services/adoption.service'
 import { AnalyticsService } from '../services/analytics.service'
 import { CatalogService } from '../services/catalog.service'
 import { LocationService } from '../services/location.service'
+import { MaintenanceService } from '../services/maintenance.service'
 import { PetService } from '../services/pet.service'
 import { ProfileService } from '../services/profile.service'
 import { StaffService } from '../services/staff.service'
@@ -45,6 +47,7 @@ interface Container {
   locationService: LocationService
   profileService: ProfileService
   addressService: AddressService
+  maintenanceService: MaintenanceService
   blobStorage: BlobStorage
 }
 
@@ -80,10 +83,16 @@ function buildContainer(): Container {
   const addressRepo = new DrizzleAddressRepository(db)
   const invitationRepo = new DrizzleStaffInvitationRepository(db)
   const profileRepo = new DrizzleStaffProfileRepository(db)
+  const maintenanceRepo = new DrizzleMaintenanceRepository(db)
   const identityProvider = new BetterAuthIdentityProvider()
 
   return {
-    petService: new PetService(petRepo, imageStorage, adoptionRepo, vaccineRepo),
+    petService: new PetService(
+      petRepo,
+      imageStorage,
+      adoptionRepo,
+      vaccineRepo,
+    ),
     vaccineService: new VaccineService(vaccineRepo, appliedVaccineRepo),
     adoptionService: new AdoptionService(adoptionRepo, petRepo),
     analyticsService: new AnalyticsService(analyticsRepo),
@@ -98,6 +107,7 @@ function buildContainer(): Container {
     locationService: new LocationService(locationRepo),
     profileService: new ProfileService(profileRepo, identityProvider),
     addressService: new AddressService(addressRepo, profileRepo),
+    maintenanceService: new MaintenanceService(blobStorage, maintenanceRepo),
     blobStorage,
   }
 }
@@ -116,4 +126,5 @@ export const useCatalogService = () => container().catalogService
 export const useLocationService = () => container().locationService
 export const useProfileService = () => container().profileService
 export const useAddressService = () => container().addressService
+export const useMaintenanceService = () => container().maintenanceService
 export const useBlobStorage = () => container().blobStorage

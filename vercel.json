@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/maintenance/blob-sweep?delete=true",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}
