@@ -14,12 +14,15 @@ const form = reactive({ email: '', role: 'staff' as 'staff' | 'admin' })
 
 const roleOptions = [
   { label: 'Staff', value: 'staff' },
-  { label: 'Admin', value: 'admin' },
+  // { label: 'Admin', value: 'admin' },
 ]
 
 async function invite() {
   try {
-    const invitation = await createInvitation({ email: form.email, role: form.role })
+    const invitation = await createInvitation({
+      email: form.email,
+      role: form.role,
+    })
     form.email = ''
     toast.success(`Convite enviado para ${invitation.email}`)
   } catch (err) {
@@ -28,7 +31,11 @@ async function invite() {
 }
 
 const statusLabel = (inv: InvitationDto) =>
-  inv.acceptedAt ? 'Aceito' : new Date(inv.expiresAt) < new Date() ? 'Expirado' : 'Pendente'
+  inv.acceptedAt
+    ? 'Aceito'
+    : new Date(inv.expiresAt) < new Date()
+      ? 'Expirado'
+      : 'Pendente'
 
 const columns: ColumnDef<Features, InvitationDto>[] = [
   { accessorKey: 'email', header: 'E-mail', meta: { class: 'font-medium' } },
@@ -64,12 +71,16 @@ const columns: ColumnDef<Features, InvitationDto>[] = [
       <CardHeader>
         <CardTitle>Convidar um funcionário</CardTitle>
         <CardDescription>
-          A pessoa recebe um link de cadastro e ganha a função selecionada. O link do convite também
-          é registrado no console do servidor em desenvolvimento.
+          A pessoa recebe um link de cadastro e ganha a função selecionada. O
+          link do convite também é registrado no console do servidor em
+          desenvolvimento.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="invite">
+        <form
+          class="flex flex-col gap-3 sm:flex-row sm:items-end"
+          @submit.prevent="invite"
+        >
           <FormField label="E-mail" required name="email" class="flex-1">
             <template #default="{ id }">
               <Input
