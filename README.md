@@ -140,3 +140,12 @@ Production runs on **Vercel + Neon Postgres**. Import the repo into Vercel (Nuxt
 is auto-detected), point it at a Neon database (use the pooled connection string),
 and provide the production configuration. Run `pnpm db:migrate` and `pnpm db:seed`
 against Neon once per release. See [docs/backend.md](docs/backend.md) for details.
+
+**Dev environment:** the `staging` branch deploys to a Vercel Preview environment
+with its own Neon database and Blob store. The `Database` workflow
+(`.github/workflows/database.yml`) applies migrations to the dev database
+whenever `staging` receives new migration files; run it manually from the
+Actions tab (with the seed options) to bootstrap a fresh database. It reads
+`DATABASE_URL`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` from the `dev`
+GitHub environment's secrets. Vercel crons only run on Production, so trigger the
+blob sweep from `/admin/sweep-blobs` on dev.

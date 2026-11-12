@@ -1,0 +1,54 @@
+name: Database
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'server/database/migrations/**'
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Seed first admin + reference species (idempotent)'
+        type: boolean
+        default: false
+      seed_locations:
+        description: 'Seed BR states + cities from the IBGE API'
+        type: boolean
+        default: false
+
+concurrency:
+  group: database-dev
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Migrate
+        run: pnpm db:migrate
+
+      - name: Seed
+        if: ${{ inputs.seed }}
+        run: pnpm db:seed
+        env:
+          SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+          SEED_ADMIN_NAME: ${{ vars.SEED_ADMIN_NAME || 'Aumigo Admin' }}
+
+      - name: Seed locations
+        if: ${{ inputs.seed_locations }}
+        run: pnpm db:seed:locations
