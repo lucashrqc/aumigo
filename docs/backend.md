@@ -6,12 +6,13 @@ controller → service → repository, with swappable ports. See
 
 ## Stack
 
-- **Runtime:** Nitro (h3). Node 22+.
+- **Runtime:** Nitro (h3). Node 20+ (CI uses 24, Docker uses 22).
 - **DB:** Postgres — Neon serverless in prod/Vercel, Docker Postgres locally.
-  Driver auto-selected by URL in `server/database/client.ts` (Neon WebSocket pool
-  vs. node-postgres pool; only Neon/node pools support transactions).
-- **ORM:** Drizzle (`casing: snake_case`; schema in TS).
-- **Auth:** BetterAuth (email+password, Google scaffolded) + admin plugin.
+  The driver is auto-selected by URL in `server/database/client.ts`: a
+  `neon.tech` URL uses the Neon WebSocket pool, anything else uses node-postgres.
+  Both support transactions.
+- **ORM:** Drizzle (`casing: snake_case`, schema in TS).
+- **Auth:** BetterAuth (email + password, Google scaffolded) + admin plugin.
 - **Validation:** Zod schemas from `#shared/schemas`.
 
 ## Folder structure
@@ -21,20 +22,21 @@ server/
   api/**              HTTP routes (file-based). /api/admin/** = staff/admin only.
                       /api/me/** = current user. Public: /api/pets, /api/species,
                       /api/breeds, /api/locations/**. Auth at /api/auth/[...all].
-  services/**         Business logic (one class per aggregate). Pure, testable.
-                      pet, vaccine, adoption, staff, catalog, location, profile,
-                      address, identity.
+                      /api/maintenance/blob-sweep = cron (requireCronOrAdmin).
+  services/**         Business logic (one class per aggregate). Pure, testable:
+                      pet, vaccine, adoption, analytics, staff, catalog, location,
+                      profile, address, maintenance.
   repositories/**     Drizzle data access (Drizzle<Name>Repository implements <Name>Repository).
   database/
     schema/           Drizzle tables: auth.ts, domain.ts, enums.ts, columns.ts, relations.ts
     migrations/       Generated SQL + journal (DO NOT hand-edit)
     client.ts         createDatabase(url) — driver selection
-    migrate.ts        pnpm db:migrate entrypoint
+    migrate.ts        pnpm db:migrate entrypoint (always node-postgres)
     seed.ts           pnpm db:seed — first admin + reference species (idempotent)
-    seed-locations.ts pnpm db:seed:locations — BR states + cities from IBGE API
+    seed-locations.ts pnpm db:seed:locations — BR states + cities from the IBGE API
   storage/            ImageStorage port (UrlImageStorage) + BlobStorage port
                       (VercelBlobStorage / DisabledBlobStorage) for uploads
-  email/              EmailSender port + ConsoleEmailSender/ResendEmailSender adapters
+  email/              EmailSender port + Console/Smtp/Resend adapters
   utils/              auth.ts, db.ts, session.ts, services.ts (composition root),
                       validation.ts, identity-provider.ts
 ```
@@ -42,31 +44,34 @@ server/
 ## Domain model
 
 Tables (`server/database/schema/domain.ts`): `state` / `city` / `address`
-(BR locations + per-user address), `species` / `breed`, `pet` / `petImage`,
-`vaccine` / `appliedVaccine`, `adoptionApplication`, `staffProfile` /
-`staffInvitation`. Enums (`enums.ts`): user role, pet sex/size/status,
-application status, invitation role.
+(BR locations + per-user address), `species` / `breed`, `pet` / `pet_image`,
+`vaccine` / `applied_vaccine`, `adoption_application`, `staff_profile` /
+`staff_invitation`. Enums (`enums.ts`): `user_role`, `pet_sex`, `pet_size`,
+`pet_status`, `application_status`, `invitation_role`, plus `home` and
+`enclosure_type` (used on adoption applications).
 
 ## Code patterns
 
-- **API route** = thin controller: guard → validate → delegate → return.
+- **API route = thin controller:** guard → validate → delegate → return.
   ```ts
   export default defineEventHandler(async (event) => {
-    const session = await requireStaff(event)              // authz (session.ts)
-    const id = useUuidParam(event, 'id')                   // param (validation.ts)
+    const session = await requireStaff(event)               // authz (session.ts)
+    const id = useUuidParam(event, 'id')                    // param (validation.ts)
     const input = await useValidatedBody(event, someSchema) // body (validation.ts)
     return useSomeService().doThing(id, input, session.user.id)
   })
   ```
-  Route file naming is Nitro convention: `index.get.ts`, `[id].patch.ts`,
+  Route file naming follows Nitro convention: `index.get.ts`, `[id].patch.ts`,
   `[id]/review.post.ts`.
-- **Validation helpers** (`server/utils/validation.ts`): `useValidatedBody`,
-  `useValidatedQuery` (both throw 422 with field errors), `useUuidParam` (400).
+- **Validation helpers** (`server/utils/validation.ts`): `useValidatedBody` and
+  `useValidatedQuery` (throw 422 with field errors), `useUuidParam` (400).
 - **Authz helpers** (`server/utils/session.ts`): `requireUser` (401),
-  `requireStaff` (admin+staff, 403), `requireAdmin` (403). `/api/admin/**` always
-  calls `requireStaff`/`requireAdmin` — never trust client middleware alone.
-- **Services** take repository/port interfaces via constructor; throw `createError`
-  for HTTP errors. Wired only in `server/utils/services.ts` via `useXService()`.
+  `requireStaff` (admin + staff, 403), `requireAdmin` (admin only, 403),
+  `requireCronOrAdmin` (bearer `CRON_SECRET` or admin session). `/api/admin/**`
+  always calls `requireStaff`/`requireAdmin` — never trust client middleware alone.
+- **Services** take repository/port interfaces via the constructor and throw
+  `createError` for HTTP errors. Wired only in `server/utils/services.ts` via
+  `useXService()`.
 - **Repositories** are the only DB-touching layer; each exposes an interface the
   service depends on. Multi-step writes use `db.transaction`.
 - `useDb()` returns a lazy, process-wide Drizzle client (reused across requests).
@@ -75,8 +80,8 @@ application status, invitation role.
 
 **Roles:** `admin`, `staff`, `adopter` (stored on `user.role`, default `adopter`).
 BetterAuth is mounted at `/api/auth/**` (`server/api/auth/[...all].ts`); config in
-`server/utils/auth.ts`. Google activates automatically once
-`GOOGLE_CLIENT_ID`/`SECRET` are set.
+`server/utils/auth.ts`. Google activates automatically once its client ID + secret
+are set.
 
 ```
 Adopter self-registration
@@ -86,8 +91,8 @@ Staff invitation (admin-issued)
   1. Admin → Staff → invite(email, role)
      POST /api/admin/invitations  ──►  StaffService.invite()
        → create staff_invitation (token, 7-day expiry)
-       → EmailSender.send(link = {appBaseUrl}/register?invite=<token>)   [logged to console in dev]
-  2. Invitee opens /register?invite=<token>  (register.vue detects token)
+       → EmailSender.send(link = {authBaseUrl}/register?invite=<token>)   [logged to console in dev]
+  2. Invitee opens /register?invite=<token>  (register.vue detects the token)
      POST /api/invitations/accept  ──►  StaffService.acceptInvitation()
        → validate token (not expired/used)
        → IdentityProvider.createUser()  (BetterAuth signUpEmail)
@@ -96,7 +101,7 @@ Staff invitation (admin-issued)
 
 Password reset (BetterAuth built-in)
   1. /forgot-password  →  authClient.requestPasswordReset({ email, redirectTo: '/reset-password' })
-       → always generic response (no account enumeration)
+       → always a generic response (no account enumeration)
        → sendResetPassword() in auth.ts  →  EmailSender.send(url = {authBaseUrl}/reset-password?token=…)
        → token hashed in the `verification` table, single-use, 1-hour expiry
   2. /reset-password?token=…  →  authClient.resetPassword({ newPassword, token })  →  /login
@@ -107,51 +112,9 @@ Session use (every request)
 ```
 
 Plain `/register` (no `?invite`) always yields an `adopter`; adopters can never
-reach the admin panel. The BetterAuth admin plugin's privileged ops are limited
-to `admin` (`adminRoles: ['admin']`); domain admin-panel access (staff+admin) is
+reach the admin panel. The BetterAuth admin plugin's privileged ops are limited to
+`admin` (`adminRoles: ['admin']`); domain admin-panel access (staff + admin) is
 enforced by `requireStaff`.
-
-## Run locally (app + DB in Docker)
-
-Postgres in Docker, everything else on the host:
-
-```bash
-cp .env.example .env
-docker compose up -d db          # local Postgres on :5432
-pnpm install
-pnpm db:migrate
-pnpm db:seed                     # first admin + reference species (idempotent)
-pnpm db:seed:locations           # BR states + cities (optional, from IBGE API)
-pnpm dev                         # http://localhost:3000
-```
-
-Seeded admin (override in `.env`): `admin@aumigo.local` / `ChangeMe123!`.
-
-## Run everything in Docker
-
-The `app` service (Dockerfile `dev` target) runs the Nuxt dev server with the
-repo bind-mounted, so host edits hot-reload inside the container:
-
-```bash
-docker compose up --build        # db + app on :3000
-docker compose down              # stop (volume aumigo_pgdata persists data)
-```
-
-`node_modules` and `.nuxt` live in anonymous volumes (not bind-mounted from the
-host), so after changing dependencies you must install **inside** the container
-and restart — a host `pnpm install` won't touch the container's volume:
-
-```bash
-docker compose exec -T app pnpm install    # update node_modules in the container volume
-docker compose restart app                 # reload Nitro/Vite with the new deps
-```
-
-Run migrations/seed against the Dockerized app the same way:
-
-```bash
-docker compose exec -T app pnpm db:migrate
-docker compose exec -T app pnpm db:seed
-```
 
 ## Database (Drizzle)
 
@@ -167,29 +130,65 @@ pnpm db:studio                   # Drizzle Studio
 Workflow for schema changes: edit `server/database/schema/**` → `pnpm db:generate`
 → review the generated SQL → `pnpm db:migrate`.
 
-## Environment
+## Ports & adapters
 
-Server-only (read in `nuxt.config.ts` runtimeConfig): `DATABASE_URL`,
-`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
-`EMAIL_PROVIDER`, `SMTP_HOST/PORT/USER/PASS/FROM`, `RESEND_API_KEY`,
-`RESEND_FROM_EMAIL`, `BLOB_READ_WRITE_TOKEN`. Public:
-`NUXT_PUBLIC_AUTH_BASE_URL`, `NUXT_PUBLIC_SITE_URL`,
-`NUXT_PUBLIC_CF_ANALYTICS_TOKEN`. Seed: `SEED_ADMIN_EMAIL/PASSWORD/NAME`. See
-`.env.example`.
+**Email** (`server/email/email-sender.ts`): `EMAIL_PROVIDER` selects the adapter —
+`console` (`ConsoleEmailSender`, logs to stdout — the default), `smtp`
+(`SmtpEmailSender`, Nodemailer; Gmail needs an App Password), or `resend`
+(`ResendEmailSender`). The chosen adapter is wrapped in `DeferredEmailSender`,
+which returns before delivery completes so the request isn't blocked: on Vercel
+`waitUntil` keeps the function alive until the send finishes; elsewhere it's
+fire-and-forget. A send failure is logged, not surfaced to the caller. Selected in
+`createEmailSender()`, wired in both `services.ts` and `auth.ts`.
 
-Email: `EMAIL_PROVIDER` selects the adapter — `smtp` (`SmtpEmailSender`, Nodemailer
-over SMTP; Gmail for the MVP, `SMTP_PASS` is an App Password), `resend`
-(`ResendEmailSender`, kept for future use), or `console` (`ConsoleEmailSender`,
-logs to stdout — the default). The chosen adapter is wrapped in
-`DeferredEmailSender`, which returns before delivery completes so the request is
-not blocked: on Vercel serverless `waitUntil` keeps the function alive until the
-send finishes; elsewhere it falls back to fire-and-forget. A send failure is
-logged, not surfaced to the caller. Selection is in `createEmailSender()`
-(`server/email/email-sender.ts`), wired in both `services.ts` and `auth.ts`.
-
-Image uploads: when `BLOB_READ_WRITE_TOKEN` is set, `services.ts` wires
-`VercelBlobStorage`; otherwise `DisabledBlobStorage` (upload endpoints return
-501). Uploads are client-direct — the browser sends bytes straight to Vercel
-Blob after the token endpoints (`/api/admin/uploads/pet-image`,
-`/api/me/avatar-upload`) authorize and scope a token. Create a separate Blob
+**Image uploads** (`server/storage/blob-storage.ts`): when a Vercel Blob
+read/write token is set, `services.ts` wires `VercelBlobStorage`; otherwise
+`DisabledBlobStorage` (upload endpoints return 501). Uploads are client-direct —
+the browser sends bytes straight to Vercel Blob after the token endpoints
+(`/api/admin/uploads/pet-image`, `/api/me/avatar-upload`) authorize and scope a
+token. The daily `blob-sweep` cron deletes orphaned blobs. Create a separate Blob
 store for local dev so uploads stay out of production data.
+
+## Local setup & Docker
+
+See the [README](../README.md) for first-time setup and how to obtain optional
+keys. Quick reference:
+
+```bash
+docker compose up -d db          # local Postgres on :5432
+pnpm install
+pnpm db:migrate
+pnpm db:seed                     # first admin + reference species (idempotent)
+pnpm db:seed:locations           # BR states + cities (optional, from IBGE API)
+pnpm dev                         # http://localhost:3000
+```
+
+Seeded admin (overridable): `admin@aumigo.local` / `ChangeMe123!`.
+
+**Everything in Docker:** `docker compose up --build` runs the DB plus the Nuxt
+dev server (Dockerfile `dev` target) on :3000 with the repo bind-mounted, so host
+edits hot-reload. The app container does **not** run migrations or seeds — run
+them yourself:
+
+```bash
+docker compose exec -T app pnpm db:migrate
+docker compose exec -T app pnpm db:seed
+```
+
+`node_modules` and `.nuxt` live in anonymous volumes (not bind-mounted), so after
+changing dependencies you must install **inside** the container and restart:
+
+```bash
+docker compose exec -T app pnpm install
+docker compose restart app
+```
+
+## Configuration
+
+Server configuration is read in `nuxt.config.ts` (`runtimeConfig`). For the full
+list of variables and their defaults see `.env.example`. The important behavior:
+
+- **Postgres** is required (Docker locally, Neon pooled connection in prod).
+- **Email** defaults to `console` (no account needed); SMTP/Resend are optional.
+- **Image uploads** are disabled until a Vercel Blob token is provided.
+- **Google login** is off until a Google OAuth client ID + secret are provided.
