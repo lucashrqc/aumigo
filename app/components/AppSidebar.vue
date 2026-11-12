@@ -7,6 +7,7 @@ import {
   FileChartColumn,
   FileText,
   FolderPlus,
+  ImageOff,
   LayoutDashboard,
   LogOut,
   PawPrint,
@@ -74,6 +75,13 @@ const data = {
       url: '/admin/staff',
       icon: Users,
       iconClass: 'text-indigo-400',
+      adminOnly: true,
+    },
+    {
+      title: 'Limpeza de imagens',
+      url: '/admin/sweep-blobs',
+      icon: ImageOff,
+      iconClass: 'text-rose-400',
       adminOnly: true,
     },
     {
@@ -183,11 +191,17 @@ const searchQuery = ref('')
 
 const isSearching = computed(() => searchQuery.value.trim().length > 0)
 
+const isAdmin = computed(() => auth.user?.role === 'admin')
+
+const visibleNavMain = computed(() =>
+  data.navMain.filter((item) => !item.adminOnly || isAdmin.value),
+)
+
 const filteredNavMain = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
-  if (!query) return data.navMain
+  if (!query) return visibleNavMain.value
 
-  return data.navMain.flatMap((item) => {
+  return visibleNavMain.value.flatMap((item) => {
     const titleMatch = item.title.toLowerCase().includes(query)
 
     if (item.items?.length) {
