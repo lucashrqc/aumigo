@@ -91,6 +91,10 @@ const data = {
       iconClass: 'text-cyan-400 dark:text-cyan-600',
       items: [
         {
+          title: 'Usuários',
+          url: '/admin/users',
+        },
+        {
           title: 'Vacinas',
           url: '/admin/vaccines',
         },
@@ -283,13 +287,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
     <SidebarContent>
       <NavMain :items="filteredNavMain" :searching="isSearching" />
       <!-- <NavDocuments :items="data.documents" /> -->
-      <NavSecondary :items="data.navSecondary" class="mt-auto">
-        <template #before>
-          <div class="flex justify-center px-1 pb-1">
-            <ThemeSwitcher />
-          </div>
-        </template>
-      </NavSecondary>
+      <NavSecondary :items="data.navSecondary" class="mt-auto" />
     </SidebarContent>
     <SidebarFooter>
       <NavUser :user="user" />

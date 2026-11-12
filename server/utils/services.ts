@@ -16,6 +16,7 @@ import {
   DrizzleStaffInvitationRepository,
   DrizzleStaffProfileRepository,
 } from '../repositories/staff.repository'
+import { DrizzleUserRepository } from '../repositories/user.repository'
 import {
   DrizzleAppliedVaccineRepository,
   DrizzleVaccineRepository,
@@ -29,6 +30,7 @@ import { MaintenanceService } from '../services/maintenance.service'
 import { PetService } from '../services/pet.service'
 import { ProfileService } from '../services/profile.service'
 import { StaffService } from '../services/staff.service'
+import { UserService } from '../services/user.service'
 import { VaccineService } from '../services/vaccine.service'
 import { BetterAuthIdentityProvider } from './identity-provider'
 
@@ -43,6 +45,7 @@ interface Container {
   adoptionService: AdoptionService
   analyticsService: AnalyticsService
   staffService: StaffService
+  userService: UserService
   catalogService: CatalogService
   locationService: LocationService
   profileService: ProfileService
@@ -84,6 +87,7 @@ function buildContainer(): Container {
   const invitationRepo = new DrizzleStaffInvitationRepository(db)
   const profileRepo = new DrizzleStaffProfileRepository(db)
   const maintenanceRepo = new DrizzleMaintenanceRepository(db)
+  const userRepo = new DrizzleUserRepository(db)
   const identityProvider = new BetterAuthIdentityProvider()
 
   return {
@@ -103,6 +107,7 @@ function buildContainer(): Container {
       emailSender,
       config.public.authBaseUrl,
     ),
+    userService: new UserService(userRepo),
     catalogService: new CatalogService(catalogRepo),
     locationService: new LocationService(locationRepo),
     profileService: new ProfileService(profileRepo, identityProvider),
@@ -122,6 +127,7 @@ export const useVaccineService = () => container().vaccineService
 export const useAdoptionService = () => container().adoptionService
 export const useAnalyticsService = () => container().analyticsService
 export const useStaffService = () => container().staffService
+export const useUserService = () => container().userService
 export const useCatalogService = () => container().catalogService
 export const useLocationService = () => container().locationService
 export const useProfileService = () => container().profileService

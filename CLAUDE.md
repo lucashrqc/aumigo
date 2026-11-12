@@ -9,6 +9,7 @@ Aumigo is a Nuxt 4 fullstack pet-adoption platform (Vue 3 + Nitro server + Postg
 Use these as context for any change, improvement, or question — read the ones relevant to the task:
 
 - [docs/architecture.md](docs/architecture.md) — big picture, layers, ports, domain model, request lifecycle.
+- [docs/diagrams.md](docs/diagrams.md) — rendered diagrams: ER data model, layered architecture, request data flow, endpoint map.
 - [docs/backend.md](docs/backend.md) — server stack, layout, code patterns, **auth flow**, DB & Docker commands, local setup.
 - [docs/frontend.md](docs/frontend.md) — Nuxt/Vue stack, folder layout, data-fetching & route-guard patterns.
 - [docs/testing.md](docs/testing.md) — unit/integration/E2E suites and how to run a single test.

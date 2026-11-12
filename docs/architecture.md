@@ -5,6 +5,9 @@ via Drizzle ORM. The public browses adoptable pets and submits adoption
 applications; staff manage pets, vaccines, applications, and invitations from a
 gated admin panel.
 
+> 📊 Visual reference: see [diagrams.md](diagrams.md) for the ER data model,
+> layered architecture, request data flow, and endpoint map.
+
 ## Server layers
 
 The server is layered and dependency-inverted. Data flows top-down; dependencies

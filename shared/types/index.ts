@@ -184,6 +184,19 @@ export interface InvitationDto {
   createdAt: string
 }
 
+/** A platform user (adopter or staff), listed in the admin users table. */
+export interface UserDto {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'staff' | 'adopter'
+  image: string | null
+  emailVerified: boolean
+  banned: boolean | null
+  createdAt: string
+  updatedAt: string
+}
+
 /** The current staff member's editable profile. */
 export interface ProfileDto {
   /** staff_profile id */

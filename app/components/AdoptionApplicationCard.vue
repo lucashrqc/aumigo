@@ -77,7 +77,7 @@ async function handleCancel(app: AdoptionApplicationDto) {
           :src="coverUrl(application)"
           :alt="application.pet?.name ?? 'Pet'"
           class="aspect-square w-full rounded-[16px] object-cover"
-        />
+        >
         <Button
           variant="outline"
           class="w-full border-brand text-forest hover:bg-cream-soft"
