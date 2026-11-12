@@ -14,6 +14,13 @@ export const formatPhone = (value: string | null | undefined): string => {
   return value?.trim() || '—'
 }
 
+/** Format a BR CEP for display: 8 digits as XXXXX-XXX. */
+export const formatZipCode = (value: string | null | undefined): string => {
+  const digits = onlyDigits(value ?? '')
+  if (digits.length === 8) return digits.replace(/(\d{5})(\d{3})/, '$1-$2')
+  return value?.trim() || '—'
+}
+
 const toDate = (value: string | Date | null | undefined): Date | null => {
   if (!value) return null
   const date = value instanceof Date ? value : new Date(value)
@@ -21,7 +28,9 @@ const toDate = (value: string | Date | null | undefined): Date | null => {
 }
 
 /** Format a date as `dd/mm/YYYY HH:MM:ss` in local time, or `—` when empty/invalid. */
-export const formatDateTime = (value: string | Date | null | undefined): string => {
+export const formatDateTime = (
+  value: string | Date | null | undefined,
+): string => {
   const date = toDate(value)
   if (!date) return '—'
   return (
@@ -86,7 +95,8 @@ export const petTimeInAdoptionLabel = (
     const years = Math.floor(months / 12)
     return `${years} ${years === 1 ? 'ano' : 'anos'} em adoção`
   }
-  if (months >= 1) return `${months} ${months === 1 ? 'mês' : 'meses'} em adoção`
+  if (months >= 1)
+    return `${months} ${months === 1 ? 'mês' : 'meses'} em adoção`
 
   const days = Math.floor((now.getTime() - since.getTime()) / 86_400_000)
   if (days < 1) return 'Novo pet'

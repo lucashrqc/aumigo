@@ -1,0 +1,48 @@
+---
+title: Aumigo — Endpoint Map by Access Level
+---
+flowchart LR
+  subgraph public["PUBLIC · no guard"]
+    direction TB
+    p1["POST/GET /api/auth/**<br/>(BetterAuth)"]:::public
+    p2["GET /api/pets · /api/pets/:id"]:::public
+    p3["GET /api/breeds · /api/species"]:::public
+    p4["POST /api/invitations/accept"]:::public
+    p5["GET /api/__sitemap__/urls"]:::public
+  end
+
+  subgraph usr["USER · requireUser (any authenticated)"]
+    direction TB
+    u1["POST /api/applications<br/>POST /api/applications/:id/cancel<br/>GET /api/applications/me"]:::usr
+    u2["GET /api/locations/states · /:id<br/>GET /api/locations/cities · /:id<br/>GET /api/locations/resolve"]:::usr
+    u3["PATCH /api/me/avatar<br/>POST /api/me/avatar-upload"]:::usr
+  end
+
+  subgraph staff["STAFF · requireStaff"]
+    direction TB
+    s0["GET/PATCH /api/me/profile<br/>GET/PUT /api/me/address"]:::staff
+    s1["/api/admin/pets/** (CRUD, publish,<br/>unpublish, adopt, stats, applied-vaccines)"]:::staff
+    s2["/api/admin/applications (list, stats,<br/>:id/review, :id/cancel)"]:::staff
+    s3["/api/admin/species · breeds · vaccines<br/>applied-vaccines · cities (CRUD)"]:::staff
+    s4["GET /api/admin/analytics<br/>POST /api/admin/uploads/pet-image<br/>GET /api/admin/users"]:::staff
+  end
+
+  subgraph admin["ADMIN · requireAdmin"]
+    direction TB
+    a1["GET/POST /api/admin/invitations"]:::admin
+    a2["DELETE /api/admin/users/:id"]:::admin
+  end
+
+  subgraph cron["CRON / ADMIN · requireCronOrAdmin"]
+    direction TB
+    c1["GET /api/maintenance/blob-sweep"]:::cron
+  end
+
+  public --> usr --> staff --> admin
+  staff -.-> cron
+
+  classDef public fill:#ecfdf5,stroke:#6ee7b7,color:#1e293b
+  classDef usr fill:#eff6ff,stroke:#93c5fd,color:#1e293b
+  classDef staff fill:#fffbeb,stroke:#fcd34d,color:#1e293b
+  classDef admin fill:#fdf2f8,stroke:#f9a8d4,color:#1e293b
+  classDef cron fill:#f5f3ff,stroke:#c4b5fd,color:#1e293b

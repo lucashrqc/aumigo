@@ -1,0 +1,47 @@
+---
+title: Aumigo — Layered Architecture
+---
+flowchart TB
+  client["Browser · Nuxt app<br/>(pages, composables, useFetch)"]:::client
+
+  subgraph api["API route — server/api/**"]
+    direction TB
+    guard["requireUser / requireStaff / requireAdmin<br/>(server/utils/session.ts)"]:::route
+    validate["useValidatedBody(zod schema)<br/>(#shared/schemas)"]:::route
+    delegate["delegate → useXService()"]:::route
+    guard --> validate --> delegate
+  end
+
+  subgraph svc["Service layer — business rules (interfaces only)"]
+    direction LR
+    services["PetService · AdoptionService · VaccineService<br/>CatalogService · LocationService · StaffService<br/>ProfileService · AddressService · AnalyticsService<br/>UserService · MaintenanceService"]:::service
+  end
+
+  subgraph repo["Repository layer — only layer touching the DB"]
+    direction LR
+    repos["Drizzle*Repository<br/>(pet · adoption · vaccine · catalog · location<br/>address · staff · analytics · user · maintenance)"]:::repo
+  end
+
+  db[("Postgres<br/>Drizzle ORM")]:::db
+
+  subgraph ports["Swappable ports / adapters — wired in server/utils/services.ts"]
+    direction TB
+    imagePort["ImageStorage → UrlImageStorage"]:::port
+    emailPort["EmailSender → SMTP / Resend"]:::port
+    blobPort["BlobStorage → Vercel / Disabled"]:::port
+    idPort["IdentityProvider → BetterAuth"]:::port
+  end
+
+  client -->|HTTP /api/**| guard
+  delegate --> services
+  services --> repos
+  repos --> db
+  services -.uses.-> ports
+  delegate -.auth.-> idPort
+
+  classDef client fill:#eff6ff,stroke:#93c5fd,color:#1e293b
+  classDef route fill:#fffbeb,stroke:#fcd34d,color:#1e293b
+  classDef service fill:#ecfdf5,stroke:#6ee7b7,color:#1e293b
+  classDef repo fill:#f5f3ff,stroke:#c4b5fd,color:#1e293b
+  classDef db fill:#f1f5f9,stroke:#94a3b8,color:#1e293b
+  classDef port fill:#fdf2f8,stroke:#f9a8d4,color:#1e293b

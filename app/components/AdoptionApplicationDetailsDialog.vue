@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ClipboardList, X } from '@lucide/vue'
+import { ClipboardList } from '@lucide/vue'
 import useDialog from '@/composables/useDialog'
 import { formatDocument } from '#shared/utils/document'
 import type { AdoptionApplicationDto } from '#shared/types'
+import { formatZipCode } from '~/utils/format'
 
 const props = defineProps<{ application: AdoptionApplicationDto }>()
 
@@ -17,8 +18,10 @@ const addressLine = computed(() => {
     [a.street, a.number].filter(Boolean).join(', '),
     a.complement,
     a.neighborhood,
-    a.city ? `${a.city.name}${a.city.state ? ` - ${a.city.state.uf}` : ''}` : '',
-    a.zipCode ? `CEP ${a.zipCode}` : '',
+    a.city
+      ? `${a.city.name}${a.city.state ? ` - ${a.city.state.uf}` : ''}`
+      : '',
+    a.zipCode ? `CEP ${formatZipCode(a.zipCode)}` : '',
   ].filter(Boolean)
   return parts.join(' · ') || '—'
 })
@@ -29,30 +32,7 @@ const enclosureLabels = computed(() =>
 </script>
 
 <template>
-  <div class="flex flex-col gap-5 p-4 text-forest sm:p-6">
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex flex-col gap-1">
-        <DialogTitle
-          class="text-[22px] font-semibold tracking-[-0.5px] text-forest"
-        >
-          Candidatura de {{ app.adopter?.name ?? 'adotante' }}
-        </DialogTitle>
-        <DialogDescription class="text-[14px] text-text-soft">
-          {{ app.pet?.name ?? 'Pet' }} ·
-          {{ applicationStatusLabel(app.status) }} ·
-          enviada em {{ formatDateTime(app.createdAt) }}
-        </DialogDescription>
-      </div>
-      <button
-        type="button"
-        aria-label="Fechar"
-        class="flex size-10 shrink-0 items-center justify-center rounded-full bg-cream-soft text-forest transition-colors hover:bg-cream-soft/70"
-        @click="close()"
-      >
-        <X class="size-5" />
-      </button>
-    </div>
-
+  <div class="flex flex-col gap-5 text-forest w-full">
     <fieldset class="rounded-2xl border border-brand/50 bg-[#fffcf7] p-4">
       <legend class="px-2 text-[13px] font-semibold text-forest">
         Adotante
@@ -60,19 +40,27 @@ const enclosureLabels = computed(() =>
       <dl class="grid gap-3 sm:grid-cols-2">
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Nome</dt>
-          <dd class="text-[14px] font-medium">{{ app.adopter?.name ?? '—' }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ app.adopter?.name ?? '—' }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">E-mail</dt>
-          <dd class="text-[14px] font-medium">{{ app.adopter?.email ?? '—' }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ app.adopter?.email ?? '—' }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">CPF/CNPJ</dt>
-          <dd class="text-[14px] font-medium">{{ formatDocument(app.document) }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ formatDocument(app.document) }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Telefone</dt>
-          <dd class="text-[14px] font-medium">{{ app.contactPhone ?? '—' }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ formatPhone(app.contactPhone) ?? '—' }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Idade</dt>
@@ -92,11 +80,15 @@ const enclosureLabels = computed(() =>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Imóvel alugado?</dt>
-          <dd class="text-[14px] font-medium">{{ yesNoLabel(app.isRental) }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ yesNoLabel(app.isRental) }}
+          </dd>
         </div>
         <div v-if="app.isRental" class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Contrato permite animais?</dt>
-          <dd class="text-[14px] font-medium">{{ yesNoLabel(app.allowPets) }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ yesNoLabel(app.allowPets) }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5 sm:col-span-2">
           <dt class="text-[12px] text-text-soft">Endereço</dt>
@@ -112,7 +104,10 @@ const enclosureLabels = computed(() =>
             >
               {{ label }}
             </span>
-            <span v-if="!enclosureLabels.length" class="text-[14px] font-medium">
+            <span
+              v-if="!enclosureLabels.length"
+              class="text-[14px] font-medium"
+            >
               —
             </span>
           </dd>
@@ -127,7 +122,9 @@ const enclosureLabels = computed(() =>
       <dl class="grid gap-3 sm:grid-cols-2">
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Primeiro pet?</dt>
-          <dd class="text-[14px] font-medium">{{ yesNoLabel(app.firstPet) }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ yesNoLabel(app.firstPet) }}
+          </dd>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Condições financeiras?</dt>
@@ -137,7 +134,9 @@ const enclosureLabels = computed(() =>
         </div>
         <div class="flex flex-col gap-0.5">
           <dt class="text-[12px] text-text-soft">Aceitou os termos?</dt>
-          <dd class="text-[14px] font-medium">{{ yesNoLabel(app.acceptedTerms) }}</dd>
+          <dd class="text-[14px] font-medium">
+            {{ yesNoLabel(app.acceptedTerms) }}
+          </dd>
         </div>
       </dl>
     </fieldset>

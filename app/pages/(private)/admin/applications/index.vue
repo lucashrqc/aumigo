@@ -151,7 +151,13 @@ const statusClass: Record<string, string> = {
 
 function openDetails(row: AdoptionApplicationDto) {
   dialog.open(AdoptionApplicationDetailsDialog, {
-    dialogProps: { class: 'max-w-2xl' },
+    dialogProps: {
+      title: `Candidatura de ${row.adopter?.name ?? 'adotante'}`,
+      description: `${row.pet?.name ?? 'Pet'} · ${applicationStatusLabel(
+        row.status,
+      )} · enviada em ${formatDateTime(row.createdAt)}`,
+      class: 'sm:max-w-4xl',
+    },
     props: { application: row },
   })
 }

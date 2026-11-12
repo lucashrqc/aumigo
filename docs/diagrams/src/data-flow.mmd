@@ -1,0 +1,40 @@
+---
+title: Aumigo — Request Data Flow (submit adoption application)
+---
+sequenceDiagram
+  autonumber
+  actor U as Adopter (browser)
+  participant R as API route<br/>applications/index.post.ts
+  participant G as Guard<br/>requireUser
+  participant V as Validation<br/>adoptionApplicationCreateSchema
+  participant S as AdoptionService
+  participant P as PetRepository
+  participant A as AdoptionRepository
+  participant DB as Postgres (Drizzle)
+
+  U->>R: POST /api/applications { body }
+  R->>G: requireUser(event)
+  alt no valid session
+    G-->>U: 401 Unauthorized
+  end
+  G-->>R: session.user
+  R->>V: useValidatedBody(body)
+  alt invalid payload
+    V-->>U: 422 Validation error
+  end
+  V-->>R: typed input
+  R->>S: apply(input, userId)
+  S->>P: find target pet
+  P->>DB: SELECT pet
+  DB-->>P: pet row
+  P-->>S: pet
+  alt pet not available / duplicate open application
+    S-->>U: 409 Conflict
+  end
+  S->>A: insert application (status = pending)
+  A->>DB: INSERT adoption_application
+  DB-->>A: created row
+  A-->>S: application
+  S-->>R: application DTO
+  R-->>U: 201 Created
+  Note over S,A: Staff later review via<br/>/api/admin/applications/:id/review
