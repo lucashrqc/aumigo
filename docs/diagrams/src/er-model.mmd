@@ -1,0 +1,137 @@
+---
+title: Aumigo — Data Model (ER)
+---
+erDiagram
+  user ||--o| staffProfile : "has profile"
+  user ||--o{ session : "has"
+  user ||--o{ account : "has"
+  user ||--o{ adoptionApplication : "submits"
+  user ||--o{ staffInvitation : "invites"
+
+  staffProfile ||--o{ address : "has"
+  state ||--o{ city : "has"
+  city ||--o{ address : "locates"
+  city ||--o{ adoptionApplication : "locates"
+
+  species ||--o{ breed : "has"
+  species ||--o{ pet : "classifies"
+  breed ||--o{ pet : "classifies"
+  pet ||--o{ petImage : "has"
+  pet ||--o{ appliedVaccine : "receives"
+  vaccine ||--o{ appliedVaccine : "applied as"
+  pet ||--o{ adoptionApplication : "targets"
+
+  user {
+    text id PK
+    text email UK
+    text role "admin|staff|adopter"
+    boolean banned
+  }
+  session {
+    text id PK
+    text userId FK
+    text token UK
+    timestamp expiresAt
+  }
+  account {
+    text id PK
+    text userId FK
+    text providerId
+    text password
+  }
+  verification {
+    text id PK
+    text identifier
+    text value
+  }
+  staffProfile {
+    uuid id PK
+    text userId FK "unique 1:1"
+    text name
+    boolean active
+  }
+  staffInvitation {
+    uuid id PK
+    text email
+    enum role "staff|admin"
+    text token UK
+    timestamp expiresAt
+    timestamp acceptedAt
+  }
+  state {
+    uuid id PK
+    int ibgeId UK
+    text uf UK
+    text name
+  }
+  city {
+    uuid id PK
+    uuid stateId FK
+    text name
+    int ibgeId
+  }
+  address {
+    uuid id PK
+    uuid staffId FK
+    uuid cityId FK
+    text street
+    text zipCode
+  }
+  species {
+    uuid id PK
+    text name UK
+  }
+  breed {
+    uuid id PK
+    uuid speciesId FK
+    text name
+  }
+  pet {
+    uuid id PK
+    uuid speciesId FK
+    uuid breedId FK
+    text name
+    enum status "available|adopted|…"
+    enum sex
+    boolean active
+    timestamp publishedAt
+  }
+  petImage {
+    uuid id PK
+    uuid petId FK
+    text url
+    int position
+  }
+  vaccine {
+    uuid id PK
+    text name
+    date expirationDate
+    boolean active
+  }
+  appliedVaccine {
+    uuid id PK
+    uuid petId FK
+    uuid vaccineId FK
+    date applicationDate
+    date nextDoseDate
+  }
+  adoptionApplication {
+    uuid id PK
+    uuid petId FK
+    text adopterUserId FK
+    uuid cityId FK
+    enum status "pending|approved|rejected|canceled"
+    enum home
+    boolean acceptedTerms
+    timestamp reviewedAt
+  }
+
+  classDef auth fill:#eff6ff,stroke:#93c5fd,stroke-width:1px,color:#1e293b
+  classDef location fill:#f5f3ff,stroke:#c4b5fd,stroke-width:1px,color:#1e293b
+  classDef catalog fill:#ecfdf5,stroke:#6ee7b7,stroke-width:1px,color:#1e293b
+  classDef adoption fill:#fffbeb,stroke:#fcd34d,stroke-width:1px,color:#1e293b
+
+  class user,session,account,verification,staffProfile,staffInvitation auth
+  class state,city,address location
+  class species,breed,pet,petImage,vaccine,appliedVaccine catalog
+  class adoptionApplication adoption

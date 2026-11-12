@@ -187,7 +187,7 @@ const showEmpty = computed(() => !props.isFetching && props.items.length === 0)
             v-model="rawSearch"
             :placeholder="searchPlaceholder"
             class="placeholder:text-muted-foreground flex h-10 w-full bg-transparent py-3 text-sm outline-hidden"
-          />
+          >
         </div>
         <CommandList ref="listRef">
           <div

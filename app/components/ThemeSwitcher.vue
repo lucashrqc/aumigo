@@ -1,19 +1,27 @@
 <script setup lang="ts">
-import { Monitor, Moon, Sun } from '@lucide/vue'
-import { cn } from 'cn'
+import { Moon, Sun } from '@lucide/vue'
 
 const colorMode = useColorMode()
 
-const options = [
-  { value: 'system', label: 'Tema do sistema', icon: Monitor },
-  { value: 'light', label: 'Tema claro', icon: Sun },
-  { value: 'dark', label: 'Tema escuro', icon: Moon },
-] as const
+const isDark = computed(() => colorMode.value === 'dark')
+
+function setDark(value: boolean) {
+  colorMode.preference = value ? 'dark' : 'light'
+}
+
+// Dependencies for the commented reference implementation below:
+// import { Monitor } from '@lucide/vue'
+// import { cn } from 'cn'
+// const options = [
+//   { value: 'system', label: 'Tema do sistema', icon: Monitor },
+//   { value: 'light', label: 'Tema claro', icon: Sun },
+//   { value: 'dark', label: 'Tema escuro', icon: Moon },
+// ] as const
 </script>
 
 <template>
   <ClientOnly>
-    <div
+    <!-- <div
       role="radiogroup"
       aria-label="Alternar tema"
       class="dark:bg-muted bg-sage-line inline-flex items-center gap-0.5 rounded-full p-1"
@@ -52,6 +60,26 @@ const options = [
           <Moon class="text-muted-foreground size-3" />
         </span>
       </div>
+    </template> -->
+
+    <Switch
+      :model-value="isDark"
+      aria-label="Alternar tema"
+      class="data-[state=unchecked]:bg-sage-line"
+      @update:model-value="setDark"
+    >
+      <template #thumb>
+        <span
+          class="bg-background text-foreground flex size-full items-center justify-center rounded-full"
+        >
+          <Moon v-if="isDark" class="size-2.5" />
+          <Sun v-else class="size-2.5" />
+        </span>
+      </template>
+    </Switch>
+
+    <template #fallback>
+      <div class="bg-muted h-[1.15rem] w-8 rounded-full" />
     </template>
   </ClientOnly>
 </template>
