@@ -2,8 +2,10 @@
 import { useAuthStore } from '@/stores/auth'
 import { Heart, PawPrint } from '@lucide/vue'
 import { computed } from 'vue'
+import AdoptionTermsDialog from '../AdoptionTermsDialog.vue'
 
 const auth = useAuthStore()
+const dialog = useDialog()
 
 const footerColumns = computed(() => [
   {
@@ -35,6 +37,21 @@ const footerColumns = computed(() => [
         ],
   },
 ])
+
+const termsDialogProps = {
+  class:
+    'max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 bg-white text-forest border-brand sm:max-w-2xl',
+  showCloseButton: false,
+}
+
+async function onTermsClick() {
+  await dialog.open<boolean>(AdoptionTermsDialog, {
+    dialogProps: termsDialogProps,
+    props: {
+      viewOnly: true,
+    },
+  })
+}
 </script>
 
 <template>
@@ -77,15 +94,18 @@ const footerColumns = computed(() => [
       >
         <span>© 2026 Aumigo</span>
         <div class="flex gap-6">
-          <a href="#" class="transition-colors hover:text-forest"
+          <!-- <a href="#" class="transition-colors hover:text-forest"
             >Privacidade</a
+          > -->
+          <NuxtLink
+            class="text-[13px] text-text-soft transition-colors hover:text-forest cursor-default"
+            @click="onTermsClick"
           >
-          <a href="#" class="transition-colors hover:text-forest"
-            >Termos de uso</a
-          >
+            Termos de adoção
+          </NuxtLink>
         </div>
         <span class="flex items-center gap-1.5">
-          <Heart class="size-3.25" />
+          <Heart class="size-3.25 text-red-500" />
           O amor encontra um lar.
         </span>
       </div>

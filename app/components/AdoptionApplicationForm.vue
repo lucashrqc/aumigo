@@ -38,8 +38,8 @@ const termsDialogProps = {
     'max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 bg-white text-forest border-brand sm:max-w-2xl',
   showCloseButton: false,
 }
-const { mutateAsync: apply, isPending } = useApplyForPet()
 
+const { mutateAsync: apply, isPending } = useApplyForPet()
 const { data: pet, isLoading: isPetLoading } = usePublicPetQuery(
   () => props.petId,
   { enabled: computed(() => Boolean(props.petId)) },
@@ -240,7 +240,7 @@ const boolFieldValue = (v: boolean | undefined) =>
             :src="petPhoto"
             :alt="pet.name"
             class="h-full w-full object-cover backface-hidden"
-          >
+          />
           <div
             v-else
             class="flex h-full w-full items-center justify-center text-forest/40"
