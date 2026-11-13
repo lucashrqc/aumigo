@@ -94,11 +94,14 @@ async function onTermsClick() {
       >
         <span>© 2026 Aumigo</span>
         <div class="flex gap-6">
-          <!-- <a href="#" class="transition-colors hover:text-forest"
-            >Privacidade</a
-          > -->
           <NuxtLink
-            class="text-[13px] text-text-soft transition-colors hover:text-forest cursor-default"
+            to="/privacy"
+            class="text-[13px] text-text-soft transition-colors hover:text-forest cursor-pointer"
+          >
+            Termos de privacidade
+          </NuxtLink>
+          <NuxtLink
+            class="text-[13px] text-text-soft transition-colors hover:text-forest cursor-pointer"
             @click="onTermsClick"
           >
             Termos de adoção

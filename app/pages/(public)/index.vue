@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
 import useDialog from '@/composables/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -49,7 +49,7 @@ const steps = [
     icon: Search,
     number: '01',
     title: 'Encontre sua conexão',
-    body: 'Explore os perfis e conheça a história, o personalidade e as necessidades de cada pet.',
+    body: 'Explore os perfis e conheça a história, a personalidade e as necessidades de cada pet.',
   },
   {
     icon: MessagesSquare,
@@ -83,7 +83,7 @@ const essentials = [
 const faqs = [
   {
     q: 'Como faço para adotar pela Aumigo?',
-    a: 'Comece pelos perfis e escolha um pet que combine com você. Depois, crie sua conta e entre em contato com o responsável para conversar, conhecer o pet e entender as próximas etapas da adoção.',
+    a: 'Comece pelos perfis e escolha um pet que combine com você. Depois, crie sua conta e siga com a candidatura para o pet escolhido. A ONG entrará em contato com você para conhecer o pet e entender as próximas etapas da adoção.',
   },
   {
     q: 'Preciso criar uma conta para adotar?',
@@ -91,7 +91,7 @@ const faqs = [
   },
   {
     q: 'Como sei se um pet combina com a minha rotina?',
-    a: 'Cada perfil traz o personalidade, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
+    a: 'Cada perfil traz a personalidade, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
   },
   {
     q: 'Posso conhecer o pet antes da adoção?',
