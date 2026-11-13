@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Gavel, HeartHandshake, Info, X } from '@lucide/vue'
 import useDialog from '@/composables/useDialog'
+import { Gavel, HeartHandshake, Info, X } from '@lucide/vue'
+import { ref } from 'vue'
+
+const props = withDefaults(defineProps<{ viewOnly?: boolean }>(), {
+  viewOnly: false,
+})
 
 const { close } = useDialog()
 const agreed = ref(false)
@@ -23,6 +27,11 @@ const awareness = [
   'Um cão ou gato pode viver até 15 anos ou mais, e durante todo este tempo serei responsável pelo seu bem-estar, principalmente durante sua velhice;',
   'O não cumprimento dos itens acima poderá ser interpretado como maus-tratos, o que acarretará a retirada do animal pelo doador responsável a qualquer tempo;',
 ]
+
+const title = props.viewOnly ? '' : 'Antes de enviar sua candidatura'
+const desc = props.viewOnly
+  ? ''
+  : 'Leia com atenção o termo de compromisso abaixo e confirme sua concordância para concluir o envio.'
 </script>
 
 <template>
@@ -37,11 +46,10 @@ const awareness = [
         <DialogTitle
           class="text-[22px] font-medium tracking-[-0.6px] text-forest sm:text-[26px]"
         >
-          Antes de enviar sua candidatura
+          {{ title }}
         </DialogTitle>
         <DialogDescription class="text-[14px] leading-[1.5] text-text-soft">
-          Leia com atenção o termo de compromisso abaixo e confirme sua
-          concordância para concluir o envio.
+          {{ desc }}
         </DialogDescription>
       </div>
       <button
@@ -108,14 +116,19 @@ const awareness = [
           </div>
           <p class="pt-1 text-[14px] leading-[1.65] text-forest">
             Maus-tratos é crime e estarei sujeito às penas previstas pela
-            <strong class="font-semibold">Lei Federal de Proteção aos Animais</strong>
+            <strong class="font-semibold"
+              >Lei Federal de Proteção aos Animais</strong
+            >
             nº 9605, art. 32, de 13 de fevereiro de 1998, no caso de infração.
           </p>
         </div>
       </div>
     </div>
 
-    <footer class="flex flex-col gap-4 border-t border-brand px-6 py-5 sm:px-8">
+    <footer
+      v-if="!props.viewOnly"
+      class="flex flex-col gap-4 border-t border-brand px-6 py-5 sm:px-8"
+    >
       <div class="flex items-start gap-2.5">
         <Checkbox
           id="accept-adoption-terms"

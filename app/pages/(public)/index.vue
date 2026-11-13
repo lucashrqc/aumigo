@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import AdoptionGuideDialog from '@/components/AdoptionGuideDialog.vue'
 import useDialog from '@/composables/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -49,7 +49,7 @@ const steps = [
     icon: Search,
     number: '01',
     title: 'Encontre sua conexão',
-    body: 'Explore os perfis e conheça a história, o personalidade e as necessidades de cada pet.',
+    body: 'Explore os perfis e conheça a história, a personalidade e as necessidades de cada pet.',
   },
   {
     icon: MessagesSquare,
@@ -83,7 +83,7 @@ const essentials = [
 const faqs = [
   {
     q: 'Como faço para adotar pela Aumigo?',
-    a: 'Comece pelos perfis e escolha um pet que combine com você. Depois, crie sua conta e entre em contato com o responsável para conversar, conhecer o pet e entender as próximas etapas da adoção.',
+    a: 'Comece pelos perfis e escolha um pet que combine com você. Depois, crie sua conta e siga com a candidatura para o pet escolhido. A ONG entrará em contato com você para conhecer o pet e entender as próximas etapas da adoção.',
   },
   {
     q: 'Preciso criar uma conta para adotar?',
@@ -91,7 +91,7 @@ const faqs = [
   },
   {
     q: 'Como sei se um pet combina com a minha rotina?',
-    a: 'Cada perfil traz o personalidade, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
+    a: 'Cada perfil traz a personalidade, o nível de energia e os cuidados necessários. Compare com o seu dia a dia e converse com o responsável para tirar dúvidas antes de decidir.',
   },
   {
     q: 'Posso conhecer o pet antes da adoção?',
@@ -260,7 +260,7 @@ onMounted(() => {
               src="/images/aumigo/dog-cat-home.avif"
               alt="Um cão e um gato juntos em casa"
               class="h-full w-full object-cover"
-            >
+            />
           </div>
           <div
             class="absolute right-2 top-6 flex size-30 rotate-12 items-center justify-center rounded-full bg-[#f6d8c9] p-4 text-center lg:right-6"
@@ -369,7 +369,7 @@ onMounted(() => {
             data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.7px] text-forest md:text-[44px]"
           >
-            Mais que abrir a porta.<br >É abrir espaço na vida.
+            Mais que abrir a porta.<br />É abrir espaço na vida.
           </h2>
           <p class="text-[16px] leading-[1.65] text-text-soft">
             Adotar é acolher uma vida com tudo o que ela precisa. Antes do
@@ -422,7 +422,7 @@ onMounted(() => {
             data-reveal-heading
             class="text-[34px] font-medium leading-[1.15] tracking-[-1.8px] text-forest md:text-[44px]"
           >
-            Todo começo<br >vem com dúvidas.
+            Todo começo<br />vem com dúvidas.
           </h2>
           <p class="text-[16px] leading-[1.6] text-text-soft">
             E tudo bem. O importante é dar esse passo com informação e
@@ -470,7 +470,7 @@ onMounted(() => {
             src="/images/aumigo/carinho.avif"
             alt="Pessoa fazendo carinho em um cão"
             class="aspect-square w-full object-cover"
-          >
+          />
         </div>
         <div
           class="flex flex-1 flex-col items-center gap-5 text-center lg:items-start lg:text-left"
