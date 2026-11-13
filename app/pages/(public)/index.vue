@@ -163,6 +163,11 @@ onMounted(() => {
         <div class="flex items-center gap-4 lg:gap-6">
           <template v-if="auth.isAuthenticated">
             <NuxtLink
+              to="/pets"
+              class="hidden text-[14px] font-medium text-forest sm:block"
+              >Adotar</NuxtLink
+            >
+            <NuxtLink
               to="/applications"
               class="hidden text-[14px] font-medium text-forest sm:block"
             >
