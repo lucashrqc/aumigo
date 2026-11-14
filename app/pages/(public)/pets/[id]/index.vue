@@ -13,13 +13,14 @@ const {
   error,
 } = await useFetch<PetDto>(() => `/api/pets/${id.value}`)
 const isLoading = computed(() => status.value === 'pending')
+const displayName = computed(() => petDisplayName(pet.value))
 
 useSeoMeta({
-  title: () => (pet.value ? `${pet.value.name} — Aumigo` : 'Pet — Aumigo'),
+  title: () => (pet.value ? `${displayName.value} — Aumigo` : 'Pet — Aumigo'),
   description: () =>
     pet.value?.description ||
     'Conheça este pet disponível para adoção na Aumigo.',
-  ogTitle: () => (pet.value ? `${pet.value.name} — Aumigo` : 'Pet — Aumigo'),
+  ogTitle: () => (pet.value ? `${displayName.value} — Aumigo` : 'Pet — Aumigo'),
   ogDescription: () => pet.value?.description || undefined,
   ogImage: () => pet.value?.images?.[0]?.url,
 })
@@ -27,7 +28,7 @@ useSeoMeta({
 if (pet.value) {
   useSchemaOrg([
     defineProduct({
-      name: pet.value.name,
+      name: petDisplayName(pet.value),
       description: pet.value.description ?? undefined,
       image: pet.value.images?.map((img) => img.url) ?? [],
       offers: [
@@ -57,7 +58,7 @@ const { startApplication } = useAdoptionFlow()
         <img
           v-if="pet.images?.[0]"
           :src="pet.images[0].url"
-          :alt="pet.name"
+          :alt="displayName"
           class="h-full w-full object-cover"
         >
         <div
@@ -72,7 +73,7 @@ const { startApplication } = useAdoptionFlow()
           v-for="img in pet.images.slice(1)"
           :key="img.id"
           :src="img.url"
-          :alt="pet.name"
+          :alt="displayName"
           class="aspect-square w-full rounded object-cover"
         >
       </div>
@@ -80,7 +81,7 @@ const { startApplication } = useAdoptionFlow()
 
     <div class="space-y-4">
       <div class="flex items-center gap-3">
-        <h1 class="text-3xl font-bold">{{ pet.name }}</h1>
+        <h1 class="text-3xl font-bold">{{ displayName }}</h1>
         <Badge :variant="pet.status === 'available' ? 'outline' : 'secondary'">
           {{ petStatusLabel(pet.status) }}
         </Badge>
@@ -102,6 +103,10 @@ const { startApplication } = useAdoptionFlow()
         <div>
           <dt class="text-muted-foreground">Porte</dt>
           <dd>{{ petSizeLabel(pet.size) }}</dd>
+        </div>
+        <div v-if="pet.coat">
+          <dt class="text-muted-foreground">Pelagem</dt>
+          <dd>{{ pet.coat }}</dd>
         </div>
         <div>
           <dt class="text-muted-foreground">Castrado</dt>
@@ -127,7 +132,10 @@ const { startApplication } = useAdoptionFlow()
         Este pet já encontrou um lar. 🎉
       </div>
       <div v-else-if="!auth.isStaff">
-        <Button size="lg" @click="startApplication({ id: pet.id, name: pet.name })">
+        <Button
+          size="lg"
+          @click="startApplication({ id: pet.id, name: displayName })"
+        >
           Candidatar-se para adotar
         </Button>
       </div>

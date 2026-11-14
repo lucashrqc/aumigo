@@ -98,7 +98,7 @@ async function handlePublish(pet: PetDto) {
     props: {
       title: 'Publicar pet',
       icon: Megaphone,
-      description: `Publicar ${pet.name}? Ele ficará visível no site público para adoção.`,
+      description: `Publicar ${petDisplayName(pet)}? Ele ficará visível no site público para adoção.`,
       confirmText: 'Publicar',
     },
   })
@@ -119,8 +119,8 @@ async function handleUnpublish(pet: PetDto) {
       title: adopted ? 'Cancelar adoção' : 'Despublicar pet',
       icon: adopted ? Undo2 : EyeOff,
       description: adopted
-        ? `Cancelar a adoção de ${pet.name}? Ele voltará para pendente e as candidaturas relacionadas serão reabertas.`
-        : `Despublicar ${pet.name}? Ele será ocultado do site público e voltará para pendente.`,
+        ? `Cancelar a adoção de ${petDisplayName(pet)}? Ele voltará para pendente e as candidaturas relacionadas serão reabertas.`
+        : `Despublicar ${petDisplayName(pet)}? Ele será ocultado do site público e voltará para pendente.`,
       confirmText: adopted ? 'Cancelar adoção' : 'Despublicar',
       destructive: adopted,
     },
@@ -140,7 +140,7 @@ async function handleMarkAdopted(pet: PetDto) {
     props: {
       title: 'Marcar como adotado',
       icon: CircleCheck,
-      description: `Confirmar a adoção de ${pet.name}? As candidaturas em aberto deste pet serão rejeitadas.`,
+      description: `Confirmar a adoção de ${petDisplayName(pet)}? As candidaturas em aberto deste pet serão rejeitadas.`,
       confirmText: 'Adotado!',
     },
   })
@@ -193,12 +193,16 @@ const actions: RowAction<PetDto>[] = [
     icon: Trash2,
     iconClass: 'text-red-400',
     class: 'text-destructive',
-    onClick: (row) => handleDelete(row.id, row.name),
+    onClick: (row) => handleDelete(row.id, petDisplayName(row)),
   },
 ]
 
 const columns: ColumnDef<Features, PetDto>[] = [
-  { accessorKey: 'name', header: 'Nome' },
+  {
+    id: 'name',
+    header: 'Nome',
+    cell: ({ row }) => petDisplayName(row.original),
+  },
   {
     id: 'species',
     header: 'Espécie',
@@ -253,17 +257,17 @@ const columns: ColumnDef<Features, PetDto>[] = [
     </div>
 
     <div
-      class="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-3"
+      class="grid grid-cols-2 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-3"
     >
       <Card
         v-for="card in statCards"
         :key="card.key"
-        class="from-primary/5 to-card dark:bg-card @container/card bg-linear-to-t shadow-xs"
+        class="from-primary/5 to-card dark:bg-card @container/card gap-2 bg-linear-to-t py-4 shadow-xs sm:gap-6 sm:py-6"
       >
-        <CardHeader>
+        <CardHeader class="px-4 sm:px-6">
           <CardDescription>{{ card.label }}</CardDescription>
           <CardTitle
-            class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+            class="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl"
           >
             {{ card.value }}
           </CardTitle>
@@ -271,7 +275,9 @@ const columns: ColumnDef<Features, PetDto>[] = [
             <component :is="card.icon" class="size-5" :class="card.iconClass" />
           </CardAction>
         </CardHeader>
-        <CardFooter class="text-muted-foreground text-sm">
+        <CardFooter
+          class="text-muted-foreground hidden px-4 text-sm sm:flex sm:px-6"
+        >
           {{ card.hint }}
         </CardFooter>
       </Card>

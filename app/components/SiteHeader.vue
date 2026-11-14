@@ -18,11 +18,15 @@ const route = useRoute()
         class="mx-2 data-[orientation=vertical]:h-4"
       />
       <h1 class="text-sm font-medium">
-        {{ capitalize(route.name as string) }}
+        {{
+          capitalize(route.name as string)
+            .split('-')
+            .join(' · ')
+        }}
       </h1>
       <div class="ml-auto flex items-center gap-2">
         <ThemeSwitcher />
-        <Button variant="ghost" as-child size="sm" class="hidden sm:flex">
+        <Button variant="ghost" as-child size="sm" class="flex">
           <NuxtLink href="/">Ir para o site</NuxtLink>
         </Button>
       </div>

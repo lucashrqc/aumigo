@@ -83,7 +83,7 @@ const form = useForm({
     // Shared schema stays the source of truth: build the API payload and let
     // petCreateSchema validate/normalize it before emitting.
     const parsed = petCreateSchema.safeParse({
-      name: value.name,
+      name: value.name || null,
       speciesId: value.speciesId,
       breedId: value.breedId || null,
       description: value.description || null,
@@ -128,6 +128,8 @@ const removeImage = (
 
 // Reactive view of the selected species so the breeds query refetches.
 const speciesId = form.useStore((state) => state.values.speciesId)
+// Name drives whether the coat field is shown as required.
+const nameValue = form.useStore((state) => state.values.name)
 const attempts = form.useStore((state) => state.submissionAttempts)
 const breeds = useBreedOptions(() => speciesId.value || undefined)
 
@@ -144,14 +146,10 @@ const sizeOptions = [
 <template>
   <form class="space-y-4" @submit.prevent="form.handleSubmit">
     <div class="grid gap-4 xs:grid-cols-2 sm:grid-cols-4 gap-y-6">
-      <form.Field
-        name="name"
-        :validators="{ onChange: z.string().trim().min(1, 'Informe o nome') }"
-      >
+      <form.Field name="name">
         <template #default="{ field }">
           <FormField
             label="Nome"
-            required
             :name="field.name"
             :errors="field.state.meta.errors"
             :touched="showErrors(field.state.meta.isTouched)"
@@ -274,9 +272,25 @@ const sizeOptions = [
         </template>
       </form.Field>
 
-      <form.Field name="coat">
+      <form.Field
+        name="coat"
+        :validators="{
+          onChangeListenTo: ['name'],
+          onChange: ({ value, fieldApi }) =>
+            !String(fieldApi.form.getFieldValue('name') ?? '').trim() &&
+            !String(value ?? '').trim()
+              ? 'Informe a pelagem quando o pet não tem nome'
+              : undefined,
+        }"
+      >
         <template #default="{ field }">
-          <FormField label="Pelagem" :name="field.name">
+          <FormField
+            label="Pelagem"
+            :required="!nameValue?.trim()"
+            :name="field.name"
+            :errors="field.state.meta.errors"
+            :touched="showErrors(field.state.meta.isTouched)"
+          >
             <template #default="{ id }">
               <Input
                 :id="id"

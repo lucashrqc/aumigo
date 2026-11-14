@@ -124,7 +124,7 @@ async function handleCancel(row: AdoptionApplicationDto) {
     props: {
       title: 'Cancelar candidatura',
       icon: Ban,
-      description: `Cancelar a candidatura de ${row.adopter?.name ?? 'adotante'} para ${row.pet?.name ?? 'o pet'}? O pet voltará a ficar disponível e as candidaturas rejeitadas serão reabertas.`,
+      description: `Cancelar a candidatura de ${row.adopter?.name ?? 'adotante'} para ${row.pet ? petDisplayName(row.pet) : 'o pet'}? O pet voltará a ficar disponível e as candidaturas rejeitadas serão reabertas.`,
       confirmText: 'Cancelar candidatura',
       destructive: true,
     },
@@ -153,7 +153,7 @@ function openDetails(row: AdoptionApplicationDto) {
   dialog.open(AdoptionApplicationDetailsDialog, {
     dialogProps: {
       title: `Candidatura de ${row.adopter?.name ?? 'adotante'}`,
-      description: `${row.pet?.name ?? 'Pet'} · ${applicationStatusLabel(
+      description: `${petDisplayName(row.pet)} · ${applicationStatusLabel(
         row.status,
       )} · enviada em ${formatDateTime(row.createdAt)}`,
       class: 'sm:max-w-4xl',
@@ -206,7 +206,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
           class: 'text-left font-medium hover:underline',
           onClick: () => navigateTo(`/admin/pets/${row.original.petId}`),
         },
-        row.original.pet?.name ?? '—',
+        row.original.pet ? petDisplayName(row.original.pet) : '—',
       ),
   },
   {
@@ -377,7 +377,7 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
         role="button"
         tabindex="0"
         :aria-pressed="statusFilter === card.key"
-        class="from-primary/5 to-card dark:bg-card @container/card cursor-pointer bg-gradient-to-t shadow-xs transition-colors hover:border-primary/40"
+        class="from-primary/5 to-card dark:bg-card @container/card hover:border-primary/40 cursor-pointer gap-2 bg-linear-to-t py-4 shadow-xs transition-colors sm:gap-6 sm:py-6"
         :class="
           statusFilter === card.key ? 'border-primary ring-1 ring-primary' : ''
         "
@@ -385,10 +385,10 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
         @keydown.enter.prevent="statusFilter = card.key"
         @keydown.space.prevent="statusFilter = card.key"
       >
-        <CardHeader>
+        <CardHeader class="px-4 sm:px-6">
           <CardDescription>{{ card.label }}</CardDescription>
           <CardTitle
-            class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+            class="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl"
           >
             {{ card.value }}
           </CardTitle>
@@ -396,7 +396,9 @@ const columns: ColumnDef<Features, AdoptionApplicationDto>[] = [
             <component :is="card.icon" class="size-5" :class="card.iconClass" />
           </CardAction>
         </CardHeader>
-        <CardFooter class="text-muted-foreground text-sm">
+        <CardFooter
+          class="text-muted-foreground hidden px-4 text-sm sm:flex sm:px-6"
+        >
           {{ card.hint }}
         </CardFooter>
       </Card>

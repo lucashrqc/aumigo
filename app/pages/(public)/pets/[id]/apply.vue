@@ -9,7 +9,7 @@ const route = useRoute()
 const petId = computed(() => route.params.id as string)
 
 const { data: pet } = usePublicPetQuery(() => petId.value)
-const petName = computed(() => pet.value?.name ?? '')
+const petName = computed(() => (pet.value ? petDisplayName(pet.value) : ''))
 
 useHead({
   title: () =>

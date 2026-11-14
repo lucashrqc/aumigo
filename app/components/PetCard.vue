@@ -48,7 +48,7 @@ function openGallery(event: MouseEvent) {
       <div class="cursor-pointer" @click="openGallery">
         <PetImageCarousel
           :images="pet.images"
-          :alt="pet.name"
+          :alt="petDisplayName(pet)"
           aspect-class="aspect-4/3"
         />
       </div>
@@ -56,7 +56,7 @@ function openGallery(event: MouseEvent) {
       <div class="flex items-baseline justify-between gap-2 px-2 pb-1 pt-3">
         <div class="flex min-w-0 items-baseline gap-2">
           <span class="shrink-0 text-[16px] font-semibold text-forest">
-            {{ pet.name }}
+            {{ petDisplayName(pet) }}
           </span>
           <span v-if="ageSizeLine" class="truncate text-[13px] text-text-soft">
             {{ ageSizeLine }}
@@ -97,9 +97,9 @@ function openGallery(event: MouseEvent) {
       <button
         type="button"
         class="mt-auto inline-flex h-11 items-center justify-center gap-2.5 rounded-xl bg-forest px-5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
-        @click="startApplication({ id: pet.id, name: pet.name })"
+        @click="startApplication({ id: pet.id, name: petDisplayName(pet) })"
       >
-        Quero conhecer {{ sexArticle[pet.sex] }}{{ pet.name }}
+        Quero conhecer {{ sexArticle[pet.sex] }}{{ petDisplayName(pet) }}
         <ArrowUpRight class="size-4.5 shrink-0" />
       </button>
     </div>

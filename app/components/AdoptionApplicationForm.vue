@@ -38,13 +38,14 @@ const termsDialogProps = {
     'max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 bg-white text-forest border-brand sm:max-w-2xl',
   showCloseButton: false,
 }
-const { mutateAsync: apply, isPending } = useApplyForPet()
 
+const { mutateAsync: apply, isPending } = useApplyForPet()
 const { data: pet, isLoading: isPetLoading } = usePublicPetQuery(
   () => props.petId,
   { enabled: computed(() => Boolean(props.petId)) },
 )
 
+const petDisplay = computed(() => petDisplayName(pet.value))
 const petPhoto = computed(() => pet.value?.images?.[0]?.url ?? null)
 const petVaccines = computed(() => pet.value?.vaccines ?? [])
 const petMeta = computed(() => {
@@ -220,7 +221,7 @@ const boolFieldValue = (v: boolean | undefined) =>
     >
       <button
         type="button"
-        :aria-label="`Ver galeria de fotos de ${pet.name}`"
+        :aria-label="`Ver galeria de fotos de ${petDisplay}`"
         class="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-brand bg-white px-3 py-1.5 text-[12px] font-medium text-forest transition-colors hover:bg-cream-soft"
         @click="openGallery()"
       >
@@ -231,14 +232,14 @@ const boolFieldValue = (v: boolean | undefined) =>
       <div class="flex items-center gap-4">
         <button
           type="button"
-          :aria-label="`Ver galeria de fotos de ${pet.name}`"
+          :aria-label="`Ver galeria de fotos de ${petDisplay}`"
           class="h-33 w-33 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-cream-soft transition-opacity hover:opacity-90"
           @click="openGallery()"
         >
           <img
             v-if="petPhoto"
             :src="petPhoto"
-            :alt="pet.name"
+            :alt="petDisplay"
             class="h-full w-full object-cover backface-hidden"
           >
           <div
@@ -252,7 +253,7 @@ const boolFieldValue = (v: boolean | undefined) =>
           <p
             class="text-[24px] font-medium tracking-[-0.7px] text-forest leading-none"
           >
-            {{ pet.name }}
+            {{ petDisplay }}
           </p>
           <p v-if="petMeta" class="text-[12px] text-text-soft">
             {{ petMeta }}
@@ -288,14 +289,15 @@ const boolFieldValue = (v: boolean | undefined) =>
         onChange: z
           .string()
           .trim()
-          .min(1, 'Informe o CPF ou CNPJ')
-          .refine(isValidDocument, 'Informe um CPF ou CNPJ válido'),
+          .refine(
+            (v) => v === '' || isValidDocument(v),
+            'Informe um CPF ou CNPJ válido',
+          ),
       }"
     >
       <template #default="{ field }">
         <FormField
-          label="CPF ou CNPJ"
-          required
+          label="CPF ou CNPJ (opcional)"
           :name="field.name"
           :errors="field.state.meta.errors"
           :touched="showErrors(field.state.meta.isTouched)"

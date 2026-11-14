@@ -6,7 +6,11 @@ import { useCancelMyApplication } from '@/composables/useApplications'
 import useDialog from '@/composables/useDialog'
 import { resolveErrorMessage } from '@/utils/errors'
 import { formatDate, petAgeLabel } from '@/utils/format'
-import { applicationStatusLabel, petSizeLabel } from '@/utils/labels'
+import {
+  applicationStatusLabel,
+  petDisplayName,
+  petSizeLabel,
+} from '@/utils/labels'
 import { Ban, Check, ImageIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
@@ -51,7 +55,7 @@ async function handleCancel(app: AdoptionApplicationDto) {
     props: {
       title: 'Cancelar candidatura',
       icon: Ban,
-      description: `Tem certeza que deseja cancelar sua candidatura para ${app.pet?.name ?? 'este pet'}? Esta ação não pode ser desfeita.`,
+      description: `Tem certeza que deseja cancelar sua candidatura para ${app.pet ? petDisplayName(app.pet) : 'este pet'}? Esta ação não pode ser desfeita.`,
       confirmText: 'Cancelar candidatura',
       cancelText: 'Voltar',
       destructive: true,
@@ -75,7 +79,7 @@ async function handleCancel(app: AdoptionApplicationDto) {
       <div class="flex w-full shrink-0 flex-col gap-3 sm:w-48">
         <img
           :src="coverUrl(application)"
-          :alt="application.pet?.name ?? 'Pet'"
+          :alt="petDisplayName(application.pet)"
           class="aspect-square w-full rounded-[16px] object-cover"
         >
         <Button
@@ -96,7 +100,7 @@ async function handleCancel(app: AdoptionApplicationDto) {
               :to="`/pets/${application.petId}`"
               class="text-[24px] font-semibold tracking-[-0.5px] text-forest hover:underline"
             >
-              {{ application.pet?.name ?? 'Pet' }}
+              {{ petDisplayName(application.pet) }}
             </NuxtLink>
             <p v-if="metaLine(application)" class="text-[14px] text-text-soft">
               {{ metaLine(application) }}
