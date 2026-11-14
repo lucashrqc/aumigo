@@ -126,7 +126,7 @@ onMounted(() => {
                 <div class="relative overflow-hidden rounded-[16px]">
                   <img
                     :src="coverUrl(pet)"
-                    :alt="pet.name"
+                    :alt="petDisplayName(pet)"
                     class="aspect-416/370 w-full object-cover"
                   >
                   <div
@@ -143,7 +143,9 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex items-center justify-between px-2 pb-1.5 pt-3">
-                  <span class="text-[13px] text-forest">{{ pet.name }}</span>
+                  <span class="text-[13px] text-forest">{{
+                    petDisplayName(pet)
+                  }}</span>
                   <PawPrint class="size-4.5 text-forest" />
                 </div>
               </div>
@@ -157,7 +159,7 @@ onMounted(() => {
                 <h3
                   class="text-[34px] font-medium tracking-[-1.5px] text-forest md:text-[38px]"
                 >
-                  {{ pet.name }}
+                  {{ petDisplayName(pet) }}
                 </h3>
                 <span
                   v-if="pet.species"
@@ -186,14 +188,17 @@ onMounted(() => {
                       ? 'pointer-events-none opacity-60'
                       : 'hover:bg-forest/90'
                   "
-                  @click="startApplication({ id: pet.id, name: pet.name })"
+                  @click="
+                    startApplication({ id: pet.id, name: petDisplayName(pet) })
+                  "
                 >
                   <template v-if="isApplied(pet)">
                     Candidatura já enviada
                     <Check class="size-4.5" />
                   </template>
                   <template v-else>
-                    Quero conhecer {{ articleArticle[pet.sex] }}{{ pet.name }}
+                    Quero conhecer {{ articleArticle[pet.sex]
+                    }}{{ petDisplayName(pet) }}
                     <ArrowUpRight class="size-4.5" />
                   </template>
                 </button>

@@ -18,7 +18,9 @@ const showErrors = (touched: boolean) => touched || attempts.value > 0
 
 const description = computed(() => {
   const adopter = props.application?.adopter?.name ?? 'o adotante'
-  const pet = props.application?.pet?.name ?? 'o pet'
+  const pet = props.application?.pet
+    ? petDisplayName(props.application.pet)
+    : 'o pet'
   return `Rejeitar a candidatura de ${adopter} para ${pet}?`
 })
 </script>

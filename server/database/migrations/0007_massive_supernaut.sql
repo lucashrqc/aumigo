@@ -1,0 +1,1 @@
+ALTER TABLE "adoption_application" ALTER COLUMN "document" DROP NOT NULL;

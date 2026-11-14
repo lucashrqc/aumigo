@@ -24,9 +24,9 @@ export const adoptionApplicationCreateSchema = z
     document: z
       .string()
       .trim()
-      .min(1, 'Informe o CPF ou CNPJ')
-      .refine(isValidDocument, 'Informe um CPF ou CNPJ válido')
-      .transform(documentDigits),
+      .refine((v) => v === '' || isValidDocument(v), 'Informe um CPF ou CNPJ válido')
+      .transform((v) => (v === '' ? undefined : documentDigits(v)))
+      .optional(),
     contactPhone: z
       .string()
       .trim()

@@ -48,7 +48,7 @@ function validBody(petId: string, overrides: Record<string, unknown> = {}) {
   return {
     petId,
     document: VALID_CPF,
-    contactPhone: '+55 11 99999-9999',
+    contactPhone: '11999999999',
     age: 30,
     home: 'house',
     cityId,
@@ -112,23 +112,34 @@ describe('POST /api/applications — happy path', () => {
     expect(res.status).toBe(200)
     expect((res.json as { document: string }).document).toBe('11222333000181')
   })
+
+  it('accepts a missing document, persisting it as null', async () => {
+    const petId = await makeAvailablePet()
+    const body = validBody(petId)
+    delete (body as Record<string, unknown>).document
+    const res = await endpoint.post(body, adopterId)
+
+    expect(res.status).toBe(200)
+
+    const row = await endpoint.db.query.adoptionApplication.findFirst({
+      where: eq(adoptionApplication.petId, petId),
+    })
+    expect(row?.document).toBeNull()
+  })
 })
 
 describe('POST /api/applications — document validation', () => {
-  const cases: Record<string, unknown> = {
-    'a missing document': undefined,
+  const cases: Record<string, string> = {
     'an invalid CPF checksum': '529.982.247-24',
     'an invalid CNPJ checksum': '11.222.333/0001-80',
     'a wrong-length value': '5299822472',
-    'a blank value': '   ',
   }
 
   for (const [label, value] of Object.entries(cases)) {
     it(`rejects ${label} with a 422 document field error`, async () => {
       const petId = await makeAvailablePet()
       const body = validBody(petId)
-      if (value === undefined) delete (body as Record<string, unknown>).document
-      else body.document = value as string
+      body.document = value
 
       const res = await endpoint.post(body, adopterId)
       expect(res.status).toBe(422)

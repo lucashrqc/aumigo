@@ -18,7 +18,16 @@ describe('petCreateSchema', () => {
     expect(parsed.images).toEqual([])
   })
 
-  it('rejects a pet without a name', () => {
+  it('accepts a pet without a name when a coat is given', () => {
+    const parsed = petCreateSchema.parse({
+      speciesId: '11111111-1111-4111-8111-111111111111',
+      coat: 'Caramelo',
+    })
+    expect(parsed.name).toBeUndefined()
+    expect(parsed.coat).toBe('Caramelo')
+  })
+
+  it('rejects a pet with neither a name nor a coat', () => {
     const result = petCreateSchema.safeParse({
       speciesId: '11111111-1111-4111-8111-111111111111',
     })
@@ -31,7 +40,7 @@ describe('adoptionApplicationCreateSchema', () => {
   const validPayload = {
     petId: uuid,
     document: '529.982.247-25',
-    contactPhone: '+55 11 99999-9999',
+    contactPhone: '11999999999',
     age: 30,
     home: 'house',
     cityId: uuid,
@@ -63,10 +72,12 @@ describe('adoptionApplicationCreateSchema', () => {
     expect(parsed.document).toBe('11222333000181')
   })
 
-  it('rejects a missing document', () => {
+  it('accepts a missing document', () => {
     const { document, ...withoutDocument } = validPayload
     void document
-    expect(adoptionApplicationCreateSchema.safeParse(withoutDocument).success).toBe(false)
+    const result = adoptionApplicationCreateSchema.safeParse(withoutDocument)
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.document).toBeUndefined()
   })
 
   it('rejects a document with an invalid checksum', () => {
