@@ -81,6 +81,11 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --forest: #234619;
+  --cream-soft: #faeed8;
+  --sage: #edf2e8;
+  --sage-line: #e7ebdd;
+  --text-soft: #64735e;
 }
 
 @theme inline {
