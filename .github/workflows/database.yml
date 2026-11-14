@@ -2,7 +2,7 @@ name: Database
 
 on:
   push:
-    branches: [staging]
+    branches: [staging, master]
     paths:
       - 'server/database/migrations/**'
   workflow_dispatch:
@@ -16,14 +16,50 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: database-dev
-  cancel-in-progress: false
-
 jobs:
-  migrate:
+  migrate-dev:
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: dev
+    concurrency:
+      group: database-dev
+      cancel-in-progress: false
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Migrate
+        run: pnpm db:migrate
+
+      - name: Seed
+        if: ${{ inputs.seed }}
+        run: pnpm db:seed
+        env:
+          SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+          SEED_ADMIN_NAME: ${{ vars.SEED_ADMIN_NAME || 'Aumigo Admin' }}
+
+      - name: Seed locations
+        if: ${{ inputs.seed_locations }}
+        run: pnpm db:seed:locations
+
+  migrate-production:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: database-production
+      cancel-in-progress: false
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
