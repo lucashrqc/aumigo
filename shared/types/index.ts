@@ -39,7 +39,7 @@ export interface PetVaccineDto {
 
 export interface PetDto {
   id: string
-  name: string
+  name: string | null
   speciesId: string
   breedId: string | null
   description: string | null

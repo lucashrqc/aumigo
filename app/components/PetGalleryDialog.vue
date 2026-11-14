@@ -6,12 +6,15 @@ import type { PetImageDto } from '#shared/types'
 
 const props = defineProps<{
   pet: {
-    name: string
+    name?: string | null
+    coat?: string | null
     birthDate?: string | null
     size?: 'small' | 'medium' | 'large' | null
     images?: PetImageDto[]
   }
 }>()
+
+const displayName = computed(() => petDisplayName(props.pet))
 
 const { close } = useDialog()
 
@@ -41,7 +44,7 @@ const photoCountLabel = computed(() =>
         <DialogTitle
           class="text-[22px] font-semibold tracking-[-0.5px] text-forest"
         >
-          Um pouco mais de {{ pet.name }}
+          Um pouco mais de {{ displayName }}
         </DialogTitle>
         <DialogDescription v-if="meta" class="text-[14px] text-text-soft">
           {{ meta }}
@@ -59,14 +62,14 @@ const photoCountLabel = computed(() =>
 
     <PetImageCarousel
       :images="images"
-      :alt="pet.name"
+      :alt="displayName"
       aspect-class="aspect-square sm:aspect-4/3"
     />
 
     <div class="flex items-center gap-3">
       <img
         :src="images[0]?.url ?? placeholder"
-        :alt="pet.name"
+        :alt="displayName"
         class="size-12 rounded-[10px] border border-brand object-cover"
       >
       <div class="flex flex-col">
@@ -84,7 +87,7 @@ const photoCountLabel = computed(() =>
     >
       <span class="flex items-center gap-2 text-[13px] text-text-soft">
         <ImageIcon class="size-4" />
-        {{ pet.name }} • Galeria de fotos
+        {{ displayName }} • Galeria de fotos
       </span>
       <Button
         variant="outline"

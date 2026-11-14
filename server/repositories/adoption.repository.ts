@@ -60,7 +60,7 @@ export interface AdoptionApplicationWithRelations extends AdoptionApplicationRow
 export interface CreateApplicationData {
   petId: string
   adopterUserId: string
-  document: string
+  document?: string | null
   contactPhone: string
   message?: string
   age: number

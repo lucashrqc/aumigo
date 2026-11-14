@@ -156,7 +156,7 @@ const enclosureLabels = computed(() =>
     >
       <span class="flex items-center gap-2 text-[13px] text-text-soft">
         <ClipboardList class="size-4" />
-        {{ app.pet?.name ?? 'Pet' }} • Detalhes da candidatura
+        {{ petDisplayName(app.pet) }} • Detalhes da candidatura
       </span>
       <Button
         variant="outline"

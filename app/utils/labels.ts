@@ -43,6 +43,11 @@ const enclosureTypeLabels: Record<string, string> = {
   is_netted: 'Telado',
 }
 
+/** Display name for a pet: its given name, or the coat (pelagem) as a fallback. */
+export const petDisplayName = (
+  pet: { name?: string | null; coat?: string | null } | null | undefined,
+) => pet?.name?.trim() || pet?.coat?.trim() || 'Pet'
+
 export const petStatusLabel = (v: string) => petStatusLabels[v] ?? v
 export const applicationStatusLabel = (v: string) => applicationStatusLabels[v] ?? v
 export const petSexLabel = (v: string) => petSexLabels[v] ?? v

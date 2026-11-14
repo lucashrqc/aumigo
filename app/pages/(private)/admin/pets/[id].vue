@@ -12,7 +12,7 @@ const id = computed(() => route.params.id as string)
 
 const { data: pet, isLoading } = useAdminPetQuery(id)
 useHead(() => ({
-  title: pet.value ? `${pet.value.name} — Admin` : 'Pet — Admin',
+  title: pet.value ? `${petDisplayName(pet.value)} — Admin` : 'Pet — Admin',
 }))
 
 const { mutateAsync: updatePet, isPending: saving } = useUpdatePet()
@@ -102,7 +102,7 @@ const vaccineName = (vaccineId: string) =>
       <Button as-child variant="ghost" size="sm"
         ><NuxtLink to="/admin/pets">← Voltar</NuxtLink></Button
       >
-      <h1 class="text-2xl font-bold">{{ pet.name }}</h1>
+      <h1 class="text-2xl font-bold">{{ petDisplayName(pet) }}</h1>
     </div>
 
     <Card>

@@ -13,6 +13,7 @@ import {
   Check,
   Heart,
   House,
+  Menu,
   MessagesSquare,
   Minus,
   PawPrint,
@@ -114,6 +115,7 @@ const adoptTitle = ref<HTMLElement | null>(null)
 const respTitle = ref<HTMLElement | null>(null)
 const faqTitle = ref<HTMLElement | null>(null)
 const ctaTitle = ref<HTMLElement | null>(null)
+const menuOpen = ref<boolean>(false)
 
 onMounted(() => {
   ready.value = true
@@ -160,7 +162,119 @@ onMounted(() => {
           </a>
         </nav>
 
-        <div class="flex items-center gap-4 lg:gap-6">
+        <nav class="hidden items-center gap-4 lg:gap-6 sm:flex">
+          <NuxtLink
+            to="/pets"
+            class="text-[14px] font-medium text-forest sm:block"
+            >Adotar</NuxtLink
+          >
+          <template v-if="auth.isAuthenticated">
+            <NuxtLink
+              to="/applications"
+              class="text-[14px] font-medium text-forest sm:block"
+            >
+              Minhas candidaturas
+            </NuxtLink>
+            <NuxtLink
+              v-if="auth.isStaff"
+              to="/admin"
+              class="text-[14px] font-medium text-forest sm:block"
+            >
+              Admin
+            </NuxtLink>
+            <button
+              type="button"
+              class="inline-flex h-8 items-center rounded-lg bg-forest px-5.5 text-[14px] font-semibold text-white transition-colors hover:bg-forest/90"
+              @click="logout()"
+            >
+              Sair
+            </button>
+          </template>
+          <template v-else>
+            <Button as-child variant="ghost" size="sm">
+              <NuxtLink to="/login">Entrar</NuxtLink>
+            </Button>
+            <Button as-child size="sm">
+              <NuxtLink to="/register">Cadastrar</NuxtLink>
+            </Button>
+          </template>
+        </nav>
+
+        <div class="sm:hidden">
+          <Sheet v-model:open="menuOpen">
+            <SheetTrigger as-child>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Abrir menu"
+                class="text-forest"
+              >
+                <Menu class="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" class="w-72">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <nav class="flex flex-col gap-1 px-4 pb-4">
+                <Button
+                  as-child
+                  variant="ghost"
+                  class="justify-start"
+                  @click="menuOpen = false"
+                >
+                  <NuxtLink to="/pets">Adotar</NuxtLink>
+                </Button>
+
+                <template v-if="auth.isAuthenticated">
+                  <Button
+                    v-if="auth.isStaff"
+                    as-child
+                    variant="ghost"
+                    class="justify-start"
+                    @click="menuOpen = false"
+                  >
+                    <NuxtLink to="/admin">Admin</NuxtLink>
+                  </Button>
+                  <Button
+                    as-child
+                    variant="ghost"
+                    class="justify-start"
+                    @click="menuOpen = false"
+                  >
+                    <NuxtLink to="/applications">Minhas candidaturas</NuxtLink>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    class="mt-2 justify-start"
+                    @click="logout"
+                  >
+                    Sair
+                  </Button>
+                </template>
+                <template v-else>
+                  <Button
+                    as-child
+                    variant="ghost"
+                    class="justify-start"
+                    @click="menuOpen = false"
+                  >
+                    <NuxtLink to="/login">Entrar</NuxtLink>
+                  </Button>
+                  <Button
+                    as-child
+                    class="mt-2 justify-start"
+                    @click="menuOpen = false"
+                  >
+                    <NuxtLink to="/register">Cadastrar</NuxtLink>
+                  </Button>
+                </template>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        <!-- <div class="flex items-center gap-4 lg:gap-6">
           <template v-if="auth.isAuthenticated">
             <NuxtLink
               to="/pets"
@@ -202,7 +316,7 @@ onMounted(() => {
               Criar conta
             </NuxtLink>
           </template>
-        </div>
+        </div> -->
       </div>
     </header>
 

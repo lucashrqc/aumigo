@@ -172,7 +172,6 @@ export class DrizzlePetRepository implements PetRepository {
         .insert(pet)
         .values({
           ...toColumns(data),
-          name: data.name,
           speciesId: data.speciesId,
           createdBy: actorId,
           updatedBy: actorId,
