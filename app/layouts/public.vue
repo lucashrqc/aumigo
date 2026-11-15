@@ -27,18 +27,28 @@ async function logout() {
 
         <nav class="hidden items-center gap-4 lg:gap-6 sm:flex">
           <NuxtLink
+            v-if="route.name !== 'pets'"
             to="/pets"
             class="text-[14px] font-medium text-forest sm:block"
-            >Ver pets</NuxtLink
+            >Encontre um pet</NuxtLink
           >
           <template v-if="auth.isAuthenticated">
             <UserMenu use-light-theme />
           </template>
           <template v-else>
-            <Button as-child variant="ghost" size="sm">
+            <Button
+              as-child
+              variant="ghost"
+              size="sm"
+              class="text-forest! hover:bg-cream-soft! hover:text-forest!"
+            >
               <NuxtLink to="/login">Entrar</NuxtLink>
             </Button>
-            <Button as-child size="sm">
+            <Button
+              as-child
+              size="sm"
+              class="bg-forest text-white hover:bg-forest hover:text-white"
+            >
               <NuxtLink to="/register">Cadastrar</NuxtLink>
             </Button>
           </template>
