@@ -69,7 +69,7 @@ async function logout() {
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"
-        class="p-0! group size-fit"
+        class="p-0! group size-fit min-w-46"
         :class="btnLightTheme"
       >
         <Avatar class="h-8 w-8 rounded-lg">

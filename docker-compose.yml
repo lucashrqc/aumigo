@@ -34,6 +34,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me}
       BETTER_AUTH_URL: http://localhost:3000
       NUXT_PUBLIC_AUTH_BASE_URL: http://localhost:3000
+      NPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: 'false'
     ports:
       - '3000:3000'
     volumes:
